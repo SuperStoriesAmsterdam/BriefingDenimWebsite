@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit 2>&1 | head -80)",
+      "Bash(timeout 15 npm run dev 2>&1 || true)",
+      "Bash(npm run dev 2>&1)",
+      "Bash(sleep 3 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5000/)",
+      "Bash(xdg-open http://localhost:5000/ 2>&1 || true)",
+      "Bash(curl -s http://localhost:5000/ | head -30)",
+      "Bash(curl -s http://localhost:5000/src/main.tsx 2>&1 | head -30)",
+      "Bash(curl -s http://localhost:5000/src/App.tsx 2>&1 | head -5)",
+      "Bash(curl -s http://localhost:5000/src/pages/prd.tsx 2>&1 | grep -i \"error\" || echo \"No errors in prd.tsx compilation\")",
+      "Bash(curl -s http://localhost:5000/src/pages/prd.tsx 2>&1 | head -10)",
+      "Bash(curl -s http://localhost:5000/ 2>&1 | grep -c \"root\")",
+      "Bash(curl -s http://localhost:5000/src/components/prd/prd-sidebar.tsx 2>&1 | grep -i \"error\\\\|failed\\\\|not found\" | head -5)",
+      "Bash(curl -s http://localhost:5000/src/components/prd/editable-text.tsx 2>&1 | grep -i \"error\\\\|failed\\\\|not found\" | head -5)",
+      "Bash(curl -s 'http://localhost:5000/src/components/ui/button.tsx' | head -3)",
+      "Bash(sleep 2 && curl -s http://localhost:5000/ | grep -o \"PRD Debug\" || echo \"Not found in response\")",
+      "Bash(curl -s http://localhost:5000/src/index.css | head -20)",
+      "Bash(pkill -f \"tsx server/index.ts\" 2>/dev/null; pkill -f \"node.*vite\" 2>/dev/null; sleep 1; echo \"cleaned\")",
+      "Bash(lsof -i :5000 2>/dev/null | grep LISTEN || echo \"Port 5000 is free\")",
+      "Bash(sleep 5 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5000/ && echo \" OK\")",
+      "Bash(fuser -k 5000/tcp 2>/dev/null; sleep 2; lsof -i :5000 2>/dev/null | grep LISTEN || echo \"Port 5000 is free\")",
+      "Bash(npx tsc --noEmit 2>&1 | head -10)",
+      "Bash(git add client/src/App.tsx client/src/index.css client/src/components/prd/ client/src/hooks/use-prd-store.ts client/src/lib/prd-constants.ts client/src/lib/prd-defaults.ts client/src/lib/prd-storage.ts client/src/pages/prd.tsx client/src/types/prd.ts)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nIntegrate PRD wireframe into full-stack app with Denim City theme\n\nDecompose the standalone PRD.html into TypeScript React components using\nTailwind CSS + shadcn/ui, wired into the Vite + Express scaffold via wouter.\n\n- Replace all placeholder CSS variables with Denim City HSL palette\n- Add 16 new files: types, constants, defaults, storage, state hook,\n  10 components \\(editable-text, annotations, blocks, views, toolbar, sidebar\\),\n  and the PRD page\n- Reorganize site structure: activity-based navigation \\(Store, Education,\n  Lab & Atelier, Tours, Collaborate, About, Contact\\), with Individuals\n  and Companies & Schools as audience landing pages nested under Home\n- Store split into Brands, Collabs, Fabrics, Repair & Customization, Made to Order\n- Education consolidates Academy, Incubator, Jean School, Archive, Library\n- Lab & Atelier restructured: Sustainable Laundry R&D, Prototyping,\n  Capsule Collections, Made-to-Order, Custom Made Products\n- Press updated with press releases and downloadable imagery\n- Homepage follows Model 3 \\(Vitra/Design Museum pattern\\): universal for\n  all visitors, no B2C/B2B routing\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}
