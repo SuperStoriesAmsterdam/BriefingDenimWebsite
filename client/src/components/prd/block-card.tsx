@@ -194,6 +194,12 @@ export function BlockCard({
         }}
         onDelete={(i) => onUpdate({ ...block, content: block.content.filter((_, j) => j !== i) })}
         onAdd={() => onUpdate({ ...block, content: [...block.content, "New item..."] })}
+        onReorder={(from, to) => {
+          const content = [...block.content];
+          const [item] = content.splice(from, 1);
+          content.splice(to, 0, item);
+          onUpdate({ ...block, content });
+        }}
       />
 
       {/* Annotations */}
