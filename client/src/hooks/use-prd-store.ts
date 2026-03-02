@@ -19,10 +19,9 @@ export function usePrdStore() {
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load on mount
+  // Load on mount — merges user edits with latest defaults if version changed
   useEffect(() => {
-    const stored = loadPages();
-    setPages(stored || defaults());
+    setPages(loadPages(defaults()));
   }, []);
 
   // Persist with debounce
@@ -224,6 +223,21 @@ export function usePrdStore() {
     [pages, persist]
   );
 
+  const reorderPage = useCallback(
+    (sourceId: string, targetId: string, position: "before" | "after") => {
+      if (!pages || sourceId === targetId) return;
+      const updated = pages.filter((p) => p.id !== sourceId);
+      const sourcePage = pages.find((p) => p.id === sourceId);
+      if (!sourcePage) return;
+      const targetIndex = updated.findIndex((p) => p.id === targetId);
+      if (targetIndex === -1) return;
+      const insertAt = position === "before" ? targetIndex : targetIndex + 1;
+      updated.splice(insertAt, 0, sourcePage);
+      persist(updated);
+    },
+    [pages, persist]
+  );
+
   const resetToDefaults = useCallback(() => {
     const d = defaults();
     setPages(d);
@@ -273,6 +287,7 @@ export function usePrdStore() {
     moveBlockUp,
     moveBlockDown,
     moveBlockToPage,
+    reorderPage,
     resetToDefaults,
   };
 }

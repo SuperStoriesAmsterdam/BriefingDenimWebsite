@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -43,6 +44,8 @@ const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "sitemap", label: "Sitemap", icon: Map },
 ];
 
+type DropZone = { pageId: string; position: "before" | "after" } | null;
+
 export function PrdSidebar({ store }: PrdSidebarProps) {
   const {
     viewMode,
@@ -61,10 +64,61 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
     overPage,
     setOverPage,
     setDragPage,
+    dragPage,
     resetToDefaults,
     moveBlockToPage,
+    reorderPage,
     pages,
   } = store;
+
+  const [dropZone, setDropZone] = useState<DropZone>(null);
+
+  const handleDragOver = (e: React.DragEvent, pageId: string) => {
+    e.preventDefault();
+
+    // If this is a block drag, just highlight the page
+    if (e.dataTransfer.types.includes("block-page-id")) {
+      setOverPage(pageId);
+      setDropZone(null);
+      return;
+    }
+
+    // For page drags, detect top/bottom half
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const position = y < rect.height / 2 ? "before" : "after";
+    setDropZone({ pageId, position });
+    setOverPage(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetPageId: string) => {
+    e.preventDefault();
+    const srcPageId = e.dataTransfer.getData("page-id");
+    const blockPageId = e.dataTransfer.getData("block-page-id");
+    const blockIndex = e.dataTransfer.getData("block-index");
+
+    if (blockPageId && blockIndex !== "") {
+      // Cross-page block move
+      moveBlockToPage(blockPageId, parseInt(blockIndex, 10), targetPageId);
+    } else if (srcPageId && srcPageId !== targetPageId) {
+      if (dropZone) {
+        // Reorder
+        reorderPage(srcPageId, targetPageId, dropZone.position);
+      } else {
+        // Nest (fallback)
+        nestPage(srcPageId, targetPageId);
+      }
+    }
+    setOverPage(null);
+    setDragPage(null);
+    setDropZone(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragPage(null);
+    setOverPage(null);
+    setDropZone(null);
+  };
 
   return (
     <Sidebar>
@@ -120,8 +174,10 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
             <SidebarMenu>
               {topLevelPages.map((p) => {
                 const children = childrenOf(p.id);
-                const isActive =
-                  activePage === p.id || children.some((c) => c.id === activePage);
+                const showDropBefore =
+                  dropZone?.pageId === p.id && dropZone.position === "before";
+                const showDropAfter =
+                  dropZone?.pageId === p.id && dropZone.position === "after";
 
                 return (
                   <SidebarMenuItem
@@ -129,37 +185,22 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData("page-id", p.id);
+                      e.dataTransfer.effectAllowed = "move";
                       setDragPage(p.id);
                     }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setOverPage(p.id);
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const srcPageId = e.dataTransfer.getData("page-id");
-                      const blockPageId = e.dataTransfer.getData("block-page-id");
-                      const blockIndex = e.dataTransfer.getData("block-index");
-
-                      if (blockPageId && blockIndex !== "") {
-                        // Cross-page block move
-                        moveBlockToPage(blockPageId, parseInt(blockIndex, 10), p.id);
-                      } else if (srcPageId && srcPageId !== p.id) {
-                        // Page nesting
-                        nestPage(srcPageId, p.id);
-                      }
-                      setOverPage(null);
-                      setDragPage(null);
-                    }}
-                    onDragEnd={() => {
-                      setDragPage(null);
-                      setOverPage(null);
-                    }}
+                    onDragOver={(e) => handleDragOver(e, p.id)}
+                    onDrop={(e) => handleDrop(e, p.id)}
+                    onDragEnd={handleDragEnd}
                     className={cn(
+                      "relative",
                       overPage === p.id &&
-                        "bg-sidebar-primary/15 outline outline-1 outline-sidebar-primary"
+                        "bg-sidebar-primary/15 outline outline-1 outline-sidebar-primary",
+                      dragPage === p.id && "opacity-40"
                     )}
                   >
+                    {showDropBefore && (
+                      <div className="absolute -top-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />
+                    )}
                     <SidebarMenuButton
                       isActive={activePage === p.id}
                       onClick={() => setActivePage(p.id)}
@@ -213,6 +254,9 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                         ))}
                       </SidebarMenuSub>
                     )}
+                    {showDropAfter && (
+                      <div className="absolute -bottom-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />
+                    )}
                   </SidebarMenuItem>
                 );
               })}
@@ -248,7 +292,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Reset all changes?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will discard all your edits and restore the original 13 pages. This action
+                This will discard all your edits and restore the original pages. This action
                 cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>

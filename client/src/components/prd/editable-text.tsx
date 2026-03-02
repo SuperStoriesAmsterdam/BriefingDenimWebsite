@@ -42,7 +42,7 @@ export function EditableText({
     if (draft !== value) onChange(draft);
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setEditing(true);
   };
@@ -98,13 +98,13 @@ export function EditableText({
 
   return (
     <span
-      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       className={cn(
         "cursor-text border-b border-dashed border-transparent hover:border-muted-foreground/30",
         multi && "block min-h-[20px]",
         className
       )}
-      title="Click to edit"
+      title="Double-click to edit"
     >
       {value || (
         <span className="italic text-muted-foreground/50">{placeholder}</span>
