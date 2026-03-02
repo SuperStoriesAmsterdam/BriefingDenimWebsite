@@ -14,6 +14,7 @@ const FILTERS: { id: FilterTeam; label: string; activeClass: string }[] = [
   { id: "design", label: "Designer", activeClass: "bg-violet-500 text-white" },
   { id: "dev", label: "Developer", activeClass: "bg-blue-500 text-white" },
   { id: "ghl", label: "GHL", activeClass: "bg-orange-600 text-white" },
+  { id: "copy", label: "Copy", activeClass: "bg-emerald-500 text-white" },
 ];
 
 export function PrdToolbar({ store }: PrdToolbarProps) {

@@ -1,6 +1,6 @@
 import type { TeamId, BlockType } from "@/types/prd";
 
-export const STORE_KEY = "dc-prd-v14";
+export const STORE_KEY = "dc-prd-v16";
 
 export const TEAM_COLORS: Record<TeamId, { bg: string; border: string; badge: string; text: string }> = {
   design: {
@@ -21,12 +21,19 @@ export const TEAM_COLORS: Record<TeamId, { bg: string; border: string; badge: st
     badge: "bg-orange-600",
     text: "text-orange-600",
   },
+  copy: {
+    bg: "bg-emerald-500/5",
+    border: "border-l-emerald-500",
+    badge: "bg-emerald-500",
+    text: "text-emerald-500",
+  },
 };
 
 export const TEAM_LABELS: Record<TeamId, string> = {
   design: "DESIGNER",
   dev: "DEVELOPER",
   ghl: "GHL",
+  copy: "COPY",
 };
 
 export const BLOCK_TYPES: BlockType[] = ["hero", "grid", "section", "cta"];

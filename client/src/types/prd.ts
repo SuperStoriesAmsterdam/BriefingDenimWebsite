@@ -1,4 +1,4 @@
-export type TeamId = "design" | "dev" | "ghl";
+export type TeamId = "design" | "dev" | "ghl" | "copy";
 
 export type BlockType = "hero" | "grid" | "section" | "cta";
 

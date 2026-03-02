@@ -36,7 +36,7 @@ export function AnnotationList({
         );
       })}
       <div className="mt-1 flex gap-1">
-        {(["design", "dev", "ghl"] as const).map((team) => (
+        {(["design", "dev", "ghl", "copy"] as const).map((team) => (
           <Button
             key={team}
             variant="outline"
