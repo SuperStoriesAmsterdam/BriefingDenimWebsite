@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denim City — Wireframe PRD</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; overflow: hidden; }
+  #root { height: 100vh; }
+  .drag-over { outline: 2px dashed #C4A35A !important; outline-offset: -2px; }
+  .dragging { opacity: 0.4; }
+  .editable-hover:hover { border-bottom-color: #ccc !important; }
+  .sidebar-item { transition: background 0.1s; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.08) !important; }
+  .nav-drop-target { transition: border-color 0.15s; }
+  .nav-drop-target.drop-active { background: rgba(196,163,90,0.15) !important; border-left-color: #C4A35A !important; }
+  textarea { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+/* ── COLORS ── */
+const C = {
+  ghl: "#E85D2F", dark: "#0B1D33", mid: "#1B3A5C", light: "#2E5C8A",
+  gold: "#C4A35A", dev: "#3B82F6", design: "#8B5CF6",
+};
+C.ghlA = C.ghl;
+
+/* ── STORAGE ── */
+const STORE_KEY = "dc-prd-v3";
+const load = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch(e) { return null; } };
+const save = (d) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch(e) {} };
+
+/* ── EDITABLE TEXT ── */
+function ET({ value, onChange, style, multi, placeholder = "Click to edit..." }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const ref = useRef(null);
+  useEffect(() => setDraft(value), [value]);
+  useEffect(() => { if (editing && ref.current) { ref.current.focus(); ref.current.select && ref.current.select(); if (ref.current.tagName === "TEXTAREA") { ref.current.style.height = "auto"; ref.current.style.height = ref.current.scrollHeight + "px"; } } }, [editing]);
+  const done = () => { setEditing(false); if (draft !== value) onChange(draft); };
+  if (editing) {
+    const s = { ...style, width: "100%", border: "1px solid #3B82F6", borderRadius: 3, padding: "2px 4px", background: "#FAFCFF", outline: "none", resize: "none", overflow: "hidden", fontFamily: "inherit" };
+    return multi
+      ? <textarea ref={ref} value={draft} onChange={e => { setDraft(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }} onBlur={done} onKeyDown={e => e.key === "Escape" && (setDraft(value), setEditing(false))} style={s} />
+      : <input ref={ref} value={draft} onChange={e => setDraft(e.target.value)} onBlur={done} onKeyDown={e => { if (e.key === "Enter") done(); if (e.key === "Escape") { setDraft(value); setEditing(false); }}} style={s} />;
+  }
+  return <span onClick={() => setEditing(true)} className="editable-hover" style={{ ...style, cursor: "text", borderBottom: "1px dashed transparent", display: multi ? "block" : "inline", minHeight: multi ? 20 : undefined }} title="Click to edit">{value || <span style={{ color: "#bbb", fontStyle: "italic" }}>{placeholder}</span>}</span>;
+}
+
+/* ── DEFAULT DATA ── */
+function defaults() { return [
+  { id:"home", label:"Home", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Hero Section", desc:"First impression. Must answer: What is Denim City? What can I do here? Is this for me?", content:["Headline: short, punchy line positioning Denim City as a denim innovation hub","Subline: 'Towards a Brighter Blue'","Visual: full-width image or video of the location","Two routing buttons: 'I'm a consumer' / 'I'm a business or school'"], annotations:[{team:"design",text:"No stock photos. Use real images of the location, the team, the work."},{team:"design",text:"Routing buttons must be visually distinct, not two identical buttons."},{team:"dev",text:"Store routing choice in cookie/session for personalized navigation on subsequent pages."},{team:"ghl",text:"GHL TRACKING: Capture B2C/B2B routing choice as contact property via Webflow → GHL webhook. This is the foundation for all downstream segmentation."}] },
+    { type:"grid", title:"Services Grid", desc:"Overview of all pillars. Varies based on B2C/B2B routing.", content:["B2C: Store, Courses, Tours, Repair & Customization, Made to Order","B2B: Lab & Atelier, Collaborations, Partnerships, B2B Services","Each tile: icon/image + short description + CTA"], annotations:[{team:"dev",text:"Conditionally render based on routing choice from hero. Fallback: show all with B2C/B2B labels."},{team:"design",text:"Tiles can be asymmetric. Not every block the same size. Show priority visually."}] },
+    { type:"section", title:"Agenda / Upcoming", desc:"Next upcoming events, Friday Talks, courses.", content:["Show max 3 items","No dedicated page, section on home only","Footer link to full overview (TBD)"], annotations:[{team:"ghl",text:"GHL CALENDARS: Pull events and courses from GHL calendar via API. Booking link → GHL funnel per event type."},{team:"dev",text:"GHL Calendar API endpoint required. Fallback: static content if API unavailable."}] },
+    { type:"section", title:"Social Proof / Press", desc:"Short block with media mentions, figures, or quotes.", content:["NY Times mention (2012), I Amsterdam listing (goal)","Figures: 57 incubator talents, 550+ worldwide, 95% progression","Quote from Mariette or tour feedback"], annotations:[{team:"design",text:"Not a testimonial carousel. Integrate into the page as a typographic element."}] },
+    { type:"cta", title:"Footer CTA", desc:"Universal conversion section at bottom of every page.", content:["Context-dependent: on Home → 'Plan your visit' or 'Book a tour'","Always: contact form or booking link"], annotations:[{team:"ghl",text:"GHL FORM: Universal contact form → GHL via Webflow webhook. Tagging based on page origin for correct pipeline assignment."}] },
+  ]},
+  { id:"store", label:"Store", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Store Hero", desc:"'STRICTLY OFFLINE — Some things you have to see for yourself.'", content:["No webshop. No product pages with 'add to cart'.","Hero communicates the physical experience.","CTA: 'Visit us' with opening hours + address"], annotations:[{team:"design",text:"This is the page where the 'strictly offline' positioning must come through strongest."},{team:"dev",text:"Google Maps embed with custom styling. Opening hours as structured data (Schema.org LocalBusiness)."}] },
+    { type:"section", title:"Two Walls", desc:"Visual explanation of the two wall concepts.", content:["6-meter Jeans Wall: pairs of jeans on display, brands explained","Fabric Wall: fabric by the meter, raw selvedge to innovative stretch","No webshop-style product listing. Mood images + short description."], annotations:[{team:"design",text:"Two columns or split-screen. Visual contrast between the two walls."}] },
+    { type:"grid", title:"Brands & Designers", desc:"Overview of carried brands and independent designers.", content:["Established: Benzak, Edwin, KOI, Kuyichi, Nudie, Naked and Famous","Independent: Jouez les Enfants, Florian Regtien, Peter Wertmann, Jan de Vries, Wallflower","Collabs: Very GoodS Studio (candles), Mood Denim (spray)","Special: Royal Delft x Henk Schiffmacher"], annotations:[{team:"design",text:"No brand logo grid. Each brand deserves context."},{team:"dev",text:"CMS-driven content so brands can be easily added/removed."}] },
+    { type:"section", title:"Services: Repair, Customization, Made to Order, Hemming", desc:"Four services, each with its own character.", content:["Repair: 'Free repair for life partner for Nudie. Dedicated partner for KOI.'","Customization: upgrades, personalization","Made to Order: tailor-made jeans by Incubator talent","Hemming: genuine chain stitching"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Repair B2B': For brand partnership inquiries. Webflow form → GHL pipeline with auto-tagging."},{team:"ghl",text:"GHL BOOKING: Repair/customization appointments via Calendly → GHL. Confirmation + reminder automated."},{team:"dev",text:"Each service as its own content block with its own CTA."}] },
+  ]},
+  { id:"academy", label:"Academy", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Academy Hero", desc:"Denim City Academy — courses for anyone who wants to go deeper into denim.", content:["Three audiences: Consumers, Students, Industry","Hero with image of workshop in action","Routing: tabs or buttons per audience"], annotations:[{team:"design",text:"Not a course catalog. It's an academy, not a Udemy page."},{team:"ghl",text:"GHL TRACKING: Audience choice sent as tag with every booking."}] },
+    { type:"grid", title:"Course Overview", desc:"All courses grouped by type.", content:["Highest demand: Make Your Own Jeans ⭐, Customize Your Jeans","Highest margin: Make Your Own Bag","Companies favorite: Bags (team building)","Full list: Jeans, Jacket, Kimono, Bag, Customize/Upcycle, Sashiko, Repair, Denim 101, eDesigner","Schools: Summer/Winter School, Custom programs"], annotations:[{team:"dev",text:"Filter by audience. Pricing from Milene needed — placeholder."},{team:"ghl",text:"GHL PIPELINE 'Courses': Every booking → pipeline. Automations: confirmation, reminder, post-course feedback + upsell (30d)."},{team:"ghl",text:"GHL ABANDONED BOOKING: Recovery sequence at 1h, 24h, 72h."}] },
+    { type:"cta", title:"Cross-sell: Jean School", desc:"Link to Jean School for those who want more.", content:["'Want more than a course? Jean School offers 1- and 3-year programs.'","Link to jeanschool.com (external)"], annotations:[{team:"dev",text:"External link, opens in new tab. We are NOT their marketing department."}] },
+  ]},
+  { id:"lab", label:"Lab & Atelier", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Lab & Atelier Hero", desc:"'The only lab in the Netherlands.' That's the headline.", content:["Split: Lab (Sustainable Laundry Lab) vs Atelier (production)","Visuals: the machines, the work, the wash results","Positioning: 'Only lab in the Netherlands / Northern mainland Europe'"], annotations:[{team:"design",text:"Industrial, but not 'factory'. Lab feel: clean, innovative, precision."}] },
+    { type:"section", title:"Lab — Equipment & Capabilities", desc:"What the lab can do.", content:["Equipment: Laser (Jeanologia eDesigner), Ozone, EcoStone, Natural dyes, Coatings","Rigmic Partnership: washmaster Pauline, 'premier league' lab"], annotations:[{team:"design",text:"Show equipment visually, not as a bullet list."}] },
+    { type:"grid", title:"Services — By Audience", desc:"Three tracks: Individuals, Labels & Brands, Schools & Companies.", content:["Individuals: Denim upgrade service","Labels & Brands: Wash development, sample washings, capsule production","Schools & Companies: Lab courses, custom programs"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Lab/Atelier': Three intake forms per audience. Each → own sub-pipeline."},{team:"dev",text:"Tabs or accordion per audience. Own CTA per track."},{team:"design",text:"Individuals vs B2B should look visually different."}] },
+    { type:"section", title:"Atelier — Production", desc:"Industrial sewing machines, small productions up to ~100 pieces.", content:["Samples to final production","Used by schools for courses","Team: Jos (master tailor), Jan de Vries (teacher)"], annotations:[] },
+  ]},
+  { id:"tours", label:"Tours", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Tour Hero", desc:"'If you ever did a tour, you will never buy the same way again.'", content:["Two categories: Educational & NGO's / Companies","Pricing: €500 commercial, €250 educational","Direct booking CTA"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Tours': Booking → confirmation → reminder → post-tour nurture + upsell."},{team:"ghl",text:"GHL TOUR→COURSE CONVERSION: Auto email sequence after tour."}] },
+    { type:"section", title:"What You'll See", desc:"Tour content without giving it away.", content:["Sustainability is cool, not boring","Circularity is practical","Value of product","Four guides: Jos (archive), Mariette (sustainability), Bowie (lab/wash), Jan (craftsmanship)"], annotations:[{team:"design",text:"Give a taste, not the full tour. Mood images only."}] },
+    { type:"cta", title:"Booking", desc:"Direct booking flow.", content:["Calendly embed or custom booking form","Choice: Educational / Commercial","Date + group size"], annotations:[{team:"ghl",text:"Calendly → GHL: Sync booking data as contact properties."},{team:"dev",text:"Calendly inline embed with Denim City styling. No redirect."}] },
+  ]},
+  { id:"collaborate", label:"Collaborate", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Collaborate Hero", desc:"Three forms of collaboration, each with its own logic.", content:["Collabs: commercial partnerships (Lycra, KOI, Denham)","Partnerships: structural, often in kind (Oficina, MIC, APXpress, Jeanalogia)","Non-profit funding: House of Denim Foundation"], annotations:[{team:"design",text:"Three tracks visually distinct. Not three identical columns."}] },
+    { type:"section", title:"Projects Showcase", desc:"Existing projects as social proof.", content:["Categories: Industry / Cultural / Private","Examples: Team NL Olympics x Denham, Amsterdam Museum, FLAX project","NRI 3001 NOT to be shown (NDA)"], annotations:[{team:"dev",text:"CMS-driven. Each project as case study card. Filterable by category."}] },
+    { type:"section", title:"Partnership Packages", desc:"Tiers: €1,000 / €5,000+ / €15-20K.", content:["Transparency: show the value chain","Details from Milene needed"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Partnerships': Inquiry → discovery call → proposal. Long B2B nurture."}] },
+    { type:"cta", title:"Funding / Support", desc:"Separate section for funders.", content:["PVH Foundation as reference (Commitment #9, D&I)","Sponsor deck: needs to be created","CTA: 'Talk to us about funding'"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Funding': Inquiry → application → reporting. Separate pipeline."}] },
+  ]},
+  { id:"incubator", label:"Incubator", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Incubator Hero", desc:"'A modern take on the traditional guild structure.'", content:["57 talents, ~8 daily on-site, 550+ worldwide, 95% progression","PVH Foundation: Diversity & Inclusion (Commitment #9)"], annotations:[{team:"design",text:"Numbers prominent but not as infographic. Integrate into the story."}] },
+    { type:"section", title:"Guild Model", desc:"How talents grow.", content:["Repair specialists, wash masters, made-to-order designers, teachers, retail, micro-entrepreneurs","Path: Intern → Trial → Incubator","Application: CV, portfolio, motivation, trial day(s)"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Incubator': Application → review → trial day → acceptance. Longest pipeline."}] },
+    { type:"section", title:"B2B Services via Incubator", desc:"What brands can get through incubator talent.", content:["Small productions, capsule collections, workshops, launches, trade shows","Mariette: 'Anything goes.'"], annotations:[{team:"ghl",text:"Shares pipeline with Lab/Atelier for B2B. Tag as 'Incubator' for routing."}] },
+  ]},
+  { id:"jeanschool", label:"Jean School", nav:true, parent:null, blocks:[
+    { type:"hero", title:"Jean School", desc:"We are cofounders. We wrote the curriculum. We are the location.", content:["3-year Dutch + 1-year International program","Only school: store in front, lab in back, school upstairs","Revenue: rent + curriculum licensing fee"], annotations:[{team:"dev",text:"Do NOT become their marketing department. Link to jeanschool.com."},{team:"design",text:"Single page, compact. Positions our role, not their offering."}] },
+    { type:"cta", title:"Cross-sell", desc:"From Jean School to Academy.", content:["'Don't want 3 or 1 year? Book a Denim City Academy course.'","Link to Academy page"], annotations:[] },
+  ]},
+  { id:"about", label:"About / Story", nav:true, parent:null, blocks:[
+    { type:"section", title:"Origin Story", desc:"Denim City timeline.", content:["2008: 'Something has to change. Why not Amsterdam?'","2010: First co-creation, House of Denim Foundation","2012: Jean School, NY Times","2014: Kingpins → Amsterdam","2015: Denim City in De Hallen","2022: Incubator Program","Future: São Paulo, Istanbul, Joburg"], annotations:[{team:"design",text:"Timeline not as vertical line with dots. Find a form that fits Denim City."}] },
+    { type:"section", title:"Team", desc:"Who to feature.", content:["James Veenhof — Co-founder","Mariette Hoitink — Co-founder","Jos — Master tailor","The team"], annotations:[{team:"design",text:"Real portraits, in their element."}] },
+    { type:"section", title:"House of Denim", desc:"The foundation behind Denim City.", content:["Non-profit foundation","Mission: 'Advocate the good, collaborate for the better, educate the best'","'Towards a Brighter Blue'","Cofounders of Jean School, creators of Denim City"], annotations:[] },
+  ]},
+  { id:"venue", label:"Venue Rental", nav:false, parent:null, blocks:[{ type:"hero", title:"Venue Rental", desc:"Landing page, not in main nav. 'Huge unmet demand.'", content:["Archive space: €2,000 base","Extras separate: cleaning, bar, catering, tech","Best model: collaboration with Hallen Studios"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Venue': Inquiry → availability → quote → contract. 48h follow-up."},{team:"dev",text:"Not in main nav. Footer + direct URL. SEO-optimize."}] }] },
+  { id:"saopaulo", label:"São Paulo", nav:false, parent:null, blocks:[{ type:"section", title:"Denim City São Paulo", desc:"Separate section, not in main nav. Teaser on home.", content:["Location info, offerings, connection to Amsterdam","Brand guidelines with floor stickers"], annotations:[{team:"dev",text:"Not in main nav. Home teaser + footer."}] }] },
+  { id:"contact", label:"Contact", nav:true, parent:null, blocks:[{ type:"section", title:"Contact Hub", desc:"One contact page, multiple entry points.", content:["Form with dropdown: what are you reaching out about?","Options: Store, Courses, Tours, Lab, Partnerships, Venue, Press, Incubator, Other","Based on choice: correct fields + correct GHL pipeline"], annotations:[{team:"ghl",text:"GHL SMART ROUTING: Form choice determines pipeline, tags, automation sequence. Webflow → GHL webhook."},{team:"ghl",text:"GHL PIPELINES: Tours, Courses, Lab/Atelier, Partnerships, Venue, Funding, Press, Incubator, Repair B2B."},{team:"dev",text:"Dynamic form: fields change on dropdown. Not 9 separate forms."}] }] },
+  { id:"press", label:"Press", nav:false, parent:null, blocks:[{ type:"section", title:"Press", desc:"Footer link. Press kit + media inquiry.", content:["Press kit download (to be created)","Social Media Kit for collaborations","Contact: press inquiry form"], annotations:[{team:"ghl",text:"GHL PIPELINE 'Press': Inquiry → follow-up. Simplest pipeline."}] }] },
+]; }
+
+/* ── GHL DATA (static, read-only overview) ── */
+const GHL_PIPES = [
+  {n:"Tours",t:"Booking/Calendly",a:"Confirmation, reminder, post-tour nurture, tour→course conversion"},
+  {n:"Courses",t:"Booking/Calendly",a:"Confirmation, reminder, feedback, upsell (30d), abandoned recovery, certificate"},
+  {n:"Lab/Atelier",t:"Inquiry form (3 tracks)",a:"Inquiry → quote → project tracking. Sub-flows per audience."},
+  {n:"Partnerships",t:"Inquiry form",a:"Inquiry → discovery → proposal. Long B2B nurture."},
+  {n:"Venue",t:"Inquiry form",a:"Inquiry → availability → quote → contract. 48h follow-up."},
+  {n:"Funding",t:"Inquiry form",a:"Inquiry → application → reporting."},
+  {n:"Press",t:"Inquiry form",a:"Inquiry → follow-up."},
+  {n:"Incubator",t:"Application form",a:"Intake → review → trial day → acceptance."},
+  {n:"Repair B2B",t:"Partnership inquiry",a:"Brand inquiry → discovery → onboarding."},
+];
+const GHL_INT = [
+  {s:"Lightspeed R",d:"→ GHL",p:"Store purchases → customer data + post-purchase nurture"},
+  {s:"Webflow",d:"→ GHL",p:"All forms. Webhooks per form to correct pipeline."},
+  {s:"Calendly",d:"→ GHL",p:"All bookings. Sync to GHL contacts + pipeline."},
+];
+
+/* ── BLOCK COMPONENT ── */
+function Block({ block, onUpdate, showAnn, filterTeam, index, onDragStart, onDragOver, onDrop, onDragEnd, isDragging, isOver }) {
+  const ts = { hero:{bt:`4px solid ${C.dark}`,bg:"#f8f9fb"}, grid:{bt:`4px solid ${C.mid}`,bg:"#f5f7fa"}, section:{bt:`4px solid ${C.light}`,bg:"#fafbfc"}, cta:{bt:`4px solid ${C.gold}`,bg:"#fdf9f0"} };
+  const s = ts[block.type] || ts.section;
+  const filtered = filterTeam === "all" ? block.annotations : block.annotations.filter(a => a.team === filterTeam);
+
+  return (
+    <div
+      draggable
+      onDragStart={e => { e.dataTransfer.setData("block-index", index); onDragStart(index); }}
+      onDragOver={e => { e.preventDefault(); onDragOver(index); }}
+      onDrop={e => { e.preventDefault(); onDrop(index); }}
+      onDragEnd={onDragEnd}
+      className={`${isDragging ? "dragging" : ""} ${isOver ? "drag-over" : ""}`}
+      style={{ borderTop: s.bt, background: s.bg, borderRadius: 6, padding: 16, marginBottom: 12, cursor: "grab", position: "relative" }}
+    >
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <span style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", color:"#888", fontWeight:600 }}>{block.type}</span>
+        <div style={{ display:"flex", gap:4 }}>
+          <select value={block.type} onChange={e => onUpdate({...block, type: e.target.value})} style={{ fontSize:10, border:"1px solid #ddd", borderRadius:3, padding:"1px 4px", background:"#fff", color:"#888" }}>
+            {["hero","grid","section","cta"].map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <button onClick={() => onUpdate(null)} style={{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:16 }} title="Delete block">×</button>
+        </div>
+      </div>
+      <div style={{ margin:"4px 0" }}><ET value={block.title} onChange={v => onUpdate({...block, title:v})} style={{ fontSize:16, fontWeight:700, color:C.dark }} /></div>
+      <div style={{ margin:"0 0 10px" }}><ET value={block.desc} onChange={v => onUpdate({...block, desc:v})} style={{ fontSize:13, color:"#555", lineHeight:1.5 }} multi /></div>
+      <div style={{ background:"#fff", border:"1px dashed #ccc", borderRadius:4, padding:10, marginBottom:10 }}>
+        {block.content.map((item,i) => (
+          <div key={i} style={{ display:"flex", gap:6, padding:"3px 0", borderBottom: i < block.content.length-1 ? "1px dotted #e5e5e5" : "none" }}>
+            <ET value={item} onChange={v => { const c=[...block.content]; c[i]=v; onUpdate({...block,content:c}); }} style={{ fontSize:12, color:"#666", lineHeight:1.5, flex:1 }} multi />
+            <button onClick={() => onUpdate({...block, content:block.content.filter((_,j)=>j!==i)})} style={{ background:"none", border:"none", color:"#ddd", cursor:"pointer", fontSize:13 }}>×</button>
+          </div>
+        ))}
+        <button onClick={() => onUpdate({...block, content:[...block.content,"New item..."]})} style={{ background:"none", border:"1px dashed #ccc", borderRadius:4, padding:"3px 8px", fontSize:11, color:"#999", cursor:"pointer", marginTop:4 }}>+ item</button>
+      </div>
+      {showAnn && <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+        {filtered.map((a,i) => {
+          const ri = block.annotations.indexOf(a);
+          return (
+            <div key={i} style={{ display:"flex", gap:8, alignItems:"flex-start", padding:"6px 10px", background: a.team==="ghl"?`${C.ghl}10`:`${C[a.team]}08`, borderLeft:`3px solid ${C[a.team]}`, borderRadius:"0 4px 4px 0" }}>
+              <span style={{ background:C[a.team], color:"#fff", fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:2, textTransform:"uppercase", flexShrink:0 }}>{a.team==="ghl"?"GHL":a.team==="dev"?"DEVELOPER":"DESIGNER"}</span>
+              <ET value={a.text} onChange={v => { const ann=[...block.annotations]; ann[ri]={...ann[ri],text:v}; onUpdate({...block,annotations:ann}); }} style={{ fontSize:12, lineHeight:1.5, color:"#333", flex:1 }} multi />
+              <button onClick={() => onUpdate({...block, annotations:block.annotations.filter((_,j)=>j!==ri)})} style={{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:14, flexShrink:0 }}>×</button>
+            </div>
+          );
+        })}
+        <div style={{ display:"flex", gap:4, marginTop:4 }}>
+          {["design","dev","ghl"].map(t => <button key={t} onClick={() => onUpdate({...block, annotations:[...block.annotations,{team:t,text:"New instruction..."}]})} style={{ background:"none", border:"1px dashed #ccc", borderRadius:4, padding:"3px 8px", fontSize:10, color:"#999", cursor:"pointer" }}>+ {t.toUpperCase()}</button>)}
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+/* ── GHL OVERVIEW ── */
+function GHL() {
+  return <div style={{ padding:20 }}>
+    <h2 style={{ fontSize:22, fontWeight:700, color:C.dark, marginBottom:4 }}>GHL Integration Overview</h2>
+    <p style={{ fontSize:13, color:"#666", marginBottom:20 }}>All integration points for the GHL team.</p>
+    <h3 style={{ fontSize:16, fontWeight:700, color:C.ghl, marginBottom:10 }}>System Integrations</h3>
+    <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:24 }}>
+      {GHL_INT.map((x,i) => <div key={i} style={{ display:"flex", gap:10, alignItems:"center", padding:"8px 12px", background:`${C.ghl}08`, borderRadius:4, border:`1px solid ${C.ghl}20` }}><span style={{ fontWeight:700, fontSize:13, color:C.dark, minWidth:100 }}>{x.s}</span><span style={{ fontSize:13, color:C.ghl, fontWeight:600 }}>{x.d}</span><span style={{ fontSize:12, color:"#555" }}>{x.p}</span></div>)}
+    </div>
+    <h3 style={{ fontSize:16, fontWeight:700, color:C.ghl, marginBottom:10 }}>Pipelines ({GHL_PIPES.length})</h3>
+    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+      {GHL_PIPES.map((p,i) => <div key={i} style={{ padding:"10px 14px", background:"#fff", borderRadius:6, border:`1px solid ${C.ghl}25` }}><div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}><span style={{ fontWeight:700, fontSize:14, color:C.dark }}>{p.n}</span><span style={{ fontSize:11, color:"#888", background:"#f5f5f5", padding:"2px 8px", borderRadius:10 }}>{p.t}</span></div><p style={{ fontSize:12, color:"#555", margin:0 }}>{p.a}</p></div>)}
+    </div>
+    <div style={{ marginTop:24, padding:14, background:"#FFF8F0", borderRadius:6, border:"1px solid #F0DCC0" }}>
+      <h4 style={{ fontSize:13, fontWeight:700, color:C.dark, marginBottom:6 }}>Universal automations</h4>
+      <div style={{ fontSize:12, color:"#555", lineHeight:1.7 }}>
+        {["Booking confirmations + reminders (24h)","Post-experience feedback","Abandoned booking recovery (1h, 24h, 72h)","Cross-sell sequences per service","Certificate delivery (courses)","B2C/B2B segmentation from homepage routing"].map((t,i) => <div key={i}>{t}</div>)}
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── MAIN APP ── */
+function App() {
+  const [pages, setPages] = useState(null);
+  const [active, setActive] = useState("home");
+  const [showAnn, setShowAnn] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [viewMode, setViewMode] = useState("wireframe");
+  const [status, setStatus] = useState("");
+  const [dragBlock, setDragBlock] = useState(null);
+  const [overBlock, setOverBlock] = useState(null);
+  const [dragPage, setDragPage] = useState(null);
+  const [overPage, setOverPage] = useState(null);
+  const timer = useRef(null);
+
+  useEffect(() => { const s = load(); setPages(s || defaults()); }, []);
+
+  const persist = useCallback(p => {
+    setPages(p);
+    if (timer.current) clearTimeout(timer.current);
+    setStatus("...");
+    timer.current = setTimeout(() => { save(p); setStatus("Saved"); setTimeout(() => setStatus(""), 1500); }, 500);
+  }, []);
+
+  if (!pages) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", color:"#888" }}>Loading...</div>;
+
+  const cur = pages.find(p => p.id === active);
+  const topLevel = pages.filter(p => !p.parent);
+  const childrenOf = pid => pages.filter(p => p.parent === pid);
+
+  /* Block drag-drop reorder */
+  const dropBlock = (toIndex) => {
+    if (dragBlock === null || dragBlock === toIndex || !cur) return;
+    const blocks = [...cur.blocks];
+    const [moved] = blocks.splice(dragBlock, 1);
+    blocks.splice(toIndex, 0, moved);
+    persist(pages.map(p => p.id === cur.id ? {...p, blocks} : p));
+    setDragBlock(null); setOverBlock(null);
+  };
+
+  /* Page drag-drop reorder + nesting */
+  const dropPage = (targetId) => {
+    if (!dragPage || dragPage === targetId) return;
+    // Move dragged page to be a child of target, or reorder at top level
+    persist(pages.map(p => p.id === dragPage ? {...p, parent: targetId} : p));
+    setDragPage(null); setOverPage(null);
+  };
+
+  const renamePage = (id, newLabel) => persist(pages.map(p => p.id === id ? {...p, label: newLabel} : p));
+  const unnestPage = (id) => persist(pages.map(p => p.id === id ? {...p, parent: null} : p));
+  const toggleNav = (id) => persist(pages.map(p => p.id === id ? {...p, nav: !p.nav} : p));
+  const addPage = () => {
+    const id = "page-" + Date.now();
+    persist([...pages, {id, label:"New Page", nav:true, parent:null, blocks:[{type:"section",title:"First Section",desc:"Description...",content:["Content..."],annotations:[]}]}]);
+    setActive(id);
+  };
+
+  return (
+    <div style={{ display:"flex", height:"100vh", fontFamily:"'Helvetica Neue',Helvetica,Arial,sans-serif", background:"#f0f0f0" }}>
+      {/* SIDEBAR */}
+      <div style={{ width:240, background:C.dark, color:"#fff", display:"flex", flexDirection:"column", flexShrink:0, overflowY:"auto" }}>
+        <div style={{ padding:"16px 14px 8px", borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.12em", color:C.gold, fontWeight:700 }}>Denim City</div>
+          <div style={{ fontSize:15, fontWeight:700 }}>Wireframe PRD</div>
+          <div style={{ display:"flex", gap:6, marginTop:4, alignItems:"center" }}>
+            <span style={{ fontSize:10, color:"rgba(255,255,255,0.5)" }}>v2.0</span>
+            {status && <span style={{ fontSize:9, color: status==="Saved"?"#4ade80":C.gold }}>{status}</span>}
+          </div>
+        </div>
+
+        <div style={{ padding:"10px 14px", borderBottom:"1px solid rgba(255,255,255,0.1)", display:"flex", flexDirection:"column", gap:3 }}>
+          {[{id:"wireframe",l:"Wireframes"},{id:"ghl",l:"GHL Overview"},{id:"sitemap",l:"Sitemap"}].map(v =>
+            <button key={v.id} onClick={() => setViewMode(v.id)} style={{ background:viewMode===v.id?"rgba(255,255,255,0.15)":"transparent", color:viewMode===v.id?"#fff":"rgba(255,255,255,0.6)", border:"none", padding:"6px 10px", borderRadius:4, fontSize:12, fontWeight:600, cursor:"pointer", textAlign:"left" }}>{v.l}</button>
+          )}
+        </div>
+
+        {viewMode === "wireframe" && <div style={{ padding:"8px 0", flex:1, overflowY:"auto" }}>
+          {topLevel.map(p => {
+            const children = childrenOf(p.id);
+            const isActive = active === p.id || children.some(c => c.id === active);
+            return (
+              <div key={p.id}>
+                <div
+                  className={`sidebar-item nav-drop-target ${overPage === p.id ? "drop-active" : ""}`}
+                  draggable
+                  onDragStart={e => { e.dataTransfer.setData("page-id", p.id); setDragPage(p.id); }}
+                  onDragOver={e => { e.preventDefault(); setOverPage(p.id); }}
+                  onDrop={e => { e.preventDefault(); const src = e.dataTransfer.getData("page-id"); if (src && src !== p.id) { persist(pages.map(pg => pg.id === src ? {...pg, parent: p.id} : pg)); } setOverPage(null); setDragPage(null); }}
+                  onDragEnd={() => { setDragPage(null); setOverPage(null); }}
+                  style={{ display:"flex", alignItems:"center", gap:4, borderLeft: isActive?`3px solid ${C.gold}`:"3px solid transparent", padding:"6px 8px 6px 11px", cursor:"grab" }}
+                >
+                  <span onClick={() => setActive(p.id)} style={{ flex:1, fontSize:13, color: active===p.id?"#fff":"rgba(255,255,255,0.6)", fontWeight: active===p.id?600:400, cursor:"pointer" }}>
+                    <ET value={p.label} onChange={v => renamePage(p.id, v)} style={{ color:"inherit", fontSize:13, fontWeight:"inherit" }} />
+                  </span>
+                  {!p.nav && <span style={{ fontSize:8, color:"rgba(255,255,255,0.3)", background:"rgba(255,255,255,0.08)", padding:"1px 4px", borderRadius:2 }}>footer</span>}
+                </div>
+                {children.map(ch => (
+                  <div key={ch.id} className="sidebar-item" style={{ display:"flex", alignItems:"center", gap:4, paddingLeft:24, padding:"4px 8px 4px 28px", borderLeft: active===ch.id?`3px solid ${C.gold}`:"3px solid transparent" }}>
+                    <span onClick={() => setActive(ch.id)} style={{ flex:1, fontSize:12, color: active===ch.id?"#fff":"rgba(255,255,255,0.5)", cursor:"pointer" }}>
+                      <ET value={ch.label} onChange={v => renamePage(ch.id, v)} style={{ color:"inherit", fontSize:12 }} />
+                    </span>
+                    <button onClick={() => unnestPage(ch.id)} style={{ background:"none", border:"none", color:"rgba(255,255,255,0.25)", cursor:"pointer", fontSize:10 }} title="Move to top level">↑</button>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+          <button onClick={addPage} style={{ display:"block", width:"calc(100% - 28px)", margin:"8px 14px", padding:"6px", background:"rgba(255,255,255,0.06)", border:"1px dashed rgba(255,255,255,0.2)", borderRadius:4, color:"rgba(255,255,255,0.4)", cursor:"pointer", fontSize:11 }}>+ Add page</button>
+        </div>}
+
+        <div style={{ padding:"10px 14px", borderTop:"1px solid rgba(255,255,255,0.1)", display:"flex", flexDirection:"column", gap:4 }}>
+          {cur && <button onClick={() => toggleNav(cur.id)} style={{ background:"rgba(255,255,255,0.08)", color:"rgba(255,255,255,0.5)", border:"none", padding:"5px 10px", borderRadius:3, fontSize:10, cursor:"pointer" }}>{cur.nav ? "Move to footer only" : "Move to main nav"}</button>}
+          <button onClick={() => { if(confirm("Reset all changes?")) { const d=defaults(); setPages(d); save(d); setActive("home"); }}} style={{ background:"rgba(255,255,255,0.06)", color:"rgba(255,255,255,0.3)", border:"none", padding:"5px 10px", borderRadius:3, fontSize:10, cursor:"pointer" }}>Reset to defaults</button>
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div style={{ flex:1, overflowY:"auto" }}>
+        {viewMode === "wireframe" && <div style={{ position:"sticky", top:0, zIndex:10, background:"#fff", borderBottom:"1px solid #e0e0e0", padding:"10px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <h2 style={{ fontSize:18, fontWeight:700, color:C.dark, margin:0 }}>{cur?.label}</h2>
+            {cur && !cur.nav && <span style={{ fontSize:10, background:"#f0f0f0", padding:"2px 8px", borderRadius:10, color:"#888" }}>footer only</span>}
+            {cur?.parent && <span style={{ fontSize:10, background:"#EBF0FF", padding:"2px 8px", borderRadius:10, color:"#5577AA" }}>child of {pages.find(p=>p.id===cur.parent)?.label}</span>}
+          </div>
+          <div style={{ display:"flex", gap:6, alignItems:"center", flexWrap:"wrap" }}>
+            {[{id:"all",l:"All"},{id:"design",l:"Designer",c:C.design},{id:"dev",l:"Developer",c:C.dev},{id:"ghl",l:"GHL",c:C.ghl}].map(f =>
+              <button key={f.id} onClick={() => setFilter(f.id)} style={{ background:filter===f.id?(f.c||C.dark):"#f5f5f5", color:filter===f.id?"#fff":"#666", border:"none", padding:"4px 10px", borderRadius:3, fontSize:11, fontWeight:600, cursor:"pointer" }}>{f.l}</button>
+            )}
+            <div style={{ width:1, height:20, background:"#e0e0e0" }} />
+            <button onClick={() => setShowAnn(!showAnn)} style={{ background:showAnn?C.dark:"#f5f5f5", color:showAnn?"#fff":"#666", border:"none", padding:"4px 10px", borderRadius:3, fontSize:11, fontWeight:600, cursor:"pointer" }}>{showAnn?"Annotations on":"Annotations off"}</button>
+          </div>
+        </div>}
+
+        <div style={{ padding: viewMode==="wireframe"?20:0 }}>
+          {viewMode === "wireframe" && cur && <>
+            {cur.blocks.map((block, i) =>
+              <Block key={i} block={block} index={i} showAnn={showAnn} filterTeam={filter}
+                onUpdate={nb => { if(nb===null) persist(pages.map(p=>p.id===cur.id?{...p,blocks:p.blocks.filter((_,j)=>j!==i)}:p)); else persist(pages.map(p=>p.id===cur.id?{...p,blocks:p.blocks.map((b,j)=>j===i?nb:b)}:p)); }}
+                onDragStart={setDragBlock} onDragOver={setOverBlock} onDrop={dropBlock} onDragEnd={() => {setDragBlock(null);setOverBlock(null);}}
+                isDragging={dragBlock===i} isOver={overBlock===i}
+              />
+            )}
+            <button onClick={() => persist(pages.map(p=>p.id===cur.id?{...p,blocks:[...p.blocks,{type:"section",title:"New Section",desc:"Description...",content:["Content..."],annotations:[]}]}:p))} style={{ width:"100%", padding:12, background:"#fff", border:"2px dashed #ddd", borderRadius:6, color:"#999", cursor:"pointer", fontSize:13, fontWeight:600 }}>+ Add section</button>
+          </>}
+          {viewMode === "ghl" && <GHL />}
+          {viewMode === "sitemap" && <div style={{ padding:20 }}>
+            <h2 style={{ fontSize:22, fontWeight:700, color:C.dark, marginBottom:20 }}>Sitemap & Navigation</h2>
+            {topLevel.map(p => <div key={p.id} style={{ marginBottom:8 }}>
+              <div style={{ fontSize:13, fontWeight:600, color: p.nav?C.dark:"#999", padding:"4px 0" }}>{p.label} {!p.nav && <span style={{ fontSize:10, color:"#bbb" }}>(footer)</span>}</div>
+              {childrenOf(p.id).map(ch => <div key={ch.id} style={{ fontSize:12, color:"#666", paddingLeft:20 }}>└ {ch.label}</div>)}
+            </div>)}
+          </div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
