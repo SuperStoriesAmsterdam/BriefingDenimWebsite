@@ -1,6 +1,13 @@
 import type { Page, Block } from "@/types/prd";
 import { STORE_KEY } from "./prd-constants";
 
+export class StorageFullError extends Error {
+  constructor() {
+    super("Storage full! Remove some images to continue saving.");
+    this.name = "StorageFullError";
+  }
+}
+
 const DATA_KEY = "dc-prd-data";
 const VERSION_KEY = "dc-prd-version";
 
@@ -114,7 +121,9 @@ export function savePages(pages: Page[]): void {
   try {
     localStorage.setItem(DATA_KEY, JSON.stringify(pages));
     localStorage.setItem(VERSION_KEY, STORE_KEY);
-  } catch {
-    // silently fail
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "QuotaExceededError") {
+      throw new StorageFullError();
+    }
   }
 }

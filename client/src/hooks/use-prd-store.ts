@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, ViewMode, FilterTeam, Block } from "@/types/prd";
-import { loadPages, savePages } from "@/lib/prd-storage";
+import { loadPages, savePages, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 
 export function usePrdStore() {
@@ -30,9 +30,15 @@ export function usePrdStore() {
     if (timer.current) clearTimeout(timer.current);
     setSaveStatus("...");
     timer.current = setTimeout(() => {
-      savePages(p);
-      setSaveStatus("Saved");
-      setTimeout(() => setSaveStatus(""), 1500);
+      try {
+        savePages(p);
+        setSaveStatus("Saved");
+        setTimeout(() => setSaveStatus(""), 1500);
+      } catch (e) {
+        if (e instanceof StorageFullError) {
+          setSaveStatus("Storage full!");
+        }
+      }
     }, 500);
   }, []);
 

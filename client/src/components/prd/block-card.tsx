@@ -1,8 +1,10 @@
-import type { Block, FilterTeam, TeamId, BlockType, Page } from "@/types/prd";
-import { BLOCK_TYPE_STYLES, BLOCK_TYPES } from "@/lib/prd-constants";
+import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page } from "@/types/prd";
+import { BLOCK_TYPE_STYLES, BLOCK_TYPES, SCHEMA_TYPES } from "@/lib/prd-constants";
 import { EditableText } from "./editable-text";
 import { BlockContentList } from "./block-content-list";
 import { AnnotationList } from "./annotation-list";
+import { BlockImageGallery } from "./block-image-gallery";
+import { DocLinkBadge } from "./doc-link-badge";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { X, ChevronUp, ChevronDown, MoveRight } from "lucide-react";
+import { X, ChevronUp, ChevronDown, MoveRight, Code, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BlockCardProps {
@@ -135,6 +137,24 @@ export function BlockCard({
             </DropdownMenu>
           )}
 
+          {/* Schema type */}
+          <Select
+            value={block.schemaType ?? "none"}
+            onValueChange={(v) => onUpdate({ ...block, schemaType: v as SchemaType })}
+          >
+            <SelectTrigger className="h-6 w-auto gap-1 border-muted-foreground/20 bg-background px-2 text-[10px] text-muted-foreground">
+              <Code className="h-3 w-3 shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SCHEMA_TYPES.map((t) => (
+                <SelectItem key={t} value={t} className="text-xs">
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {/* Type switcher */}
           <Select
             value={block.type}
@@ -184,6 +204,21 @@ export function BlockCard({
         />
       </div>
 
+      {/* LLM Extract */}
+      <div className="mb-2 rounded border border-amber-200/60 bg-amber-50/50 px-3 py-2">
+        <div className="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700/70">
+          <Sparkles className="h-3 w-3" />
+          LLM Extract
+        </div>
+        <EditableText
+          value={block.llmParagraph ?? ""}
+          onChange={(v) => onUpdate({ ...block, llmParagraph: v || undefined })}
+          className="text-[12px] leading-relaxed text-amber-900/70"
+          multi
+          placeholder="Write one paragraph that AI models should extract and cite..."
+        />
+      </div>
+
       {/* Content items */}
       <BlockContentList
         items={block.content}
@@ -201,6 +236,20 @@ export function BlockCard({
           onUpdate({ ...block, content });
         }}
       />
+
+      {/* Image gallery */}
+      <BlockImageGallery
+        images={block.images ?? []}
+        onUpdate={(imgs: BlockImage[]) => onUpdate({ ...block, images: imgs.length > 0 ? imgs : undefined })}
+      />
+
+      {/* Doc link */}
+      <div className="mt-1.5">
+        <DocLinkBadge
+          docUrl={block.docUrl}
+          onUpdate={(url) => onUpdate({ ...block, docUrl: url })}
+        />
+      </div>
 
       {/* Annotations */}
       {showAnnotations && (

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
+import { StorageIndicator } from "./storage-indicator";
 import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw } from "lucide-react";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -277,6 +278,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
             {currentPage.nav ? "Move to footer only" : "Move to main nav"}
           </Button>
         )}
+        <StorageIndicator saveStatus={saveStatus} />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button

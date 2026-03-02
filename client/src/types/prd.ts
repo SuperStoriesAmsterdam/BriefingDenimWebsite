@@ -6,6 +6,14 @@ export type ViewMode = "wireframe" | "ghl" | "sitemap";
 
 export type FilterTeam = "all" | TeamId;
 
+export type SchemaType = "FAQPage" | "Course" | "LocalBusiness" | "Event" | "Product" | "Article" | "Organization" | "Service" | "Place" | "none";
+
+export interface BlockImage {
+  id: string;
+  data: string;
+  name: string;
+}
+
 export interface Annotation {
   team: TeamId;
   text: string;
@@ -17,6 +25,10 @@ export interface Block {
   desc: string;
   content: string[];
   annotations: Annotation[];
+  images?: BlockImage[];
+  docUrl?: string;
+  schemaType?: SchemaType;
+  llmParagraph?: string;
 }
 
 export interface Page {
