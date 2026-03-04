@@ -79,7 +79,8 @@
       "Bash(git push --set-upstream gitsafe-backup main)",
       "Bash(grep -r \"dc-prd\\\\|Denim\\\\|PROJECT\\\\|DC_\\\\|config\" /home/runner/workspace --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache | head -40)",
       "Bash(grep -rn \"Wireframe PRD\\\\|v2\\\\.0\\\\|dc-prd\" /home/runner/workspace/client /home/runner/workspace/server --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache)",
-      "Bash(find /home/runner/workspace -maxdepth 2 -name \"*.config.*\" -o -name \".*config*\" -o -name \"config.*\" 2>/dev/null | grep -v node_modules | grep -v cache | head -20)"
+      "Bash(find /home/runner/workspace -maxdepth 2 -name \"*.config.*\" -o -name \".*config*\" -o -name \"config.*\" 2>/dev/null | grep -v node_modules | grep -v cache | head -20)",
+      "Bash(git push)"
     ]
   }
 }
