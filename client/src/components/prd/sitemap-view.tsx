@@ -6,7 +6,7 @@ interface SitemapViewProps {
 }
 
 export function SitemapView({ topLevelPages, childrenOf }: SitemapViewProps) {
-  const sitePages = topLevelPages.filter((p) => p.id !== "briefings");
+  const sitePages = topLevelPages.filter((p) => p.id !== "briefings" && p.id !== "questions");
 
   return (
     <div className="p-5">

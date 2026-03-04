@@ -30,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2 } from "lucide-react";
+import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -172,6 +172,22 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                {(["questions-to-client", "questions-from-client"] as const).map((id) => {
+                  const page = pages?.find((p) => p.id === id);
+                  if (!page) return null;
+                  return (
+                    <SidebarMenuItem key={id}>
+                      <SidebarMenuButton
+                        isActive={viewMode === "wireframe" && activePage === id}
+                        onClick={() => { setViewMode("wireframe"); setActivePage(id); }}
+                        className="text-xs font-semibold"
+                      >
+                        <HelpCircle className="h-4 w-4" />
+                        <span>{page.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroup>
 
@@ -236,7 +252,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
               <Plus className="h-4 w-4" />
             </SidebarGroupAction>
             <SidebarMenu>
-              {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
+              {topLevelPages.filter((p) => p.id !== "briefings" && p.id !== "questions").map((p) => {
                 const children = childrenOf(p.id);
                 const showDropBefore =
                   dropZone?.pageId === p.id && dropZone.position === "before";
