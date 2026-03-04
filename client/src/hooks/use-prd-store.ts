@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, ViewMode, FilterTeam, Block } from "@/types/prd";
-import { loadPages, savePages, StorageFullError } from "@/lib/prd-storage";
+import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 
 export function usePrdStore() {
@@ -19,24 +19,42 @@ export function usePrdStore() {
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load on mount — merges user edits with latest defaults if version changed
+  // Load on mount — try server first, fall back to localStorage, then defaults
   useEffect(() => {
-    setPages(loadPages(defaults()));
+    async function init() {
+      const freshDefaults = defaults();
+      const server = await loadFromServer();
+      if (server.data && Array.isArray(server.data) && server.data.length > 0) {
+        // Server has data — use it (and cache locally)
+        const merged = loadPages(server.data);
+        setPages(merged);
+        try { savePages(merged); } catch {}
+      } else {
+        // No server data — use localStorage/defaults, then seed the server
+        const local = loadPages(freshDefaults);
+        setPages(local);
+        saveToServer(local);
+      }
+    }
+    init();
   }, []);
 
-  // Persist with debounce
+  // Persist with debounce — saves to both localStorage and server
   const persist = useCallback((p: Page[]) => {
     setPages(p);
     if (timer.current) clearTimeout(timer.current);
     setSaveStatus("...");
-    timer.current = setTimeout(() => {
+    timer.current = setTimeout(async () => {
       try {
         savePages(p);
-        setSaveStatus("Saved");
+        const serverOk = await saveToServer(p);
+        setSaveStatus(serverOk ? "Synced" : "Saved locally");
         setTimeout(() => setSaveStatus(""), 1500);
       } catch (e) {
         if (e instanceof StorageFullError) {
           setSaveStatus("Storage full!");
+        } else {
+          setSaveStatus("Save error");
         }
       }
     }, 500);
@@ -244,10 +262,11 @@ export function usePrdStore() {
     [pages, persist]
   );
 
-  const resetToDefaults = useCallback(() => {
+  const resetToDefaults = useCallback(async () => {
     const d = defaults();
     setPages(d);
     savePages(d);
+    await saveToServer(d);
     setActivePage("home");
   }, []);
 

@@ -127,3 +127,29 @@ export function savePages(pages: Page[]): void {
     }
   }
 }
+
+/** Load PRD data from the server database */
+export async function loadFromServer(): Promise<{ data: Page[] | null; version: string | null }> {
+  try {
+    const res = await fetch("/api/prd");
+    if (!res.ok) return { data: null, version: null };
+    const json = await res.json();
+    return { data: json.data as Page[] | null, version: json.version };
+  } catch {
+    return { data: null, version: null };
+  }
+}
+
+/** Save PRD data to the server database */
+export async function saveToServer(pages: Page[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/prd", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: pages, version: STORE_KEY }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
