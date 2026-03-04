@@ -166,14 +166,54 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
         <SidebarSeparator />
 
         {/* Page tree (wireframe mode only) */}
-        {viewMode === "wireframe" && (
+        {viewMode === "wireframe" && (<>
+          {/* Briefings & Strategies — separate from website pages */}
+          {topLevelPages.filter((p) => p.id === "briefings").map((p) => {
+            const children = childrenOf(p.id);
+            return (
+              <SidebarGroup key={p.id}>
+                <SidebarGroupLabel>
+                  <SidebarMenuButton
+                    isActive={activePage === p.id}
+                    onClick={() => setActivePage(p.id)}
+                    className="text-[11px] font-semibold uppercase tracking-wider p-0 h-auto"
+                  >
+                    {p.label}
+                  </SidebarMenuButton>
+                </SidebarGroupLabel>
+                <SidebarMenu>
+                  {children.map((ch) => (
+                    <SidebarMenuItem key={ch.id}>
+                      <SidebarMenuButton
+                        isActive={activePage === ch.id}
+                        onClick={() => setActivePage(ch.id)}
+                        className="text-xs"
+                      >
+                        <span className="flex-1 truncate">
+                          <EditableText
+                            value={ch.label}
+                            onChange={(v) => renamePage(ch.id, v)}
+                            className="text-xs"
+                          />
+                        </span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            );
+          })}
+
+          <SidebarSeparator />
+
+          {/* Website pages */}
           <SidebarGroup>
             <SidebarGroupLabel>Pages</SidebarGroupLabel>
             <SidebarGroupAction title="Add page" onClick={addPage}>
               <Plus className="h-4 w-4" />
             </SidebarGroupAction>
             <SidebarMenu>
-              {topLevelPages.map((p) => {
+              {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
                 const children = childrenOf(p.id);
                 const showDropBefore =
                   dropZone?.pageId === p.id && dropZone.position === "before";
@@ -263,7 +303,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
               })}
             </SidebarMenu>
           </SidebarGroup>
-        )}
+        </>)}
       </SidebarContent>
 
       {/* Footer */}
