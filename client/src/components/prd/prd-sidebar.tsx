@@ -183,7 +183,11 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                         className="text-xs font-semibold"
                       >
                         <HelpCircle className="h-4 w-4" />
-                        <span>{page.label}</span>
+                        <EditableText
+                          value={page.label.toLowerCase()}
+                          onChange={(v) => renamePage(id, v)}
+                          className="text-xs font-semibold"
+                        />
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
