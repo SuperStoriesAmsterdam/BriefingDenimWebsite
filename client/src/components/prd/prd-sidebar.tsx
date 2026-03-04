@@ -30,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight } from "lucide-react";
+import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -60,6 +60,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
     unnestPage,
     nestPage,
     addPage,
+    deletePage,
     toggleNav,
     currentPage,
     saveStatus,
@@ -284,6 +285,29 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                         </span>
                       </SidebarMenuBadge>
                     )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className="ml-1 shrink-0 opacity-0 group-hover/menu-item:opacity-100 text-sidebar-foreground/25 hover:text-red-400 transition-opacity"
+                          title="Delete page"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete "{p.label}"?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete this page and all its content. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deletePage(p.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
 
                     {/* Nested children */}
                     {children.length > 0 && (

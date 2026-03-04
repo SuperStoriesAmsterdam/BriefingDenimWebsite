@@ -25,10 +25,17 @@ export function usePrdStore() {
       const freshDefaults = defaults();
       const server = await loadFromServer();
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
-        // Server has data — use it (and cache locally)
-        const merged = loadPages(server.data);
-        setPages(merged);
-        try { savePages(merged); } catch {}
+        // Server has data — use it, then restore any missing default pages
+        let currentPages = loadPages(server.data);
+        const missingDefaults = freshDefaults.filter(
+          (dp) => !currentPages.some((p) => p.id === dp.id)
+        );
+        if (missingDefaults.length > 0) {
+          currentPages = [...currentPages, ...missingDefaults];
+        }
+        setPages(currentPages);
+        try { savePages(currentPages); } catch {}
+        if (missingDefaults.length > 0) saveToServer(currentPages);
       } else {
         // No server data — use localStorage/defaults, then seed the server
         const local = loadPages(freshDefaults);
