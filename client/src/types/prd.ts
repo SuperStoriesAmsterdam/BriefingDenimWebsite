@@ -19,6 +19,12 @@ export interface Annotation {
   text: string;
 }
 
+export interface QuestionItem {
+  text: string;
+  answered: boolean;
+  answer: string;
+}
+
 export interface Block {
   type: BlockType;
   title: string;
@@ -29,6 +35,7 @@ export interface Block {
   docUrl?: string;
   schemaType?: SchemaType;
   llmParagraph?: string;
+  questions?: QuestionItem[];
 }
 
 export interface Page {

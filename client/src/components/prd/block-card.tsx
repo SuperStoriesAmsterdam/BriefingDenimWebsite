@@ -1,7 +1,8 @@
-import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page } from "@/types/prd";
+import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page, QuestionItem } from "@/types/prd";
 import { BLOCK_TYPE_STYLES, BLOCK_TYPES, SCHEMA_TYPES } from "@/lib/prd-constants";
 import { EditableText } from "./editable-text";
 import { BlockContentList } from "./block-content-list";
+import { QAList } from "./qa-list";
 import { AnnotationList } from "./annotation-list";
 import { BlockImageGallery } from "./block-image-gallery";
 import { DocLinkBadge } from "./doc-link-badge";
@@ -236,6 +237,23 @@ export function BlockCard({
           onUpdate({ ...block, content });
         }}
       />
+
+      {/* Q&A checklist */}
+      {block.questions && block.questions.length > 0 ? (
+        <QAList
+          items={block.questions}
+          onUpdate={(questions: QuestionItem[]) => onUpdate({ ...block, questions: questions.length > 0 ? questions : undefined })}
+        />
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mb-2 h-6 border-dashed px-2 text-[11px] text-muted-foreground"
+          onClick={() => onUpdate({ ...block, questions: [{ text: "New question...", answered: false, answer: "" }] })}
+        >
+          + Q&A checklist
+        </Button>
+      )}
 
       {/* Image gallery */}
       <BlockImageGallery

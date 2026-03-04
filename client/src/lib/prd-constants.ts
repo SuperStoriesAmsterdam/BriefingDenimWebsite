@@ -1,6 +1,6 @@
 import type { TeamId, BlockType, SchemaType } from "@/types/prd";
 
-export const STORE_KEY = "dc-prd-v28";
+export const STORE_KEY = "dc-prd-v30";
 
 export const TEAM_COLORS: Record<TeamId, { bg: string; border: string; badge: string; text: string }> = {
   design: {
