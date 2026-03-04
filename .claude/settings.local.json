@@ -76,7 +76,10 @@
       "Bash(git add client/src/lib/prd-defaults.ts client/src/lib/prd-constants.ts)",
       "Bash(git commit -m \"$\\(cat <<'EOF'\nAdd complete nurture campaign sequences for all 9 GHL pipelines\n\nNew \"Nurture Campaigns\" page under Briefings & Strategies with:\n- Tours: pre/post-tour sequences, travel agent sub-sequence, ICP branching\n- Courses: pre/post-course, certificate delivery, Course Guide PDF nurture, tier segmentation\n- Lab/Atelier: inquiry→quote follow-ups, post-project B2B nurture\n- Partnerships: discovery→proposal→active partnership, quarterly reviews\n- Venue Rental: inquiry→quote→booking→logistics→post-event cross-sell\n- Funding: application tracking, reporting reminders, renewal prep\n- Press: fast-response acknowledgment, press kit auto-delivery, coverage follow-up\n- Incubator: application→selection→onboarding→monthly check-ins→alumni network\n- Repair B2B: brand onboarding, monthly volume reports, end-customer repair tracking\n- Cross-pipeline routing map connecting all 9 pipelines\n- Lightspeed in-store customer nurture \\(POS→Make.com→GHL\\)\n- Universal re-engagement sequence \\(90d/180d/365d\\)\n- Tagging strategy and consent management\n- 16-week implementation roadmap with QA checklist\n\nVersion bump to v31.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npx tsc --noEmit 2>&1 | head -102)",
-      "Bash(git push --set-upstream gitsafe-backup main)"
+      "Bash(git push --set-upstream gitsafe-backup main)",
+      "Bash(grep -r \"dc-prd\\\\|Denim\\\\|PROJECT\\\\|DC_\\\\|config\" /home/runner/workspace --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache | head -40)",
+      "Bash(grep -rn \"Wireframe PRD\\\\|v2\\\\.0\\\\|dc-prd\" /home/runner/workspace/client /home/runner/workspace/server --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache)",
+      "Bash(find /home/runner/workspace -maxdepth 2 -name \"*.config.*\" -o -name \".*config*\" -o -name \"config.*\" 2>/dev/null | grep -v node_modules | grep -v cache | head -20)"
     ]
   }
 }

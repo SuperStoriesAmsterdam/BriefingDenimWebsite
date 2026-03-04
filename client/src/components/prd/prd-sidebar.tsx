@@ -75,7 +75,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
 
   const [dropZone, setDropZone] = useState<DropZone>(null);
   const [briefingsOpen, setBriefingsOpen] = useState(true);
-  const [pagesOpen, setPagesOpen] = useState(true);
+  const [resourcesOpen, setResourcesOpen] = useState(true);
 
   const handleDragOver = (e: React.DragEvent, pageId: string) => {
     e.preventDefault();
@@ -131,7 +131,13 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
         <div className="text-[11px] font-bold uppercase tracking-widest text-sidebar-primary">
           Denim City
         </div>
-        <div className="text-[15px] font-bold text-sidebar-foreground">PM Team Resources</div>
+        <button
+          className="flex items-center gap-1.5 text-left"
+          onClick={() => setResourcesOpen(!resourcesOpen)}
+        >
+          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-sidebar-foreground/50", resourcesOpen && "rotate-90")} />
+          <span className="text-[15px] font-bold text-sidebar-foreground">PM Team Resources</span>
+        </button>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-sidebar-foreground/50">PRD Tool</span>
           {saveStatus && (
@@ -148,25 +154,29 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* View mode switcher */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {VIEW_MODES.map((v) => (
-              <SidebarMenuItem key={v.id}>
-                <SidebarMenuButton
-                  isActive={viewMode === v.id}
-                  onClick={() => setViewMode(v.id)}
-                  className="text-xs font-semibold"
-                >
-                  <v.icon className="h-4 w-4" />
-                  <span>{v.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {/* View mode switcher — collapses with PM Team Resources */}
+        {resourcesOpen && (
+          <>
+            <SidebarGroup>
+              <SidebarMenu>
+                {VIEW_MODES.map((v) => (
+                  <SidebarMenuItem key={v.id}>
+                    <SidebarMenuButton
+                      isActive={viewMode === v.id}
+                      onClick={() => setViewMode(v.id)}
+                      className="text-xs font-semibold"
+                    >
+                      <v.icon className="h-4 w-4" />
+                      <span>{v.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
 
-        <SidebarSeparator />
+            <SidebarSeparator />
+          </>
+        )}
 
         {/* Page tree (wireframe mode only) */}
         {viewMode === "wireframe" && (<>
@@ -218,23 +228,14 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
 
           <SidebarSeparator />
 
-          {/* Website pages — collapsible */}
-          <Collapsible open={pagesOpen} onOpenChange={setPagesOpen}>
-            <SidebarGroup>
-              <SidebarGroupLabel className="flex items-center gap-1">
-                <CollapsibleTrigger asChild>
-                  <button className="shrink-0 p-0.5 rounded hover:bg-sidebar-accent">
-                    <ChevronRight className={cn("h-3 w-3 transition-transform", pagesOpen && "rotate-90")} />
-                  </button>
-                </CollapsibleTrigger>
-                Pages
-              </SidebarGroupLabel>
-              <SidebarGroupAction title="Add page" onClick={addPage}>
-                <Plus className="h-4 w-4" />
-              </SidebarGroupAction>
-              <CollapsibleContent>
-                <SidebarMenu>
-                  {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
+          {/* Website navigation */}
+          <SidebarGroup>
+            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupAction title="Add page" onClick={addPage}>
+              <Plus className="h-4 w-4" />
+            </SidebarGroupAction>
+            <SidebarMenu>
+              {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
                 const children = childrenOf(p.id);
                 const showDropBefore =
                   dropZone?.pageId === p.id && dropZone.position === "before";
@@ -322,10 +323,8 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
-                </SidebarMenu>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+            </SidebarMenu>
+          </SidebarGroup>
         </>)}
       </SidebarContent>
 
