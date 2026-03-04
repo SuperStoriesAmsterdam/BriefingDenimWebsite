@@ -26,6 +26,7 @@ export function usePrdStore() {
       const server = await loadFromServer();
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
         // Server has data — use it, then restore any missing default pages
+        // and fix the parent of any default pages that have drifted
         let currentPages = loadPages(server.data);
         const missingDefaults = freshDefaults.filter(
           (dp) => !currentPages.some((p) => p.id === dp.id)
@@ -33,9 +34,19 @@ export function usePrdStore() {
         if (missingDefaults.length > 0) {
           currentPages = [...currentPages, ...missingDefaults];
         }
+        // Correct parent field for any existing default pages that have drifted
+        let parentFixed = false;
+        currentPages = currentPages.map((p) => {
+          const def = freshDefaults.find((d) => d.id === p.id);
+          if (def && p.parent !== def.parent) {
+            parentFixed = true;
+            return { ...p, parent: def.parent };
+          }
+          return p;
+        });
         setPages(currentPages);
         try { savePages(currentPages); } catch {}
-        if (missingDefaults.length > 0) saveToServer(currentPages);
+        if (missingDefaults.length > 0 || parentFixed) saveToServer(currentPages);
       } else {
         // No server data — use localStorage/defaults, then seed the server
         const local = loadPages(freshDefaults);
