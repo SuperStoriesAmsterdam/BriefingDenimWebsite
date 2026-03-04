@@ -128,7 +128,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
         <div className="text-[11px] font-bold uppercase tracking-widest text-sidebar-primary">
           Denim City
         </div>
-        <div className="text-[15px] font-bold text-sidebar-foreground">Briefings & Strategies</div>
+        <div className="text-[15px] font-bold text-sidebar-foreground">PM Team Resources</div>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-sidebar-foreground/50">PRD Tool</span>
           {saveStatus && (
