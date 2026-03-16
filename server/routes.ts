@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import path from "path";
+import fs from "fs";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -32,6 +34,16 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Failed to save PRD:", err);
       return res.status(500).json({ message: "Failed to save PRD data" });
+    }
+  });
+
+  // Serve standalone HTML files from workspace root
+  app.get("/customer-journey.html", (_req, res) => {
+    const filePath = path.resolve(import.meta.dirname, "..", "customer-journey.html");
+    if (fs.existsSync(filePath)) {
+      res.type("html").sendFile(filePath);
+    } else {
+      res.status(404).send("Not found");
     }
   });
 
