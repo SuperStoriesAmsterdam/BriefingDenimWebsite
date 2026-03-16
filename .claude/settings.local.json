@@ -80,7 +80,18 @@
       "Bash(grep -r \"dc-prd\\\\|Denim\\\\|PROJECT\\\\|DC_\\\\|config\" /home/runner/workspace --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache | head -40)",
       "Bash(grep -rn \"Wireframe PRD\\\\|v2\\\\.0\\\\|dc-prd\" /home/runner/workspace/client /home/runner/workspace/server --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | grep -v cache)",
       "Bash(find /home/runner/workspace -maxdepth 2 -name \"*.config.*\" -o -name \".*config*\" -o -name \"config.*\" 2>/dev/null | grep -v node_modules | grep -v cache | head -20)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(node -e \"\nconst fs = require\\('fs'\\);\nconst content = fs.readFileSync\\('/home/runner/workspace/client/src/lib/prd-defaults.ts', 'utf8'\\);\nconst titleMatches = [...content.matchAll\\(/title:\\\\\"\\([^\\\\\"]+\\)\\\\\"/g\\)].map\\(m => 'TITLE: ' + m[1]\\);\nconst descMatches = [...content.matchAll\\(/desc:\\\\\"\\([^\\\\\"]+\\)\\\\\"/g\\)].map\\(m => 'DESC: ' + m[1]\\);\nconst labelMatches = [...content.matchAll\\(/label:\\\\\"\\([^\\\\\"]+\\)\\\\\"/g\\)].map\\(m => 'LABEL: ' + m[1]\\);\nconst navMatches = [...content.matchAll\\(/id:\\\\\"\\([^\\\\\"]+\\)\\\\\", label:\\\\\"\\([^\\\\\"]+\\)\\\\\"/g\\)].map\\(m => 'PAGE: ' + m[1] + ' / ' + m[2]\\);\n[...navMatches, ...titleMatches.slice\\(0,60\\)].forEach\\(l => console.log\\(l\\)\\);\n\" 2>&1)",
+      "Bash(node -e \"\nconst fs = require\\('fs'\\);\nconst content = fs.readFileSync\\('/home/runner/workspace/client/src/lib/prd-defaults.ts', 'utf8'\\);\n// Find São Paulo section\nconst idx = content.indexOf\\('saopaulo'\\);\nif \\(idx > -1\\) console.log\\(content.substring\\(idx, idx + 2000\\)\\);\n\" 2>&1)",
+      "WebFetch(domain:denimcity.org)",
+      "WebFetch(domain:houseofdenim.org)",
+      "Bash(ls /home/runner/workspace/*.md /home/runner/workspace/docs/ 2>/dev/null || echo \"checking root\")",
+      "WebFetch(domain:docs.delphi.ai)",
+      "WebFetch(domain:www.getapp.com)",
+      "Bash(node:*)",
+      "Bash(lsof:*)",
+      "Bash(netstat -tlnp)",
+      "WebFetch(domain:localhost)"
     ]
   }
 }

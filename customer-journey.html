@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denim City — The Sales Engine | Customer Journey Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Semi+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy-deep: #1a1a2e;
+  --navy-mid: #16213e;
+  --blue-accent: #0f3460;
+  --purple-accent: #533483;
+  --red-accent: #e94560;
+  --white: #ffffff;
+  --gray-50: #f8f9fa;
+  --gray-100: #f1f3f5;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #868e96;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --font-heading: 'Bebas Neue', sans-serif;
+  --font-body: 'Barlow Semi Condensed', sans-serif;
+  --phase1: #2e7d32;
+  --phase2: #1565c0;
+  --phase3: #757575;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: var(--gray-50);
+  color: var(--navy-deep);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(233, 69, 96, 0.05); }
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes flowDot {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-mid) 50%, var(--blue-accent) 100%);
+  color: var(--white);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+  min-height: 56px;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red-accent) 0%, var(--purple-accent) 50%, var(--blue-accent) 100%);
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.header-title {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.header-title span {
+  color: var(--red-accent);
+}
+
+.header-subtitle {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--gray-400);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-toggle, .phase-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.view-toggle button, .phase-toggle button {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.view-toggle button.active {
+  background: var(--red-accent);
+  color: var(--white);
+}
+
+.phase-toggle button.active-phase1 {
+  background: var(--phase1);
+  color: var(--white);
+}
+
+.phase-toggle button.active-phase2 {
+  background: var(--phase2);
+  color: var(--white);
+}
+
+.phase-toggle button.active-phase3 {
+  background: var(--phase3);
+  color: var(--white);
+}
+
+.phase-toggle button.active-all {
+  background: var(--red-accent);
+  color: var(--white);
+}
+
+.view-toggle button:hover:not(.active):not([class*="active-"]),
+.phase-toggle button:hover:not(.active-all):not(.active-phase1):not(.active-phase2):not(.active-phase3) {
+  color: var(--white);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Main layout */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 256px;
+  min-width: 256px;
+  background: var(--white);
+  border-right: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 14px 18px 10px;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--gray-100);
+  flex-shrink: 0;
+}
+
+.icp-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 8px;
+}
+
+.icp-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.icp-item:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-200);
+}
+
+.icp-item.active {
+  background: linear-gradient(135deg, var(--navy-deep), var(--navy-mid));
+  color: var(--white);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.2);
+}
+
+.icp-item.dimmed {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.icp-icon {
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--gray-50);
+}
+
+.icp-item.active .icp-icon {
+  background: rgba(255,255,255,0.12);
+}
+
+.icp-label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.icp-sublabel {
+  font-size: 10px;
+  font-weight: 300;
+  opacity: 0.65;
+  margin-top: 1px;
+}
+
+.icp-item.active .icp-sublabel {
+  opacity: 0.7;
+}
+
+.icp-phase-badge {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.icp-phase-badge.phase-1 {
+  background: rgba(46, 125, 50, 0.12);
+  color: var(--phase1);
+}
+
+.icp-phase-badge.phase-2 {
+  background: rgba(21, 101, 192, 0.12);
+  color: var(--phase2);
+}
+
+.icp-phase-badge.phase-3 {
+  background: rgba(117, 117, 117, 0.12);
+  color: var(--phase3);
+}
+
+.icp-item.active .icp-phase-badge.phase-1 {
+  background: rgba(46, 125, 50, 0.25);
+  color: #81c784;
+}
+
+.icp-item.active .icp-phase-badge.phase-2 {
+  background: rgba(21, 101, 192, 0.25);
+  color: #90caf9;
+}
+
+.icp-item.active .icp-phase-badge.phase-3 {
+  background: rgba(200, 200, 200, 0.2);
+  color: #bdbdbd;
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--gray-50);
+  min-width: 0;
+}
+
+/* Journey view */
+.journey-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 24px 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.journey-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+  animation: fadeIn 0.3s ease;
+}
+
+.journey-title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--navy-deep);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.journey-phase-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
+
+.journey-phase-badge.phase-1 {
+  background: rgba(46, 125, 50, 0.12);
+  color: var(--phase1);
+}
+
+.journey-phase-badge.phase-2 {
+  background: rgba(21, 101, 192, 0.12);
+  color: var(--phase2);
+}
+
+.journey-phase-badge.phase-3 {
+  background: rgba(117, 117, 117, 0.12);
+  color: var(--phase3);
+}
+
+.journey-pipeline-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+  font-family: var(--font-body);
+  padding: 3px 10px;
+  background: var(--gray-100);
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.journey-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.journey-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.journey-metric-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+.journey-metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy-deep);
+  margin-top: 1px;
+}
+
+/* Pipeline stages bar */
+.pipeline-stages-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  animation: fadeIn 0.3s ease;
+  flex-wrap: wrap;
+}
+
+.pipeline-stage-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+.pipeline-stage-chip:first-child {
+  border-radius: 5px 0 0 5px;
+}
+
+.pipeline-stage-chip:last-child {
+  border-radius: 0 5px 5px 0;
+}
+
+.pipeline-stage-chip:not(:last-child) {
+  border-right: none;
+}
+
+.pipeline-stage-arrow {
+  font-size: 10px;
+  color: var(--red-accent);
+  margin: 0 -1px;
+  z-index: 1;
+}
+
+/* Stage flow */
+.journey-flow {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  min-height: 0;
+  position: relative;
+}
+
+.stage-wrapper {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  animation: slideInRight 0.4s ease forwards;
+  opacity: 0;
+}
+
+.stage-wrapper:nth-child(1) { animation-delay: 0.05s; }
+.stage-wrapper:nth-child(2) { animation-delay: 0.1s; }
+.stage-wrapper:nth-child(3) { animation-delay: 0.15s; }
+.stage-wrapper:nth-child(4) { animation-delay: 0.2s; }
+.stage-wrapper:nth-child(5) { animation-delay: 0.25s; }
+.stage-wrapper:nth-child(6) { animation-delay: 0.3s; }
+.stage-wrapper:nth-child(7) { animation-delay: 0.35s; }
+
+.stage-connector {
+  display: flex;
+  align-items: center;
+  width: 40px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.stage-connector svg {
+  width: 40px;
+  height: 40px;
+}
+
+.connector-line {
+  stroke: var(--gray-300);
+  stroke-width: 2;
+  stroke-dasharray: 6, 4;
+  animation: drawLine 0.6s ease forwards;
+}
+
+.connector-arrow {
+  fill: var(--red-accent);
+}
+
+.connector-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red-accent);
+  top: 50%;
+  transform: translateY(-50%);
+  animation: flowDot 2s ease-in-out infinite;
+}
+
+.stage-card {
+  width: 220px;
+  background: var(--white);
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.stage-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 10px 10px 0 0;
+}
+
+.stage-card[data-color="discovery"]::before { background: var(--blue-accent); }
+.stage-card[data-color="entry"]::before { background: var(--purple-accent); }
+.stage-card[data-color="concierge"]::before { background: #0f3460; }
+.stage-card[data-color="pipeline"]::before { background: var(--red-accent); }
+.stage-card[data-color="automation"]::before { background: #533483; }
+.stage-card[data-color="outcomes"]::before { background: #1a1a2e; }
+
+.stage-card:hover {
+  border-color: var(--gray-300);
+  box-shadow: 0 4px 16px rgba(26, 26, 46, 0.08);
+  transform: translateY(-2px);
+}
+
+.stage-card.expanded {
+  box-shadow: 0 8px 24px rgba(26, 26, 46, 0.12);
+  border-color: var(--red-accent);
+  z-index: 10;
+  width: 340px;
+}
+
+.stage-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.stage-icon {
+  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--gray-50);
+  flex-shrink: 0;
+}
+
+.stage-name {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  letter-spacing: 0.8px;
+  color: var(--navy-deep);
+  line-height: 1.1;
+}
+
+.stage-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  width: fit-content;
+}
+
+.stage-type-badge.automated {
+  background: rgba(83, 52, 131, 0.08);
+  color: var(--purple-accent);
+}
+
+.stage-type-badge.human {
+  background: rgba(233, 69, 96, 0.08);
+  color: var(--red-accent);
+}
+
+.stage-bullets {
+  list-style: none;
+  flex: 1;
+}
+
+.stage-bullets li {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--gray-700);
+  line-height: 1.4;
+  padding: 2px 0;
+  padding-left: 12px;
+  position: relative;
+}
+
+.stage-bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gray-400);
+}
+
+.stage-layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.layer-badge {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.layer-badge[data-layer="website"] { background: #e3f2fd; color: #1565c0; }
+.layer-badge[data-layer="concierge"] { background: #ede7f6; color: #4527a0; }
+.layer-badge[data-layer="crm"] { background: #fce4ec; color: #c62828; }
+.layer-badge[data-layer="review"] { background: #fff3e0; color: #e65100; }
+.layer-badge[data-layer="linkedin"] { background: #e0f2f1; color: #00695c; }
+.layer-badge[data-layer="retargeting"] { background: #f3e5f5; color: #6a1b9a; }
+.layer-badge[data-layer="search"] { background: #e8f5e9; color: #2e7d32; }
+.layer-badge[data-layer="offplatform"] { background: #fff8e1; color: #f57f17; }
+
+/* Conversion layer badges */
+.conversion-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.conversion-badge {
+  font-size: 8px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(233, 69, 96, 0.06);
+  color: var(--red-accent);
+  border: 1px solid rgba(233, 69, 96, 0.12);
+  white-space: nowrap;
+}
+
+/* Expanded detail overlay */
+.stage-detail-expanded {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--gray-200);
+  animation: fadeIn 0.2s ease;
+}
+
+.stage-detail-expanded .detail-section {
+  margin-bottom: 8px;
+}
+
+.stage-detail-expanded .detail-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-500);
+  margin-bottom: 2px;
+}
+
+.stage-detail-expanded .detail-text {
+  font-size: 11px;
+  color: var(--gray-700);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* GHL Tag pills */
+.tag-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.tag-pill {
+  font-size: 9px;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+/* Integration callout */
+.integration-callout {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--blue-accent);
+  padding: 3px 7px;
+  background: rgba(15, 52, 96, 0.06);
+  border-radius: 4px;
+  border: 1px solid rgba(15, 52, 96, 0.1);
+  margin-top: 3px;
+  width: fit-content;
+}
+
+/* GDPR indicator */
+.gdpr-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--phase1);
+  padding: 2px 6px;
+  background: rgba(46, 125, 50, 0.08);
+  border-radius: 3px;
+  margin-top: 3px;
+}
+
+/* Mini timeline */
+.mini-timeline {
+  margin-top: 4px;
+}
+
+.mini-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  font-size: 10px;
+  position: relative;
+  padding-left: 0;
+  min-height: 22px;
+}
+
+.mini-timeline-time {
+  width: 52px;
+  min-width: 52px;
+  font-weight: 700;
+  color: var(--navy-deep);
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  padding-top: 2px;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.mini-timeline-track {
+  width: 16px;
+  min-width: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.mini-timeline-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.mini-timeline-dot.sms { background: var(--red-accent); }
+.mini-timeline-dot.email { background: var(--purple-accent); }
+.mini-timeline-dot.whatsapp { background: #25d366; }
+.mini-timeline-dot.internal { background: var(--gray-500); }
+
+.mini-timeline-line {
+  width: 2px;
+  flex: 1;
+  background: var(--gray-200);
+  min-height: 8px;
+}
+
+.mini-timeline-content {
+  flex: 1;
+  padding-top: 1px;
+  padding-bottom: 4px;
+}
+
+.mini-timeline-channel {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 1px;
+}
+
+.mini-timeline-channel.sms { color: var(--red-accent); }
+.mini-timeline-channel.email { color: var(--purple-accent); }
+.mini-timeline-channel.whatsapp { color: #25d366; }
+.mini-timeline-channel.internal { color: var(--gray-500); }
+
+.mini-timeline-desc {
+  font-size: 10px;
+  color: var(--gray-700);
+  line-height: 1.3;
+}
+
+/* NPS routing */
+.nps-routing {
+  margin-top: 4px;
+}
+
+.nps-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  padding: 2px 0;
+}
+
+.nps-score {
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  min-width: 36px;
+}
+
+.nps-action {
+  color: var(--gray-700);
+}
+
+/* Layers legend */
+.layers-bar {
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  padding: 8px 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.layers-bar-title {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.layers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.layer-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gray-600);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  transition: all 0.2s;
+}
+
+.layer-legend-item.active {
+  border-color: var(--navy-deep);
+  color: var(--navy-deep);
+  background: var(--white);
+  font-weight: 600;
+}
+
+.layer-legend-item .layer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.layer-legend-item[data-layer="website"] .layer-dot { background: #1565c0; }
+.layer-legend-item[data-layer="concierge"] .layer-dot { background: #4527a0; }
+.layer-legend-item[data-layer="crm"] .layer-dot { background: #c62828; }
+.layer-legend-item[data-layer="review"] .layer-dot { background: #e65100; }
+.layer-legend-item[data-layer="linkedin"] .layer-dot { background: #00695c; }
+.layer-legend-item[data-layer="retargeting"] .layer-dot { background: #6a1b9a; }
+.layer-legend-item[data-layer="search"] .layer-dot { background: #2e7d32; }
+.layer-legend-item[data-layer="offplatform"] .layer-dot { background: #f57f17; }
+
+/* Overview mode */
+.overview-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 24px;
+}
+
+.overview-title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--navy-deep);
+  margin-bottom: 14px;
+}
+
+.overview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overview-row {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  animation: fadeInUp 0.3s ease forwards;
+  opacity: 0;
+}
+
+.overview-row:nth-child(1) { animation-delay: 0.02s; }
+.overview-row:nth-child(2) { animation-delay: 0.04s; }
+.overview-row:nth-child(3) { animation-delay: 0.06s; }
+.overview-row:nth-child(4) { animation-delay: 0.08s; }
+.overview-row:nth-child(5) { animation-delay: 0.10s; }
+.overview-row:nth-child(6) { animation-delay: 0.12s; }
+.overview-row:nth-child(7) { animation-delay: 0.14s; }
+.overview-row:nth-child(8) { animation-delay: 0.16s; }
+.overview-row:nth-child(9) { animation-delay: 0.18s; }
+.overview-row:nth-child(10) { animation-delay: 0.20s; }
+.overview-row:nth-child(11) { animation-delay: 0.22s; }
+
+.overview-row:hover {
+  border-color: var(--red-accent);
+  box-shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
+  transform: translateX(4px);
+}
+
+.overview-row.dimmed {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.overview-icp {
+  width: 190px;
+  min-width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overview-icp-icon {
+  font-size: 16px;
+}
+
+.overview-icp-name {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--navy-deep);
+}
+
+.overview-phase-badge {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.overview-phase-badge.phase-1 {
+  background: rgba(46, 125, 50, 0.12);
+  color: var(--phase1);
+}
+
+.overview-phase-badge.phase-2 {
+  background: rgba(21, 101, 192, 0.12);
+  color: var(--phase2);
+}
+
+.overview-phase-badge.phase-3 {
+  background: rgba(117, 117, 117, 0.12);
+  color: var(--phase3);
+}
+
+.overview-stages {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.overview-stage-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.overview-stage-pill[data-color="discovery"] { background: rgba(15,52,96,0.08); color: var(--blue-accent); }
+.overview-stage-pill[data-color="entry"] { background: rgba(83,52,131,0.08); color: var(--purple-accent); }
+.overview-stage-pill[data-color="concierge"] { background: rgba(15,52,96,0.06); color: #0f3460; }
+.overview-stage-pill[data-color="pipeline"] { background: rgba(233,69,96,0.08); color: var(--red-accent); }
+.overview-stage-pill[data-color="automation"] { background: rgba(83,52,131,0.06); color: var(--purple-accent); }
+.overview-stage-pill[data-color="outcomes"] { background: rgba(26,26,46,0.06); color: var(--navy-deep); }
+
+.overview-arrow {
+  color: var(--gray-300);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.overview-metrics {
+  width: 200px;
+  min-width: 200px;
+  text-align: right;
+}
+
+.overview-metric-text {
+  font-size: 10px;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+/* Empty state */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  animation: fadeIn 0.5s ease;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state-text {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.empty-state-sub {
+  font-size: 13px;
+  font-weight: 300;
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useCallback, useMemo } = React;
+
+// ─── Data ───────────────────────────────────────────────────────────────────
+
+const LAYERS = [
+  { id: 'website', name: 'Website', short: 'Web' },
+  { id: 'concierge', name: 'AI Concierge', short: 'AI' },
+  { id: 'crm', name: 'CRM & Automation', short: 'CRM' },
+  { id: 'review', name: 'Review Engine', short: 'Rev' },
+  { id: 'linkedin', name: 'B2B & LinkedIn', short: 'B2B' },
+  { id: 'retargeting', name: 'Retargeting', short: 'Ret' },
+  { id: 'search', name: 'Search & AI Visibility', short: 'SEO' },
+  { id: 'offplatform', name: 'Off-Platform Reach', short: 'Off' },
+];
+
+const ICPS = [
+  {
+    id: 'tourists',
+    icon: '\u2708\uFE0F',
+    name: 'International Tourists',
+    sub: 'B2C Tours',
+    buildPhase: 1,
+    ghlPipeline: 'Tours \u2014 B2C',
+    pipelineStages: ['New Lead', 'Booking Confirmed', 'Reminded', 'Tour Completed', 'Post-Visit', 'Reviewed', 'Cross-Sold'],
+    tags: ['tour-b2c-registered', 'tour-b2c-post-visit', 'course-abandoned-cart'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Booking conversion', 'Review generation', 'Course cross-sell'],
+    activeLayers: ['website', 'concierge', 'crm', 'review', 'retargeting', 'search', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'automated',
+        bullets: [
+          'Google Maps, TripAdvisor, travel blogs',
+          'AI assistants (ChatGPT, Perplexity)',
+          'Hotel concierge referrals, De Hallen foot traffic, creator content',
+        ],
+        layers: ['search', 'offplatform'],
+        conversions: ['SEO', 'AI visibility', 'Creator content'],
+        detail: 'Tourists discover Denim City through multiple channels including AI-powered search, travel platforms, and physical presence at De Hallen.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Tours page on Webflow',
+          'Mobile-optimized, < 2.5s load',
+          'Dutch + English SEO-optimized',
+        ],
+        layers: ['website', 'search'],
+        conversions: ['Exit-intent popup'],
+        detail: 'Visitors land on a fast, mobile-first Tours page optimized for international audiences in both Dutch and English.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          '"Thinking about a tour? I can help you pick the right one."',
+          'Identifies visitor type in 2 exchanges',
+          'Multilingual, 24/7 availability',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge', 'WhatsApp'],
+        detail: 'The AI concierge engages tourists conversationally, qualifies interest, and guides them to the right tour \u2014 available in multiple languages around the clock.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'automated',
+        bullets: [
+          'Tours B2C pipeline in GoHighLevel',
+          'Booking \u2192 confirmation \u2192 reminder',
+          'Cart abandonment: 1h, 24h, 72h recovery',
+          '48h escalation if no team response',
+        ],
+        layers: ['crm'],
+        conversions: ['Abandoned booking recovery'],
+        detail: 'Booking triggers an automated pipeline: instant confirmation, pre-tour reminder, and structured post-tour follow-up. Cart abandonment fires 3-touch recovery (1h/24h/72h). 48h escalation ensures no inquiry goes unanswered.',
+        automationTimeline: [
+          { time: 'Booking', channel: 'email', desc: 'Instant confirmation email + internal notification' },
+          { time: 'T-48h', channel: 'email', desc: 'Reminder email before tour' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'SMS review request at T+2h (90%+ open rate)',
+          'Email follow-up at T+24h (Google + newsletter + discount)',
+          'Second nudge at T+72h (TripAdvisor)',
+          'Course cross-sell at T+3d, referral invite at T+7d',
+        ],
+        layers: ['crm', 'review', 'retargeting'],
+        conversions: ['Review automation', 'Retargeting', 'Cross-sell', 'Referral program'],
+        detail: 'Automated review requests fire at peak emotional moments. NPS routing: 9-10 get review request, 7-8 get feedback form, 0-6 trigger internal task only (no marketing). GDPR consent filter on all outbound.',
+        automationTimeline: [
+          { time: 'T+2h', channel: 'sms', desc: 'Review request (Google direct link)' },
+          { time: 'T+24h', channel: 'email', desc: 'Review follow-up + Denim Dates newsletter + store discount' },
+          { time: 'T+72h', channel: 'email', desc: 'Second nudge (TripAdvisor link)' },
+          { time: 'T+3d', channel: 'email', desc: 'Course cross-sell ("You\'ve seen it \u2014 now make it")' },
+          { time: 'T+7d', channel: 'email', desc: 'Referral invite (10% off for both referrer and referee)' },
+        ],
+        npsRouting: [
+          { score: '9-10', action: 'Review request sent' },
+          { score: '7-8', action: 'Feedback form (no public ask)' },
+          { score: '0-6', action: 'Internal task created (no marketing)' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Google/TripAdvisor reviews generated',
+          'Cross-sell conversion to courses',
+          'Referral program activated (10% off for both)',
+        ],
+        layers: ['review', 'offplatform'],
+        conversions: ['Referral program'],
+        detail: 'The outcome loop: reviews build social proof, cross-sells increase LTV, and the referral program (10% off for referrer and referee) drives organic acquisition.',
+      },
+    ],
+  },
+  {
+    id: 'dmcs',
+    icon: '\uD83C\uDFE2',
+    name: 'DMCs / Travel Agencies',
+    sub: 'B2B Tours',
+    buildPhase: 2,
+    ghlPipeline: 'Tours \u2014 B2B / DMC',
+    pipelineStages: ['New Inquiry', 'Contacted', 'Contract Negotiation', 'Contract Signed', 'First Group Completed', 'Ongoing Partner'],
+    tags: ['b2b-dmc-inquiry', 'b2b-dmc-contract-signed'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Group bookings', 'Repeat bookings', 'Commission referrals'],
+    activeLayers: ['website', 'concierge', 'crm', 'linkedin', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'automated',
+        bullets: [
+          'LinkedIn outreach and content',
+          'Trade networks and Kingpins events',
+          'Google search for Amsterdam group experiences',
+        ],
+        layers: ['linkedin', 'search', 'offplatform'],
+        conversions: ['LinkedIn content'],
+        detail: 'DMCs and travel agencies discover Denim City through professional B2B channels: LinkedIn, trade networks, and the Kingpins denim industry events.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Dedicated B2B landing page',
+          'Commission structure overview',
+          'Group experience packages highlighted',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'A dedicated B2B page presents group packages, commission structures, and the partnership value proposition clearly for agency decision-makers.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          'Qualifies group size and dates',
+          'Presents commission structure',
+          'Routes to B2B pipeline',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge'],
+        detail: 'The concierge qualifies B2B inquiries by gathering group size, preferred dates, and commission expectations before routing to the sales pipeline.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Tours B2B/DMC pipeline in GHL',
+          'Group inquiry \u2192 contract negotiation',
+          '48h escalation if no team response',
+          'Longer follow-up window (B2B sales cycle)',
+        ],
+        layers: ['crm'],
+        conversions: ['B2B nurture sequence'],
+        detail: 'The B2B pipeline handles group inquiries through contract negotiation, with agency-specific nurture content keeping leads warm during longer sales cycles. 48h escalation ensures timely follow-up.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Instant confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'B2B nurture: case studies, commission info, test group offer',
+          'Not consumer tone \u2014 professional B2B messaging',
+          'Preferential commission referral tracking',
+        ],
+        layers: ['crm', 'linkedin'],
+        conversions: ['B2B nurture', 'Referral (commission)'],
+        detail: 'Automated B2B sequences nurture agency relationships with case studies, commission structures, and test group offers. Post-contract + first group triggers referral invite with preferential commission (not % discount).',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+          { time: 'Nurture', channel: 'email', desc: 'Case studies + commission structure + test group offer' },
+          { time: 'Post-1st group', channel: 'email', desc: 'Referral invite (preferential commission, not % discount)' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Recurring group bookings secured',
+          'Repeat booking rate tracked',
+          'Commission-driven referral loop',
+        ],
+        layers: ['crm', 'offplatform'],
+        conversions: [],
+        detail: 'Success is measured by repeat agency bookings and the commission-driven referral loop that turns satisfied agencies into ongoing distribution partners.',
+      },
+    ],
+  },
+  {
+    id: 'corporate',
+    icon: '\uD83D\uDC54',
+    name: 'Corporate Teams',
+    sub: 'B2B Team Events',
+    buildPhase: 2,
+    ghlPipeline: 'Tours \u2014 B2B (shared)',
+    pipelineStages: ['New Inquiry', 'Contacted', 'Contract Negotiation', 'Contract Signed', 'Event Completed', 'Follow-Up'],
+    tags: ['b2b-corporate-inquiry'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Average group value', 'Repeat corporate bookings'],
+    activeLayers: ['website', 'concierge', 'crm', 'linkedin', 'retargeting'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'automated',
+        bullets: [
+          'LinkedIn thought leadership',
+          'Event agency recommendations',
+          'Word of mouth from past teams',
+        ],
+        layers: ['linkedin', 'offplatform'],
+        conversions: ['LinkedIn content'],
+        detail: 'Corporate teams find Denim City through LinkedIn content, event agency referrals, and word of mouth from colleagues who attended previous team events.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Tours/Workshops page',
+          'Make Your Own Bag experience',
+          'Private tour packages',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'Corporate visitors land on Tours or Workshops pages featuring team-building experiences like "Make Your Own Bag" and private guided tours.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          'Scopes team activity type',
+          'Qualifies group size and budget',
+          'Suggests best-fit experience',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge'],
+        detail: 'The concierge helps corporate contacts scope their event by understanding team size, budget, desired outcomes, and suggesting the best-fit experience.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Uses Tours B2B pipeline in GHL',
+          'Automated invoicing flow',
+          'Group coordination handled in system',
+          '48h escalation if no team response',
+        ],
+        layers: ['crm'],
+        conversions: ['B2B nurture sequence'],
+        detail: 'Corporate bookings flow through the B2B pipeline with automated invoicing and group coordination. Same automation patterns as DMC but focused on team-building experiences.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Instant confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'LinkedIn retargeting for corporate visitors',
+          'B2B nurture sequence post-inquiry',
+          'Pre-event coordination emails',
+          'Invoicing and group coordination automated',
+        ],
+        layers: ['crm', 'linkedin', 'retargeting'],
+        conversions: ['Retargeting', 'B2B nurture'],
+        detail: 'Non-converting corporate visitors are retargeted via LinkedIn and Meta. Inquiries that go cold receive a structured nurture sequence. Invoicing and group coordination are fully automated.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+          { time: 'Nurture', channel: 'email', desc: 'Team-building case studies + experience options' },
+          { time: 'Pre-event', channel: 'email', desc: 'Group coordination + logistics' },
+          { time: 'Post-event', channel: 'email', desc: 'Feedback request + repeat booking offer' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'High average group value',
+          'Repeat corporate bookings',
+          'Team building case studies generated',
+        ],
+        layers: ['crm', 'linkedin'],
+        conversions: [],
+        detail: 'Corporate events deliver high group values. Success stories become LinkedIn content and case studies that drive further B2B acquisition.',
+      },
+    ],
+  },
+  {
+    id: 'courses',
+    icon: '\uD83C\uDF93',
+    name: 'Course Seekers',
+    sub: 'Education',
+    buildPhase: 1,
+    ghlPipeline: 'Courses',
+    pipelineStages: ['New Lead', 'Enrolled', 'Payment Confirmed', 'Reminded', 'Course Completed', 'Feedback Collected', 'Upsold'],
+    tags: ['course-enrolled', 'course-abandoned-cart', 'course-[name]-waitlist'],
+    gdpr: true,
+    integrations: ['Make.com', 'Moneybird'],
+    keyMetrics: ['Enrolment rate', 'Completion rate', 'Upsell to next level'],
+    activeLayers: ['website', 'concierge', 'crm', 'review', 'retargeting', 'search'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'automated',
+        bullets: [
+          'Google search for sewing/denim courses',
+          'Word of mouth from past students',
+          'Cross-sell from tour guests',
+        ],
+        layers: ['search', 'offplatform'],
+        conversions: ['SEO', 'Cross-sell'],
+        detail: 'Course seekers discover Denim City through organic search, word of mouth, and cross-sell emails sent to tour guests post-experience.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Education page on Webflow',
+          'Course catalog with levels',
+          'Clear pricing, schedules, early bird deadlines',
+        ],
+        layers: ['website', 'search'],
+        conversions: ['Exit-intent popup'],
+        detail: 'The Education page presents a structured course catalog organized by skill level, with transparent pricing and upcoming schedules. Early Bird pricing shown with time-aware automation that removes EB mention after deadline.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          '"Tell me your experience level"',
+          'Recommends right course match',
+          'Handles scheduling and waitlist questions',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge'],
+        detail: 'The concierge asks about experience level and learning goals to recommend the right course, handling scheduling and prerequisite questions conversationally. Seat cap script triggers waitlist tagging when course is full.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'automated',
+        bullets: [
+          'Courses pipeline in GHL',
+          'Enrollment \u2192 Moneybird invoice (via Make.com)',
+          'Seat cap script \u2192 waitlist when full',
+          'Cart abandonment: 1h, 24h, 72h recovery',
+        ],
+        layers: ['crm'],
+        conversions: ['Abandoned booking recovery'],
+        detail: 'Enrollment triggers the courses pipeline: instant confirmation, Moneybird invoice via Make.com, pre-course reminders, and materials prep. Physical seat cap script manages capacity and waitlists.',
+        automationTimeline: [
+          { time: 'Enrollment', channel: 'email', desc: 'Instant confirmation + Moneybird invoice trigger (via Make.com)' },
+          { time: 'T-7d', channel: 'email', desc: 'Reminder email + course access email' },
+          { time: 'T-24h', channel: 'email', desc: 'Final reminder' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'Post-course feedback collection',
+          'Upsell to next level at T+7d',
+          'Referral invite at T+14d (10% off both sides)',
+          'Early bird pricing: time-aware automation',
+        ],
+        layers: ['crm', 'review', 'retargeting'],
+        conversions: ['Review automation', 'Retargeting', 'Cross-sell', 'Referral program'],
+        detail: 'After completion: automated feedback requests, upsell to next course level at T+7d, and referral invite at T+14d. Early Bird pricing automation removes EB mention after deadline. Drop-offs receive 3-touch recovery emails.',
+        automationTimeline: [
+          { time: 'Post-course', channel: 'email', desc: 'Feedback request' },
+          { time: 'T+7d', channel: 'email', desc: 'Cross-sell to next course level' },
+          { time: 'T+14d', channel: 'email', desc: 'Referral invite (10% off both sides)' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Student progression to advanced levels',
+          'Reviews and testimonials collected',
+          'Referral program activation',
+        ],
+        layers: ['review', 'offplatform'],
+        conversions: ['Referral program'],
+        detail: 'The outcome loop drives students through course levels, generates social proof via reviews, and activates the referral program for peer acquisition.',
+      },
+    ],
+  },
+  {
+    id: 'repair-paid',
+    icon: '\uD83E\uDEA1',
+    name: 'Repair Customers (Paid)',
+    sub: 'Repairs',
+    buildPhase: 1,
+    ghlPipeline: 'Repairs',
+    pipelineStages: ['New Intake', 'Appointment Booked', 'Reminded', 'Repair In Progress', 'Ready for Pickup', 'Picked Up', 'Follow-Up Complete'],
+    tags: ['repair-booked'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Repair bookings', 'Review generation', 'Cross-sell'],
+    activeLayers: ['website', 'concierge', 'crm', 'review', 'search'],
+    formFields: ['Name', 'Email', 'Garment brand', "What's wrong (dropdown)", 'Nudie/KOI flag', 'Urgency', 'Photo upload'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'automated',
+        bullets: [
+          'Google: "jeans repair Amsterdam"',
+          'Word of mouth referrals',
+          'Local SEO and Maps visibility',
+        ],
+        layers: ['search'],
+        conversions: ['SEO'],
+        detail: 'Repair customers discover Denim City primarily through Google search ("jeans repair Amsterdam") and local word of mouth, supported by strong local SEO.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Repairs page on Webflow',
+          'Service descriptions and pricing',
+          'Before/after gallery',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Repairs page showcases services with clear pricing, turnaround times, and a before/after gallery that builds confidence.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          '"Tell me what\'s wrong with your jeans"',
+          'Assesses feasibility \u2192 Nudie/KOI check \u2192 price estimate',
+          'Routes to booking or walk-in',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge', 'WhatsApp'],
+        detail: 'The concierge diagnoses the repair need conversationally: "Tell me what\'s wrong" \u2192 Assess feasibility \u2192 Nudie/KOI ownership check \u2192 Price estimate \u2192 Book or walk-in.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'automated',
+        bullets: [
+          'Repairs pipeline in GHL',
+          'Intake form: brand, issue, Nudie/KOI flag, photo',
+          'Appointment confirmation + reminder at T-24h',
+        ],
+        layers: ['crm'],
+        conversions: [],
+        detail: 'The repairs pipeline manages intake through appointment confirmation. Key form fields: Name, email, garment brand, issue dropdown, Nudie/KOI flag, urgency, and photo upload.',
+        automationTimeline: [
+          { time: 'Intake', channel: 'email', desc: 'Confirmation email + internal notification' },
+          { time: 'T-24h', channel: 'email', desc: 'Appointment reminder' },
+          { time: 'Ready', channel: 'sms', desc: 'SMS/WhatsApp: repair ready for pickup' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'SMS/WhatsApp when repair is ready for pickup',
+          'Review request T+24h after pickup',
+          'Cross-sell to courses ("Turn repair knowledge into a skill")',
+        ],
+        layers: ['crm', 'review'],
+        conversions: ['Review automation', 'WhatsApp', 'Cross-sell'],
+        detail: 'Customers receive an SMS/WhatsApp when their repair is ready, followed by a review request 24 hours after pickup. Cross-sell sequence: "Turn repair knowledge into a skill."',
+        automationTimeline: [
+          { time: 'Ready', channel: 'sms', desc: 'SMS/WhatsApp notification: repair ready for pickup' },
+          { time: 'T+24h', channel: 'email', desc: 'Review request' },
+          { time: 'T+3d', channel: 'email', desc: 'Cross-sell to courses ("Turn repair knowledge into a skill")' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Google reviews generated',
+          'Cross-sell conversion to courses/store',
+          'Repeat repair customers',
+        ],
+        layers: ['review', 'offplatform'],
+        conversions: [],
+        detail: 'Repair customers become reviewers (boosting local SEO), cross-sell targets for courses and store purchases, and repeat customers for future repairs.',
+      },
+    ],
+  },
+  {
+    id: 'repair-free',
+    icon: '\u267B\uFE0F',
+    name: 'Repair Customers (Free)',
+    sub: 'Nudie / KOI Partners',
+    buildPhase: 3,
+    ghlPipeline: 'Repair B2B (Nudie/KOI)',
+    pipelineStages: ['New Intake', 'In Progress', 'Ready for Pickup', 'Picked Up', 'Partner Reported'],
+    tags: ['repair-nudie-free'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Volume processed', 'Brand satisfaction', 'Cross-sell conversion'],
+    activeLayers: ['website', 'concierge', 'crm', 'review'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Brand partner referral (Nudie/KOI)',
+          'In-store signage at brand locations',
+          'Brand website repair locator',
+        ],
+        layers: ['offplatform'],
+        conversions: [],
+        detail: 'Free repair customers are referred by brand partners Nudie Jeans and KOI through in-store signage, staff referrals, and brand repair locator tools.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Repairs page on Webflow',
+          'Brand partner section highlighted',
+          '"Repair for Life/Free" messaging',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Repairs page features a dedicated brand partner section with clear "Repair for Life" (Nudie) and "Repair for Free" (KOI) messaging.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          'Triages brand eligibility',
+          'Confirms Nudie or KOI ownership',
+          'Routes to brand partner pipeline',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge', 'WhatsApp'],
+        detail: 'The concierge verifies brand eligibility (Nudie or KOI), confirms the garment qualifies for free repair, and routes to the brand partner pipeline.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'automated',
+        bullets: [
+          'Repair B2B pipeline (Nudie/KOI)',
+          'Brand-specific intake process',
+          'Partner reporting integration',
+        ],
+        layers: ['crm'],
+        conversions: [],
+        detail: 'A separate B2B pipeline handles brand partner repairs with specific intake processes and reporting that feeds back to Nudie and KOI.',
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'WhatsApp repair-ready notification',
+          'Review request post-pickup',
+          'Cross-sell to paid DC services and courses',
+        ],
+        layers: ['crm', 'review'],
+        conversions: ['Review automation', 'WhatsApp', 'Cross-sell'],
+        detail: 'Free repair customers receive WhatsApp notifications, review requests, and cross-sell sequences for paid Denim City services \u2014 converting brand traffic into own-brand customers.',
+        automationTimeline: [
+          { time: 'Ready', channel: 'whatsapp', desc: 'Repair-ready notification' },
+          { time: 'T+24h', channel: 'email', desc: 'Review request (DC branded)' },
+          { time: 'T+3d', channel: 'email', desc: 'Cross-sell to paid DC services and courses' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Brand partner volume and satisfaction tracked',
+          'Cross-sell conversion to paid services',
+          'Reviews generated (Denim City branded)',
+        ],
+        layers: ['review', 'crm'],
+        conversions: [],
+        detail: 'Success is measured by volume processed for partners, cross-sell conversion of brand customers into Denim City services, and reviews generated under the DC brand.',
+      },
+    ],
+  },
+  {
+    id: 'brand-lab',
+    icon: '\uD83E\uDDEA',
+    name: 'Brand & Lab Partners',
+    sub: 'Lab & Atelier',
+    buildPhase: 2,
+    ghlPipeline: 'Lab & Atelier',
+    pipelineStages: ['New Inquiry', 'Project Scoping', 'Quote Sent', 'In Production', 'Milestone Tracking', 'Completed'],
+    tags: ['lab-inquiry', 'lab-active-project'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Project value', 'Repeat partnerships', 'Referrals'],
+    activeLayers: ['website', 'concierge', 'crm', 'linkedin', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'LinkedIn professional network',
+          'Kingpins denim trade events',
+          'Industry referrals and word of mouth',
+        ],
+        layers: ['linkedin', 'offplatform'],
+        conversions: ['LinkedIn content', 'Kingpins networking'],
+        detail: 'Brand and lab partners discover Denim City through professional industry channels: LinkedIn, the Kingpins denim trade circuit, and direct industry referrals.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Lab & Atelier page',
+          'Capabilities showcase',
+          'Past project portfolio',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Lab & Atelier page showcases capabilities, equipment, and a portfolio of past collaborations with brands and designers.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          '"Working on a project? Tell me about it."',
+          'Assesses Lab fit for the project',
+          'Qualifies scope and timeline',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge'],
+        detail: 'The concierge engages brand contacts conversationally about their project, assesses whether the Lab is the right fit, and qualifies scope and timeline.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Lab & Atelier pipeline in GHL',
+          'Inquiry \u2192 project scoping \u2192 quote',
+          '48h escalation if no response',
+          'Milestone tracking through production',
+        ],
+        layers: ['crm'],
+        conversions: ['B2B nurture'],
+        detail: 'The Lab pipeline manages the full project lifecycle: from initial inquiry through scoping, quoting, and milestone tracking during production. 48h escalation ensures timely follow-up.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'B2B nurture with industry content',
+          'Project milestone notifications',
+          'LinkedIn recommendation request post-project',
+        ],
+        layers: ['crm', 'linkedin'],
+        conversions: ['B2B nurture', 'LinkedIn content'],
+        detail: 'Automated B2B nurture keeps brand partners engaged with industry content. Project milestone notifications keep clients informed. Post-project: LinkedIn recommendation request.',
+        automationTimeline: [
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no response' },
+          { time: 'Nurture', channel: 'email', desc: 'Industry content + case studies' },
+          { time: 'Milestones', channel: 'email', desc: 'Project milestone notifications' },
+          { time: 'Post-project', channel: 'email', desc: 'LinkedIn recommendation request' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'High-value project partnerships',
+          'Repeat brand collaborations',
+          'Industry referral network growth',
+        ],
+        layers: ['linkedin', 'offplatform'],
+        conversions: [],
+        detail: 'Success is measured by project value, repeat partnership rate, and the expansion of the referral network through satisfied brand collaborators.',
+      },
+    ],
+  },
+  {
+    id: 'instore',
+    icon: '\uD83D\uDED2',
+    name: 'In-Store Customers',
+    sub: 'POS / Walk-in',
+    buildPhase: 2,
+    ghlPipeline: 'N/A (Lightspeed POS integration)',
+    pipelineStages: ['Purchase', 'Tagged', 'Follow-Up Sequence', 'Review Request', 'Cross-Sold'],
+    tags: ['store-nudie-buyer', 'store-dc-originals-buyer', 'store-buyer'],
+    gdpr: true,
+    integrations: ['Lightspeed POS', 'Make.com'],
+    keyMetrics: ['CRM capture rate', 'Cross-sell conversion', 'Review generation'],
+    activeLayers: ['crm', 'review', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Walk-in from De Hallen foot traffic',
+          'Window shopping and signage',
+          'In-mall directory and wayfinding',
+        ],
+        layers: ['offplatform'],
+        conversions: [],
+        detail: 'In-store customers are primarily walk-ins from De Hallen foot traffic, drawn in by window displays, signage, and the physical presence in the venue.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'human',
+        bullets: [
+          'Point of sale (Lightspeed POS)',
+          'In-store experience and browsing',
+          'Staff-guided product discovery',
+        ],
+        layers: ['offplatform'],
+        conversions: ['POS-to-CRM bridge'],
+        detail: 'The entry point is the physical store and Lightspeed POS system. Staff guide product discovery and capture customer data through digital receipt opt-in.',
+      },
+      {
+        name: 'Data Capture',
+        color: 'concierge',
+        icon: '\uD83D\uDCF1',
+        type: 'automated',
+        bullets: [
+          'Lightspeed POS \u2192 Make.com \u2192 GHL',
+          'Customer tagged by purchase type',
+          'Brand/product data captured automatically',
+        ],
+        layers: ['crm'],
+        conversions: ['POS-to-CRM bridge'],
+        detail: 'At checkout, Lightspeed POS data flows via Make.com into GoHighLevel. Customers are auto-tagged: store-nudie-buyer, store-dc-originals-buyer, or store-buyer.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'automated',
+        bullets: [
+          'Nudie buyer \u2192 repair reminder at 6 months',
+          'DC Originals buyer \u2192 course invite at 14 days',
+          'General buyer \u2192 Denim Dates newsletter offer',
+        ],
+        layers: ['crm'],
+        conversions: ['Brand-tagged follow-up', 'Cross-sell sequences'],
+        detail: 'Purchase data triggers brand-specific automations: Nudie buyers get repair reminders at 6 months, DC Originals buyers receive course invitations at 14 days, general buyers get newsletter offers.',
+        automationTimeline: [
+          { time: 'Nudie +6mo', channel: 'email', desc: 'Repair reminder for Nudie buyers' },
+          { time: 'DC Orig +14d', channel: 'email', desc: 'Course invite for DC Originals buyers' },
+          { time: 'General', channel: 'email', desc: 'Denim Dates newsletter offer' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'Review request T+2 weeks post-purchase',
+          'Cross-sell sequences by purchase type',
+          'Seasonal re-engagement campaigns',
+        ],
+        layers: ['crm', 'review'],
+        conversions: ['Review automation', 'Cross-sell sequences'],
+        detail: 'Automated review requests fire 2 weeks post-purchase. Cross-sell sequences are tailored by brand/product purchased, with seasonal re-engagement for dormant customers.',
+        automationTimeline: [
+          { time: 'T+2wk', channel: 'email', desc: 'Review request' },
+          { time: 'Ongoing', channel: 'email', desc: 'Cross-sell sequences by purchase type' },
+          { time: 'Seasonal', channel: 'email', desc: 'Re-engagement campaigns' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'CRM capture rate from walk-ins',
+          'Cross-sell conversion to services',
+          'Repeat in-store visits tracked',
+        ],
+        layers: ['crm', 'review'],
+        conversions: [],
+        detail: 'The outcome loop converts anonymous walk-ins into known CRM contacts, drives cross-sell to tours/courses/repairs, and generates reviews.',
+      },
+    ],
+  },
+  {
+    id: 'grants',
+    icon: '\uD83C\uDFDB\uFE0F',
+    name: 'Grant Funders',
+    sub: 'Government / Foundation',
+    buildPhase: 3,
+    ghlPipeline: 'Funding / Grants',
+    pipelineStages: ['Prospect', 'Applied', 'In Review', 'Active Funder', 'Renewal Due'],
+    tags: ['funding-active', 'funding-renewal-due'],
+    gdpr: false,
+    integrations: [],
+    keyMetrics: ['Grant renewal rate', 'New funding secured'],
+    activeLayers: ['website', 'crm', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Existing relationships nurtured',
+          'House of Denim Foundation network',
+          'Government program outreach',
+        ],
+        layers: ['offplatform'],
+        conversions: [],
+        detail: 'Grant funders and government partners are reached through existing relationships, the House of Denim Foundation network, and proactive program outreach.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'human',
+        bullets: [
+          'Collaborate page on Webflow',
+          'Impact metrics and mission alignment',
+          'Partnership opportunity overview',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Collaborate page presents mission alignment, documented impact metrics, and partnership opportunities for potential funders.',
+      },
+      {
+        name: 'Relationship',
+        color: 'concierge',
+        icon: '\uD83E\uDD1D',
+        type: 'human',
+        bullets: [
+          'Relationship management (not sales funnel)',
+          'Impact documentation and reporting',
+          'Face-to-face meetings and presentations',
+        ],
+        layers: ['offplatform'],
+        conversions: ['Documented impact metrics'],
+        detail: 'This is relationship management, not a sales funnel. Engagement is through face-to-face meetings, impact presentations, and documented evidence of outcomes.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Funding / Grants pipeline in GHL',
+          'Reporting deadline tracking',
+          'Renewal window management',
+          'Triggered by manual date entry',
+        ],
+        layers: ['crm'],
+        conversions: [],
+        detail: 'The funding pipeline in GHL tracks reporting deadlines and renewal windows, ensuring no critical dates are missed. All automations are internal only \u2014 NOT emails to funders.',
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'T-30d: team reminder before reporting deadline',
+          'T-60d: team reminder before renewal window',
+          '90d no activity: internal flag',
+          'All internal only \u2014 no emails to funder',
+        ],
+        layers: ['crm'],
+        conversions: [],
+        detail: 'Automated internal reminders for reporting deadlines (T-30d) and renewal windows (T-60d). 90-day inactivity triggers internal flag. All automations are team-facing only, never outbound to funders.',
+        automationTimeline: [
+          { time: 'T-60d', channel: 'internal', desc: 'Team reminder: renewal window approaching' },
+          { time: 'T-30d', channel: 'internal', desc: 'Team reminder: reporting deadline approaching' },
+          { time: '90d idle', channel: 'internal', desc: 'Internal flag: no activity for 90 days' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Grant renewals secured',
+          'New funding opportunities identified',
+          'Impact evidence feeds all channels',
+        ],
+        layers: ['crm', 'offplatform'],
+        conversions: ['Impact metrics'],
+        detail: 'Impact evidence (reviews, reach, partnerships, press, course completions, youth participation) feeds back into grant renewal applications and new funding pitches.',
+      },
+    ],
+  },
+  {
+    id: 'press',
+    icon: '\uD83D\uDCF0',
+    name: 'Press / Media',
+    sub: 'PR & Coverage',
+    buildPhase: 3,
+    ghlPipeline: 'No GHL Pipeline',
+    pipelineStages: [],
+    tags: [],
+    gdpr: false,
+    integrations: [],
+    keyMetrics: ['Coverage volume', 'Backlink quality', 'Referral traffic'],
+    activeLayers: ['website', 'search', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Press releases at milestones',
+          'PR outreach campaigns',
+          'Industry events and trade shows',
+        ],
+        layers: ['offplatform'],
+        conversions: [],
+        detail: 'Press and media discover Denim City through milestone press releases, targeted PR outreach, and presence at industry events and trade shows.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Press page on Webflow',
+          'Media kit and brand assets',
+          'Story angles and press contacts',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Press page provides journalists with a media kit, downloadable brand assets, ready-made story angles, and direct press contact information.',
+      },
+      {
+        name: 'Engagement',
+        color: 'concierge',
+        icon: '\uD83C\uDFA4',
+        type: 'human',
+        bullets: [
+          'Direct journalist engagement',
+          'Interview and visit coordination',
+          'Content and quote provision',
+        ],
+        layers: ['offplatform'],
+        conversions: ['Creator content'],
+        detail: 'Press engagement is human-led: coordinating interviews, studio visits, and providing quotes and content to journalists and creators.',
+      },
+      {
+        name: 'Coverage',
+        color: 'pipeline',
+        icon: '\uD83D\uDCDD',
+        type: 'human',
+        bullets: [
+          'Not a traditional pipeline',
+          'Coverage monitoring and backlink tracking',
+          'Press \u2192 social proof + SEO + concierge KB',
+        ],
+        layers: ['search'],
+        conversions: ['Backlinks for SEO'],
+        detail: 'Press is not a pipeline \u2014 coverage is monitored for backlinks, mentions, and referral traffic. Content feeds into concierge knowledge base.',
+      },
+      {
+        name: 'Amplification',
+        color: 'automation',
+        icon: '\uD83D\uDD01',
+        type: 'automated',
+        bullets: [
+          'Coverage feeds social proof on site',
+          'Backlinks boost SEO authority',
+          'Press mentions in concierge knowledge base',
+        ],
+        layers: ['website', 'search', 'concierge'],
+        conversions: ['Social proof', 'SEO backlinks'],
+        detail: 'Press mentions are amplified: added as social proof on conversion pages, backlinks boost domain authority, and coverage is added to the concierge knowledge base.',
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Coverage volume tracked',
+          'Backlink quality and DA impact',
+          'Referral traffic from press features',
+        ],
+        layers: ['search', 'offplatform'],
+        conversions: [],
+        detail: 'Success is measured by coverage volume, backlink quality and domain authority impact, and referral traffic generated from press features.',
+      },
+    ],
+  },
+  {
+    id: 'venue',
+    icon: '\uD83C\uDFDB\uFE0F',
+    name: 'Venue Renters',
+    sub: 'Events & Rental',
+    buildPhase: 2,
+    ghlPipeline: 'Venue Rental',
+    pipelineStages: ['New Inquiry', 'Availability Check', 'Quote Sent', 'Contract Signed', 'Event Completed', 'Follow-Up'],
+    tags: ['venue-rental-inquiry'],
+    gdpr: true,
+    integrations: [],
+    formFields: ['Name', 'Email', 'Event type', 'Estimated guests', 'Preferred date(s)'],
+    keyMetrics: ['Venue bookings', 'Event value', 'Repeat rentals'],
+    activeLayers: ['website', 'concierge', 'crm', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Event searches (Google, venue platforms)',
+          'De Hallen network and directory',
+          'Corporate planners and event agencies',
+        ],
+        layers: ['search', 'offplatform'],
+        conversions: ['SEO', 'De Hallen network'],
+        detail: 'Venue renters discover Denim City through event searches, the De Hallen network and directory, and referrals from corporate planners and event agencies.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Venue Rental page on Webflow',
+          'Space showcase with capacity info',
+          'Inquiry form: event type, guests, dates',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Venue Rental page on Webflow showcases the space with capacity info. Inquiry form captures event type, estimated guests, and preferred dates.',
+      },
+      {
+        name: 'AI Concierge',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'automated',
+        bullets: [
+          'Qualifies event type and guest count',
+          'Checks availability context',
+          'Routes to venue rental pipeline',
+        ],
+        layers: ['concierge'],
+        conversions: ['AI concierge'],
+        detail: 'The concierge qualifies venue inquiries by gathering event type, guest count, and preferred dates, then routes to the venue rental pipeline.',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Venue Rental pipeline in GHL',
+          'Inquiry \u2192 availability check \u2192 quote',
+          '48h escalation if no response',
+          'Quote follow-up sequence',
+        ],
+        layers: ['crm'],
+        conversions: ['Quote follow-up'],
+        detail: 'The venue rental pipeline manages inquiries through availability checking, quoting, and contract signing. 48h escalation ensures no inquiry goes unanswered.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+          { time: 'Quote sent', channel: 'email', desc: 'Quote follow-up sequence' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'Quote follow-up sequence',
+          'Pre-event coordination emails',
+          'Post-event review request + referral for future events',
+        ],
+        layers: ['crm', 'review'],
+        conversions: ['Review automation', 'Referral'],
+        detail: 'Automated quote follow-up keeps inquiries warm. Post-event: review request and referral invitation for future events.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+          { time: 'Quote', channel: 'email', desc: 'Quote follow-up sequence' },
+          { time: 'Pre-event', channel: 'email', desc: 'Event coordination details' },
+          { time: 'Post-event', channel: 'email', desc: 'Review request + referral for future events' },
+        ],
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Venue bookings and event value tracked',
+          'Repeat rental rate',
+          'Referrals from past event hosts',
+        ],
+        layers: ['crm', 'offplatform'],
+        conversions: ['Referral program'],
+        detail: 'Success is measured by venue bookings, event value, repeat rental rate, and referrals from satisfied event hosts.',
+      },
+    ],
+  },
+];
+
+// ─── Components ─────────────────────────────────────────────────────────────
+
+function LayerBadge({ layerId }) {
+  const layer = LAYERS.find(l => l.id === layerId);
+  if (!layer) return null;
+  return React.createElement('span', { className: 'layer-badge', 'data-layer': layerId }, layer.short);
+}
+
+function ConversionBadge({ name }) {
+  return React.createElement('span', { className: 'conversion-badge' }, name);
+}
+
+function TagPill({ tag }) {
+  return React.createElement('span', { className: 'tag-pill' }, tag);
+}
+
+function PhaseBadge({ phase, size }) {
+  const labels = { 1: 'Phase 1', 2: 'Phase 2', 3: 'Phase 3' };
+  const cls = size === 'large' ? 'journey-phase-badge' : (size === 'overview' ? 'overview-phase-badge' : 'icp-phase-badge');
+  return React.createElement('span', { className: cls + ' phase-' + phase }, labels[phase]);
+}
+
+function MiniTimeline({ items }) {
+  return React.createElement('div', { className: 'mini-timeline' },
+    items.map(function(item, i) {
+      var isLast = i === items.length - 1;
+      return React.createElement('div', { className: 'mini-timeline-item', key: i },
+        React.createElement('div', { className: 'mini-timeline-time' }, item.time),
+        React.createElement('div', { className: 'mini-timeline-track' },
+          React.createElement('div', { className: 'mini-timeline-dot ' + item.channel }),
+          !isLast && React.createElement('div', { className: 'mini-timeline-line' })
+        ),
+        React.createElement('div', { className: 'mini-timeline-content' },
+          React.createElement('div', { className: 'mini-timeline-channel ' + item.channel },
+            item.channel === 'sms' ? 'SMS' :
+            item.channel === 'email' ? 'Email' :
+            item.channel === 'whatsapp' ? 'WhatsApp' : 'Internal'
+          ),
+          React.createElement('div', { className: 'mini-timeline-desc' }, item.desc)
+        )
+      );
+    })
+  );
+}
+
+function NpsRouting({ items }) {
+  return React.createElement('div', { className: 'nps-routing' },
+    items.map(function(item, i) {
+      return React.createElement('div', { className: 'nps-row', key: i },
+        React.createElement('span', { className: 'nps-score' }, item.score),
+        React.createElement('span', { className: 'nps-action' }, '\u2192 ' + item.action)
+      );
+    })
+  );
+}
+
+function StageConnector() {
+  return (
+    React.createElement('div', { className: 'stage-connector' },
+      React.createElement('svg', { viewBox: '0 0 40 40', fill: 'none' },
+        React.createElement('line', { x1: '0', y1: '20', x2: '32', y2: '20', className: 'connector-line' }),
+        React.createElement('polygon', { points: '30,15 38,20 30,25', className: 'connector-arrow' })
+      )
+    )
+  );
+}
+
+function StageCard({ stage, icp }) {
+  const [expanded, setExpanded] = useState(false);
+
+  var expandedDetail = null;
+  if (expanded) {
+    var sections = [];
+
+    // Detail text
+    if (stage.detail) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'detail' },
+          React.createElement('div', { className: 'detail-label' }, 'Detail'),
+          React.createElement('div', { className: 'detail-text' }, stage.detail)
+        )
+      );
+    }
+
+    // GHL Pipeline
+    if (icp.ghlPipeline) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'pipeline' },
+          React.createElement('div', { className: 'detail-label' }, 'GHL Pipeline'),
+          React.createElement('div', { style: { fontSize: '11px', color: 'var(--gray-700)', fontWeight: 600 } }, icp.ghlPipeline)
+        )
+      );
+    }
+
+    // Tags
+    if (icp.tags && icp.tags.length > 0) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'tags' },
+          React.createElement('div', { className: 'detail-label' }, 'GHL Tags'),
+          React.createElement('div', { className: 'tag-pills' },
+            icp.tags.map(function(t, i) { return React.createElement(TagPill, { tag: t, key: i }); })
+          )
+        )
+      );
+    }
+
+    // Automation Timeline
+    if (stage.automationTimeline && stage.automationTimeline.length > 0) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'timeline' },
+          React.createElement('div', { className: 'detail-label' }, 'Automation Timeline'),
+          React.createElement(MiniTimeline, { items: stage.automationTimeline })
+        )
+      );
+    }
+
+    // NPS Routing
+    if (stage.npsRouting) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'nps' },
+          React.createElement('div', { className: 'detail-label' }, 'NPS Routing'),
+          React.createElement(NpsRouting, { items: stage.npsRouting })
+        )
+      );
+    }
+
+    // Integrations
+    if (icp.integrations && icp.integrations.length > 0) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'integrations' },
+          React.createElement('div', { className: 'detail-label' }, 'Integrations'),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
+            icp.integrations.map(function(intg, i) {
+              return React.createElement('span', { className: 'integration-callout', key: i }, '\u2699\uFE0F ' + intg);
+            })
+          )
+        )
+      );
+    }
+
+    // GDPR
+    if (icp.gdpr) {
+      sections.push(
+        React.createElement('div', { className: 'detail-section', key: 'gdpr' },
+          React.createElement('span', { className: 'gdpr-indicator' }, '\uD83D\uDD12 GDPR consent filter active')
+        )
+      );
+    }
+
+    expandedDetail = React.createElement('div', { className: 'stage-detail-expanded' }, sections);
+  }
+
+  return (
+    React.createElement('div', {
+      className: 'stage-card' + (expanded ? ' expanded' : ''),
+      'data-color': stage.color,
+      onClick: function() { setExpanded(!expanded); }
+    },
+      React.createElement('div', { className: 'stage-card-header' },
+        React.createElement('div', { className: 'stage-icon' }, stage.icon),
+        React.createElement('div', { className: 'stage-name' }, stage.name)
+      ),
+      React.createElement('div', { className: 'stage-type-badge', 'data-type': stage.type },
+        React.createElement('span', { className: 'stage-type-badge ' + stage.type },
+          stage.type === 'automated' ? '\u26A1 Automated' : '\uD83D\uDC64 Human-led'
+        )
+      ),
+      React.createElement('ul', { className: 'stage-bullets' },
+        stage.bullets.map(function(b, i) { return React.createElement('li', { key: i }, b); })
+      ),
+      expandedDetail,
+      stage.conversions && stage.conversions.length > 0 &&
+        React.createElement('div', { className: 'conversion-badges' },
+          stage.conversions.map(function(c, i) { return React.createElement(ConversionBadge, { key: i, name: c }); })
+        ),
+      React.createElement('div', { className: 'stage-layers' },
+        stage.layers.map(function(l) { return React.createElement(LayerBadge, { key: l, layerId: l }); })
+      )
+    )
+  );
+}
+
+function PipelineStagesBar({ stages }) {
+  if (!stages || stages.length === 0) return null;
+  var items = [];
+  stages.forEach(function(s, i) {
+    items.push(React.createElement('span', { className: 'pipeline-stage-chip', key: 'chip-' + i }, s));
+  });
+  return React.createElement('div', { className: 'pipeline-stages-bar' }, items);
+}
+
+function JourneyView({ icp }) {
+  return (
+    React.createElement('div', { className: 'journey-container', key: icp.id },
+      React.createElement('div', { className: 'journey-header' },
+        React.createElement('div', { className: 'journey-title' },
+          icp.icon, ' ', icp.name,
+          React.createElement(PhaseBadge, { phase: icp.buildPhase, size: 'large' }),
+          icp.ghlPipeline && React.createElement('span', { className: 'journey-pipeline-name' }, icp.ghlPipeline)
+        ),
+        React.createElement('div', { className: 'journey-meta' },
+          icp.keyMetrics.map(function(m, i) {
+            return React.createElement('div', { className: 'journey-metric', key: i },
+              React.createElement('div', { className: 'journey-metric-label' }, 'KPI ' + (i + 1)),
+              React.createElement('div', { className: 'journey-metric-value' }, m)
+            );
+          })
+        )
+      ),
+      React.createElement(PipelineStagesBar, { stages: icp.pipelineStages }),
+      React.createElement('div', { className: 'journey-flow' },
+        icp.stages.map(function(stage, i) {
+          return React.createElement('div', { className: 'stage-wrapper', key: i },
+            i > 0 && React.createElement(StageConnector, null),
+            React.createElement(StageCard, { stage: stage, icp: icp })
+          );
+        })
+      )
+    )
+  );
+}
+
+function OverviewView({ onSelectICP, phaseFilter }) {
+  return (
+    React.createElement('div', { className: 'overview-container' },
+      React.createElement('div', { className: 'overview-title' }, 'All Customer Journeys'),
+      React.createElement('div', { className: 'overview-grid' },
+        ICPS.map(function(icp, idx) {
+          var dimmed = phaseFilter !== 'all' && icp.buildPhase !== parseInt(phaseFilter);
+          return React.createElement('div', {
+            className: 'overview-row' + (dimmed ? ' dimmed' : ''),
+            key: icp.id,
+            onClick: function() { if (!dimmed) onSelectICP(idx); }
+          },
+            React.createElement('div', { className: 'overview-icp' },
+              React.createElement('span', { className: 'overview-icp-icon' }, icp.icon),
+              React.createElement('span', { className: 'overview-icp-name' }, icp.name),
+              React.createElement(PhaseBadge, { phase: icp.buildPhase, size: 'overview' })
+            ),
+            React.createElement('div', { className: 'overview-stages' },
+              icp.stages.map(function(stage, i) {
+                return React.createElement(React.Fragment, { key: i },
+                  i > 0 && React.createElement('span', { className: 'overview-arrow' }, '\u25B8'),
+                  React.createElement('span', { className: 'overview-stage-pill', 'data-color': stage.color }, stage.name)
+                );
+              })
+            ),
+            React.createElement('div', { className: 'overview-metrics' },
+              React.createElement('span', { className: 'overview-metric-text' }, icp.keyMetrics.join(' \u00B7 '))
+            )
+          );
+        })
+      )
+    )
+  );
+}
+
+function LayersBar({ activeLayers }) {
+  return (
+    React.createElement('div', { className: 'layers-bar' },
+      React.createElement('div', { className: 'layers-bar-title' }, 'System Layers'),
+      React.createElement('div', { className: 'layers-list' },
+        LAYERS.map(function(layer) {
+          return React.createElement('div', {
+            key: layer.id,
+            className: 'layer-legend-item' + (activeLayers.includes(layer.id) ? ' active' : ''),
+            'data-layer': layer.id
+          },
+            React.createElement('span', { className: 'layer-dot' }),
+            layer.name
+          );
+        })
+      )
+    )
+  );
+}
+
+function App() {
+  const [selectedICP, setSelectedICP] = useState(null);
+  const [viewMode, setViewMode] = useState('journey');
+  const [phaseFilter, setPhaseFilter] = useState('all');
+
+  const handleSelectICP = useCallback(function(index) {
+    setSelectedICP(index);
+    setViewMode('journey');
+  }, []);
+
+  const activeLayers = useMemo(function() {
+    if (selectedICP === null) return [];
+    return ICPS[selectedICP].activeLayers;
+  }, [selectedICP]);
+
+  return (
+    React.createElement('div', { className: 'app' },
+      React.createElement('header', { className: 'header' },
+        React.createElement('div', { className: 'header-left' },
+          React.createElement('div', { className: 'header-title' }, 'DENIM CITY ', React.createElement('span', null, '\u2014'), ' THE SALES ENGINE'),
+          React.createElement('div', { className: 'header-subtitle' }, 'Customer Journey Map')
+        ),
+        React.createElement('div', { className: 'header-right' },
+          React.createElement('div', { className: 'phase-toggle' },
+            ['all', '1', '2', '3'].map(function(p) {
+              var isActive = phaseFilter === p;
+              var cls = isActive ? (p === 'all' ? 'active-all' : 'active-phase' + p) : '';
+              return React.createElement('button', {
+                key: p,
+                className: cls,
+                onClick: function() { setPhaseFilter(p); }
+              }, p === 'all' ? 'All' : 'Phase ' + p);
+            })
+          ),
+          React.createElement('div', { className: 'view-toggle' },
+            React.createElement('button', {
+              className: viewMode === 'journey' ? 'active' : '',
+              onClick: function() { setViewMode('journey'); }
+            }, 'Journey'),
+            React.createElement('button', {
+              className: viewMode === 'overview' ? 'active' : '',
+              onClick: function() { setViewMode('overview'); }
+            }, 'All Journeys')
+          )
+        )
+      ),
+      React.createElement('div', { className: 'main' },
+        React.createElement('aside', { className: 'sidebar' },
+          React.createElement('div', { className: 'sidebar-header' }, 'Ideal Customer Profiles'),
+          React.createElement('div', { className: 'icp-list' },
+            ICPS.map(function(icp, idx) {
+              var dimmed = phaseFilter !== 'all' && icp.buildPhase !== parseInt(phaseFilter);
+              return React.createElement('div', {
+                key: icp.id,
+                className: 'icp-item' + (selectedICP === idx ? ' active' : '') + (dimmed ? ' dimmed' : ''),
+                onClick: function() { if (!dimmed) handleSelectICP(idx); }
+              },
+                React.createElement('div', { className: 'icp-icon' }, icp.icon),
+                React.createElement('div', null,
+                  React.createElement('div', { className: 'icp-label' }, icp.name),
+                  React.createElement('div', { className: 'icp-sublabel' }, icp.sub)
+                ),
+                React.createElement(PhaseBadge, { phase: icp.buildPhase, size: 'small' })
+              );
+            })
+          )
+        ),
+        React.createElement('div', { className: 'content' },
+          viewMode === 'overview' ?
+            React.createElement(OverviewView, { onSelectICP: handleSelectICP, phaseFilter: phaseFilter }) :
+          selectedICP !== null ?
+            React.createElement(JourneyView, { icp: ICPS[selectedICP] }) :
+            React.createElement('div', { className: 'empty-state' },
+              React.createElement('div', { className: 'empty-state-icon' }, '\uD83D\uDC56'),
+              React.createElement('div', { className: 'empty-state-text' }, 'Select a Customer Profile'),
+              React.createElement('div', { className: 'empty-state-sub' }, 'Choose an ICP from the left to view their journey through the Sales Engine')
+            )
+        )
+      ),
+      React.createElement(LayersBar, { activeLayers: activeLayers })
+    )
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
