@@ -8,6 +8,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -30,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle } from "lucide-react";
+import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -240,6 +241,14 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild className="text-xs">
+                          <a href="/customer-journey.html">
+                            <Route className="h-3 w-3 shrink-0" />
+                            <span className="flex-1 truncate">Customer Journey Map</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     </SidebarMenu>
                   </CollapsibleContent>
                 </SidebarGroup>
@@ -307,13 +316,14 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                     )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <button
+                        <SidebarMenuAction
+                          showOnHover
                           onClick={(e) => e.stopPropagation()}
-                          className="ml-1 shrink-0 opacity-0 group-hover/menu-item:opacity-100 text-sidebar-foreground/25 hover:text-red-400 transition-opacity"
+                          className="text-sidebar-foreground/25 hover:text-red-400"
                           title="Delete page"
                         >
                           <Trash2 className="h-3 w-3" />
-                        </button>
+                        </SidebarMenuAction>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -369,6 +379,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
               })}
             </SidebarMenu>
           </SidebarGroup>
+
         </>)}
       </SidebarContent>
 

@@ -120,6 +120,35 @@ html, body, #root {
   gap: 16px;
 }
 
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-400);
+  text-decoration: none;
+  padding: 4px 10px 4px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.06);
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.back-link:hover {
+  color: var(--white);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.back-arrow {
+  font-size: 14px;
+  line-height: 1;
+}
+
 .header-title {
   font-family: var(--font-heading);
   font-size: 26px;
@@ -1164,14 +1193,14 @@ const ICPS = [
     id: 'tourists',
     icon: '\u2708\uFE0F',
     name: 'International Tourists',
-    sub: 'B2C Tours',
+    sub: 'B2C Tours & Store',
     buildPhase: 1,
     ghlPipeline: 'Tours \u2014 B2C',
     pipelineStages: ['New Lead', 'Booking Confirmed', 'Reminded', 'Tour Completed', 'Post-Visit', 'Reviewed', 'Cross-Sold'],
     tags: ['tour-b2c-registered', 'tour-b2c-post-visit', 'course-abandoned-cart'],
     gdpr: true,
     integrations: [],
-    keyMetrics: ['Booking conversion', 'Review generation', 'Course cross-sell'],
+    keyMetrics: ['Booking conversion', 'Review generation', 'Store + course cross-sell'],
     activeLayers: ['website', 'concierge', 'crm', 'review', 'retargeting', 'search', 'offplatform'],
     stages: [
       {
@@ -1180,13 +1209,13 @@ const ICPS = [
         icon: '\uD83D\uDD0D',
         type: 'automated',
         bullets: [
-          'Google Maps, TripAdvisor, travel blogs',
-          'AI assistants (ChatGPT, Perplexity)',
+          'Google Maps, TripAdvisor, travel blogs, AI assistants',
+          '"Finally, the perfect fit" \u2014 denim destination seekers',
           'Hotel concierge referrals, De Hallen foot traffic, creator content',
         ],
         layers: ['search', 'offplatform'],
         conversions: ['SEO', 'AI visibility', 'Creator content'],
-        detail: 'Tourists discover Denim City through multiple channels including AI-powered search, travel platforms, and physical presence at De Hallen.',
+        detail: 'Tourists discover Denim City as a must-visit Amsterdam destination \u2014 not just for tours, but as THE place to find the perfect-fitting denim. Channels include AI search, travel platforms, hotel concierges, and De Hallen foot traffic.',
       },
       {
         name: 'Entry Point',
@@ -1194,13 +1223,13 @@ const ICPS = [
         icon: '\uD83C\uDFEF',
         type: 'automated',
         bullets: [
-          'Tours page on Webflow',
+          'Tours page or Store page on Webflow',
           'Mobile-optimized, < 2.5s load',
-          'Dutch + English SEO-optimized',
+          '"The best fitting denim \u2014 ever" positioning',
         ],
         layers: ['website', 'search'],
         conversions: ['Exit-intent popup'],
-        detail: 'Visitors land on a fast, mobile-first Tours page optimized for international audiences in both Dutch and English.',
+        detail: 'Visitors land on Tours or Store pages. The store positioning ("finally, the perfect fit") attracts denim seekers who may not be looking for a tour but for the best denim shopping experience in Amsterdam.',
       },
       {
         name: 'AI Concierge',
@@ -1244,7 +1273,7 @@ const ICPS = [
           'SMS review request at T+2h (90%+ open rate)',
           'Email follow-up at T+24h (Google + newsletter + discount)',
           'Second nudge at T+72h (TripAdvisor)',
-          'Course cross-sell at T+3d, referral invite at T+7d',
+          'Course cross-sell at T+3d, store discount, referral invite at T+7d',
         ],
         layers: ['crm', 'review', 'retargeting'],
         conversions: ['Review automation', 'Retargeting', 'Cross-sell', 'Referral program'],
@@ -1269,12 +1298,12 @@ const ICPS = [
         type: 'human',
         bullets: [
           'Google/TripAdvisor reviews generated',
-          'Cross-sell conversion to courses',
+          'Cross-sell to store (denim purchase) and courses',
           'Referral program activated (10% off for both)',
         ],
         layers: ['review', 'offplatform'],
         conversions: ['Referral program'],
-        detail: 'The outcome loop: reviews build social proof, cross-sells increase LTV, and the referral program (10% off for referrer and referee) drives organic acquisition.',
+        detail: 'The outcome loop: reviews build social proof, cross-sells drive store visits ("the perfect fit") and course enrolments, and the referral program drives organic acquisition.',
       },
     ],
   },
@@ -1393,14 +1422,14 @@ const ICPS = [
     id: 'corporate',
     icon: '\uD83D\uDC54',
     name: 'Corporate Teams',
-    sub: 'B2B Team Events',
+    sub: 'B2B Team Events & Meeting Space',
     buildPhase: 2,
     ghlPipeline: 'Tours \u2014 B2B (shared)',
     pipelineStages: ['New Inquiry', 'Contacted', 'Contract Negotiation', 'Contract Signed', 'Event Completed', 'Follow-Up'],
     tags: ['b2b-corporate-inquiry'],
     gdpr: true,
     integrations: [],
-    keyMetrics: ['Average group value', 'Repeat corporate bookings'],
+    keyMetrics: ['Average group value', 'Repeat bookings', 'Venue rental upsell'],
     activeLayers: ['website', 'concierge', 'crm', 'linkedin', 'retargeting'],
     stages: [
       {
@@ -1423,13 +1452,13 @@ const ICPS = [
         icon: '\uD83C\uDFEF',
         type: 'automated',
         bullets: [
-          'Tours/Workshops page',
-          'Make Your Own Bag experience',
-          'Private tour packages',
+          'Tours/Workshops + Venue Rental pages',
+          'Make Your Own Bag, private tours, meeting space',
+          'Team-building + offsite venue packages',
         ],
         layers: ['website'],
         conversions: [],
-        detail: 'Corporate visitors land on Tours or Workshops pages featuring team-building experiences like "Make Your Own Bag" and private guided tours.',
+        detail: 'Corporate visitors land on Tours, Workshops, or Venue Rental pages. Offerings include team-building experiences (Make Your Own Bag, private tours) and meeting/event space rental at De Hallen.',
       },
       {
         name: 'AI Concierge',
@@ -1437,9 +1466,9 @@ const ICPS = [
         icon: '\uD83E\uDD16',
         type: 'automated',
         bullets: [
-          'Scopes team activity type',
-          'Qualifies group size and budget',
-          'Suggests best-fit experience',
+          'Scopes team activity type + venue needs',
+          'Qualifies group size, budget, meeting space',
+          'Suggests best-fit experience or venue package',
         ],
         layers: ['concierge'],
         conversions: ['AI concierge'],
@@ -1506,7 +1535,7 @@ const ICPS = [
     id: 'courses',
     icon: '\uD83C\uDF93',
     name: 'Course Seekers',
-    sub: 'Education',
+    sub: 'Education (B2C + B2B)',
     buildPhase: 1,
     ghlPipeline: 'Courses',
     pipelineStages: ['New Lead', 'Enrolled', 'Payment Confirmed', 'Reminded', 'Course Completed', 'Feedback Collected', 'Upsold'],
@@ -1523,12 +1552,12 @@ const ICPS = [
         type: 'automated',
         bullets: [
           'Google search for sewing/denim courses',
-          'Word of mouth from past students',
-          'Cross-sell from tour guests',
+          'Word of mouth, school referrals, cross-sell from tours',
+          'Covers individual consumers, fashion students, and school groups',
         ],
         layers: ['search', 'offplatform'],
         conversions: ['SEO', 'Cross-sell'],
-        detail: 'Course seekers discover Denim City through organic search, word of mouth, and cross-sell emails sent to tour guests post-experience.',
+        detail: 'One pipeline serves all course seekers: individual consumers, fashion/denim students, and school groups. Discovery via organic search, word of mouth, school partnerships, and cross-sell from tour guests.',
       },
       {
         name: 'Entry Point',
@@ -1698,15 +1727,15 @@ const ICPS = [
         bullets: [
           'SMS/WhatsApp when repair is ready for pickup',
           'Review request T+24h after pickup',
-          'Cross-sell to courses ("Turn repair knowledge into a skill")',
+          'Cross-sell to store (denim purchase) + courses',
         ],
         layers: ['crm', 'review'],
         conversions: ['Review automation', 'WhatsApp', 'Cross-sell'],
-        detail: 'Customers receive an SMS/WhatsApp when their repair is ready, followed by a review request 24 hours after pickup. Cross-sell sequence: "Turn repair knowledge into a skill."',
+        detail: 'Customers receive an SMS/WhatsApp when their repair is ready, followed by a review request 24h after pickup. Cross-sell drives both denim sales (store) and course enrolments.',
         automationTimeline: [
           { time: 'Ready', channel: 'sms', desc: 'SMS/WhatsApp notification: repair ready for pickup' },
           { time: 'T+24h', channel: 'email', desc: 'Review request' },
-          { time: 'T+3d', channel: 'email', desc: 'Cross-sell to courses ("Turn repair knowledge into a skill")' },
+          { time: 'T+3d', channel: 'email', desc: 'Cross-sell: store discount + course invite ("Turn repair into a skill")' },
         ],
       },
       {
@@ -1831,17 +1860,17 @@ const ICPS = [
     ],
   },
   {
-    id: 'brand-lab',
+    id: 'lab-clients',
     icon: '\uD83E\uDDEA',
-    name: 'Brand & Lab Partners',
-    sub: 'Lab & Atelier',
+    name: 'Lab & Atelier Clients',
+    sub: 'Production & R&D',
     buildPhase: 2,
     ghlPipeline: 'Lab & Atelier',
     pipelineStages: ['New Inquiry', 'Project Scoping', 'Quote Sent', 'In Production', 'Milestone Tracking', 'Completed'],
     tags: ['lab-inquiry', 'lab-active-project'],
     gdpr: true,
     integrations: [],
-    keyMetrics: ['Project value', 'Repeat partnerships', 'Referrals'],
+    keyMetrics: ['Project value', 'Repeat commissions', 'Referrals'],
     activeLayers: ['website', 'concierge', 'crm', 'linkedin', 'offplatform'],
     stages: [
       {
@@ -1850,13 +1879,13 @@ const ICPS = [
         icon: '\uD83D\uDD0D',
         type: 'human',
         bullets: [
-          'LinkedIn professional network',
           'Kingpins denim trade events',
-          'Industry referrals and word of mouth',
+          'LinkedIn, industry referrals',
+          'Brands seeking sustainable wash development or sample production',
         ],
         layers: ['linkedin', 'offplatform'],
         conversions: ['LinkedIn content', 'Kingpins networking'],
-        detail: 'Brand and lab partners discover Denim City through professional industry channels: LinkedIn, the Kingpins denim trade circuit, and direct industry referrals.',
+        detail: 'Brands and designers discover the Lab as a specialized production facility for sustainable wash development, sample collections, and capsule production. Primary channels: Kingpins trade events, LinkedIn, and industry referrals.',
       },
       {
         name: 'Entry Point',
@@ -1864,13 +1893,13 @@ const ICPS = [
         icon: '\uD83C\uDFEF',
         type: 'automated',
         bullets: [
-          'Lab & Atelier page',
-          'Capabilities showcase',
-          'Past project portfolio',
+          'Lab & Atelier page on Webflow',
+          'Production capabilities: ozone wash, laser finishing',
+          'Past project portfolio and minimum runs',
         ],
         layers: ['website'],
         conversions: [],
-        detail: 'The Lab & Atelier page showcases capabilities, equipment, and a portfolio of past collaborations with brands and designers.',
+        detail: 'The Lab & Atelier page showcases the specialized production facility: ozone washing (80% less water), laser finishing (62% less energy), prototyping, and capsule collections. Portfolio and minimum project scope set expectations.',
       },
       {
         name: 'AI Concierge',
@@ -1879,12 +1908,12 @@ const ICPS = [
         type: 'automated',
         bullets: [
           '"Working on a project? Tell me about it."',
-          'Assesses Lab fit for the project',
-          'Qualifies scope and timeline',
+          'Assesses Lab fit: wash development, samples, capsule',
+          'Qualifies scope, volume, and timeline',
         ],
         layers: ['concierge'],
         conversions: ['AI concierge'],
-        detail: 'The concierge engages brand contacts conversationally about their project, assesses whether the Lab is the right fit, and qualifies scope and timeline.',
+        detail: 'The concierge qualifies whether the Lab is the right fit: what type of production (wash development, sample collection, capsule production), minimum volume, timeline, and routes to scoping call.',
       },
       {
         name: 'Pipeline',
@@ -1893,13 +1922,12 @@ const ICPS = [
         type: 'human',
         bullets: [
           'Lab & Atelier pipeline in GHL',
-          'Inquiry \u2192 project scoping \u2192 quote',
+          'Inquiry \u2192 scoping call \u2192 quote \u2192 production',
           '48h escalation if no response',
-          'Milestone tracking through production',
         ],
         layers: ['crm'],
         conversions: ['B2B nurture'],
-        detail: 'The Lab pipeline manages the full project lifecycle: from initial inquiry through scoping, quoting, and milestone tracking during production. 48h escalation ensures timely follow-up.',
+        detail: 'The Lab pipeline manages the full project lifecycle: scoping, quoting, production milestones. 48h escalation ensures timely follow-up on high-value inquiries.',
         automationTimeline: [
           { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal notification' },
           { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
@@ -1911,17 +1939,16 @@ const ICPS = [
         icon: '\u26A1',
         type: 'automated',
         bullets: [
-          'B2B nurture with industry content',
           'Project milestone notifications',
+          'B2B nurture with industry content',
           'LinkedIn recommendation request post-project',
         ],
         layers: ['crm', 'linkedin'],
         conversions: ['B2B nurture', 'LinkedIn content'],
-        detail: 'Automated B2B nurture keeps brand partners engaged with industry content. Project milestone notifications keep clients informed. Post-project: LinkedIn recommendation request.',
+        detail: 'Milestone notifications keep clients informed during production. B2B nurture maintains relationship with industry content. Post-project: LinkedIn recommendation request.',
         automationTimeline: [
-          { time: '+48h', channel: 'internal', desc: 'Escalation if no response' },
-          { time: 'Nurture', channel: 'email', desc: 'Industry content + case studies' },
           { time: 'Milestones', channel: 'email', desc: 'Project milestone notifications' },
+          { time: 'Nurture', channel: 'email', desc: 'Industry content + case studies' },
           { time: 'Post-project', channel: 'email', desc: 'LinkedIn recommendation request' },
         ],
       },
@@ -1931,13 +1958,117 @@ const ICPS = [
         icon: '\uD83C\uDFAF',
         type: 'human',
         bullets: [
-          'High-value project partnerships',
-          'Repeat brand collaborations',
-          'Industry referral network growth',
+          'Repeat production commissions',
+          'Portfolio growth (case studies)',
+          'Industry referral network expansion',
         ],
         layers: ['linkedin', 'offplatform'],
         conversions: [],
-        detail: 'Success is measured by project value, repeat partnership rate, and the expansion of the referral network through satisfied brand collaborators.',
+        detail: 'Success: repeat production commissions, portfolio of brand collaborations as marketing asset, and expanding referral network through satisfied clients.',
+      },
+    ],
+  },
+  {
+    id: 'partners',
+    icon: '\uD83E\uDD1D',
+    name: 'Technology & Industry Partners',
+    sub: 'Partnerships',
+    buildPhase: 2,
+    ghlPipeline: 'Partnerships',
+    pipelineStages: ['New Inquiry', 'Discovery Call', 'Proposal', 'Partnership Active', 'Renewal'],
+    tags: ['partnership-inquiry', 'partnership-active'],
+    gdpr: true,
+    integrations: [],
+    keyMetrics: ['Partnership value', 'Long-term retention', 'Co-marketing reach'],
+    activeLayers: ['website', 'crm', 'linkedin', 'offplatform'],
+    stages: [
+      {
+        name: 'Discovery',
+        color: 'discovery',
+        icon: '\uD83D\uDD0D',
+        type: 'human',
+        bullets: [
+          'Kingpins network, trade fairs',
+          'Machinery and technology suppliers',
+          'Industry bodies, innovation programmes',
+        ],
+        layers: ['linkedin', 'offplatform'],
+        conversions: ['LinkedIn content', 'Kingpins networking'],
+        detail: 'Partners are companies that supply machinery, technology, or innovation capability to the Lab. They find Denim City through trade events (Kingpins), industry networks, and innovation programmes.',
+      },
+      {
+        name: 'Entry Point',
+        color: 'entry',
+        icon: '\uD83C\uDFEF',
+        type: 'automated',
+        bullets: [
+          'Collaborate page on Webflow',
+          'Partnership opportunity overview',
+          'Lab capabilities and mission alignment',
+        ],
+        layers: ['website'],
+        conversions: [],
+        detail: 'The Collaborate page presents partnership opportunities, Lab capabilities, and the House of Denim Foundation mission for companies that want to supply or co-develop technology.',
+      },
+      {
+        name: 'Qualification',
+        color: 'concierge',
+        icon: '\uD83E\uDD16',
+        type: 'human',
+        bullets: [
+          'Human-led: discovery call, Lab visit',
+          'Assess technology fit and mutual value',
+          'AI concierge captures initial inquiry',
+        ],
+        layers: ['concierge', 'offplatform'],
+        conversions: ['AI concierge'],
+        detail: 'Partnership qualification is primarily human-led (discovery calls, lab visits) though the AI concierge captures initial inquiries and routes them. Focus: does the technology or machinery fit the Lab roadmap?',
+      },
+      {
+        name: 'Pipeline',
+        color: 'pipeline',
+        icon: '\uD83D\uDCCB',
+        type: 'human',
+        bullets: [
+          'Partnerships pipeline in GHL',
+          'Inquiry \u2192 discovery \u2192 proposal \u2192 active',
+          '48h escalation if no response',
+        ],
+        layers: ['crm'],
+        conversions: ['B2B nurture'],
+        detail: 'The Partnerships pipeline tracks from inquiry through discovery call, proposal, and active partnership. Different from Lab pipeline: this is about the relationship, not a production project.',
+        automationTimeline: [
+          { time: 'Inquiry', channel: 'email', desc: 'Confirmation + internal routing' },
+          { time: '+48h', channel: 'internal', desc: 'Escalation if no team response' },
+        ],
+      },
+      {
+        name: 'Automations',
+        color: 'automation',
+        icon: '\u26A1',
+        type: 'automated',
+        bullets: [
+          'Long-term B2B nurture (not sales cadence)',
+          'Co-marketing content sharing',
+          'Renewal and review reminders',
+        ],
+        layers: ['crm', 'linkedin'],
+        conversions: ['B2B nurture', 'Co-marketing'],
+        detail: 'Partnership nurture is long-term relationship management: co-marketing content, shared industry insights, and automated reminders for partnership reviews and renewals.',
+      },
+      {
+        name: 'Outcomes',
+        color: 'outcomes',
+        icon: '\uD83C\uDFAF',
+        type: 'human',
+        bullets: [
+          'Active technology/machinery partnerships',
+          'Co-marketing reach into partner audiences',
+          'Innovation capability for the Lab',
+        ],
+        layers: ['linkedin', 'offplatform'],
+        conversions: [],
+        detail: 'Success: active partnerships that expand Lab capability (machinery, technology), co-marketing that reaches partner audiences, and long-term innovation partnerships.',
       },
     ],
   },
@@ -1953,7 +2084,7 @@ const ICPS = [
     gdpr: true,
     integrations: ['Lightspeed POS', 'Make.com'],
     keyMetrics: ['CRM capture rate', 'Cross-sell conversion', 'Review generation'],
-    activeLayers: ['crm', 'review', 'offplatform'],
+    activeLayers: ['crm', 'review', 'offplatform', 'search'],
     stages: [
       {
         name: 'Discovery',
@@ -1961,13 +2092,13 @@ const ICPS = [
         icon: '\uD83D\uDD0D',
         type: 'human',
         bullets: [
-          'Walk-in from De Hallen foot traffic',
-          'Window shopping and signage',
-          'In-mall directory and wayfinding',
+          'De Hallen foot traffic, window shopping, signage',
+          'Instagram, TikTok, influencer content',
+          'PR/press coverage, brand collaborations on social',
         ],
-        layers: ['offplatform'],
-        conversions: [],
-        detail: 'In-store customers are primarily walk-ins from De Hallen foot traffic, drawn in by window displays, signage, and the physical presence in the venue.',
+        layers: ['offplatform', 'search'],
+        conversions: ['Social media', 'PR coverage', 'Influencer content'],
+        detail: 'In-store customers discover Denim City through De Hallen foot traffic, but also significantly through social media (Instagram/TikTok behind-the-scenes content), influencer visits, PR coverage, and co-created content with store brands (Nudie, KOI, Momotaro).',
       },
       {
         name: 'Entry Point',
@@ -2043,11 +2174,11 @@ const ICPS = [
         bullets: [
           'CRM capture rate from walk-ins',
           'Cross-sell conversion to services',
-          'Repeat in-store visits tracked',
+          'Social proof: user-generated content, influencer posts',
         ],
-        layers: ['crm', 'review'],
-        conversions: [],
-        detail: 'The outcome loop converts anonymous walk-ins into known CRM contacts, drives cross-sell to tours/courses/repairs, and generates reviews.',
+        layers: ['crm', 'review', 'offplatform'],
+        conversions: ['Social media amplification'],
+        detail: 'The outcome loop: walk-ins become CRM contacts, cross-sell to tours/courses/repairs, reviews boost local SEO, and satisfied customers generate social media content that drives new store visits.',
       },
     ],
   },
@@ -2057,13 +2188,13 @@ const ICPS = [
     name: 'Grant Funders',
     sub: 'Government / Foundation',
     buildPhase: 3,
-    ghlPipeline: 'Funding / Grants',
+    ghlPipeline: 'No GHL pipeline this phase',
     pipelineStages: ['Prospect', 'Applied', 'In Review', 'Active Funder', 'Renewal Due'],
-    tags: ['funding-active', 'funding-renewal-due'],
+    tags: [],
     gdpr: false,
     integrations: [],
     keyMetrics: ['Grant renewal rate', 'New funding secured'],
-    activeLayers: ['website', 'crm', 'offplatform'],
+    activeLayers: ['website', 'offplatform'],
     stages: [
       {
         name: 'Discovery',
@@ -2108,39 +2239,33 @@ const ICPS = [
         detail: 'This is relationship management, not a sales funnel. Engagement is through face-to-face meetings, impact presentations, and documented evidence of outcomes.',
       },
       {
-        name: 'Pipeline',
+        name: 'Tracking',
         color: 'pipeline',
         icon: '\uD83D\uDCCB',
         type: 'human',
         bullets: [
-          'Funding / Grants pipeline in GHL',
+          'Manual tracking (spreadsheet / shared doc)',
           'Reporting deadline tracking',
           'Renewal window management',
-          'Triggered by manual date entry',
+          'No GHL pipeline in this phase \u2014 too complex',
         ],
-        layers: ['crm'],
+        layers: ['offplatform'],
         conversions: [],
-        detail: 'The funding pipeline in GHL tracks reporting deadlines and renewal windows, ensuring no critical dates are missed. All automations are internal only \u2014 NOT emails to funders.',
+        detail: 'Funding relationship tracking is done manually (spreadsheet or shared document) in this phase. A GHL pipeline is out of scope \u2014 the complexity does not justify the build effort at this stage.',
       },
       {
-        name: 'Automations',
+        name: 'Reminders',
         color: 'automation',
         icon: '\u26A1',
-        type: 'automated',
+        type: 'human',
         bullets: [
-          'T-30d: team reminder before reporting deadline',
-          'T-60d: team reminder before renewal window',
-          '90d no activity: internal flag',
-          'All internal only \u2014 no emails to funder',
+          'Manual calendar reminders for deadlines',
+          'Reporting and renewal tracked by team',
+          'Impact metrics compiled from platform data',
         ],
-        layers: ['crm'],
+        layers: ['offplatform'],
         conversions: [],
-        detail: 'Automated internal reminders for reporting deadlines (T-30d) and renewal windows (T-60d). 90-day inactivity triggers internal flag. All automations are team-facing only, never outbound to funders.',
-        automationTimeline: [
-          { time: 'T-60d', channel: 'internal', desc: 'Team reminder: renewal window approaching' },
-          { time: 'T-30d', channel: 'internal', desc: 'Team reminder: reporting deadline approaching' },
-          { time: '90d idle', channel: 'internal', desc: 'Internal flag: no activity for 90 days' },
-        ],
+        detail: 'Reporting deadlines and renewal windows are tracked via manual calendar reminders. Impact metrics (reviews, reach, press, course completions) are compiled from platform data when needed.',
       },
       {
         name: 'Outcomes',
@@ -2152,7 +2277,7 @@ const ICPS = [
           'New funding opportunities identified',
           'Impact evidence feeds all channels',
         ],
-        layers: ['crm', 'offplatform'],
+        layers: ['offplatform'],
         conversions: ['Impact metrics'],
         detail: 'Impact evidence (reviews, reach, partnerships, press, course completions, youth participation) feeds back into grant renewal applications and new funding pitches.',
       },
@@ -2670,6 +2795,10 @@ function App() {
     React.createElement('div', { className: 'app' },
       React.createElement('header', { className: 'header' },
         React.createElement('div', { className: 'header-left' },
+          React.createElement('a', { href: '/', className: 'back-link', title: 'Back to platform' },
+            React.createElement('span', { className: 'back-arrow' }, '\u2190'),
+            'Platform'
+          ),
           React.createElement('div', { className: 'header-title' }, 'DENIM CITY ', React.createElement('span', null, '\u2014'), ' THE SALES ENGINE'),
           React.createElement('div', { className: 'header-subtitle' }, 'Customer Journey Map')
         ),
