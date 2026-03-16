@@ -91,7 +91,12 @@
       "Bash(node:*)",
       "Bash(lsof:*)",
       "Bash(netstat -tlnp)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
