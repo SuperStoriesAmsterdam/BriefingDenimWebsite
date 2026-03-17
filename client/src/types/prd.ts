@@ -2,7 +2,7 @@ export type TeamId = "design" | "dev" | "ghl" | "copy";
 
 export type BlockType = "hero" | "grid" | "section" | "cta";
 
-export type ViewMode = "wireframe" | "ghl" | "sitemap";
+export type ViewMode = "wireframe" | "ghl" | "sitemap" | "mood";
 
 export type FilterTeam = "all" | TeamId;
 

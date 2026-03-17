@@ -136,16 +136,15 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
 
   return (
     <div
-      className="mb-4"
       onPaste={handlePaste}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       tabIndex={-1}
     >
-      {/* Thumbnails row */}
+      {/* Image grid */}
       {images.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {images.map((img, idx) => (
             <div
               key={img.id}
@@ -155,7 +154,7 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
               onDrop={(e) => handleThumbDrop(e, idx)}
               onDragEnd={handleThumbDragEnd}
               className={cn(
-                "group relative h-20 shrink-0 cursor-grab overflow-hidden rounded-md border",
+                "group relative aspect-[4/3] cursor-grab overflow-hidden rounded-lg border bg-muted/30",
                 reorderIdx === idx && "opacity-40",
                 reorderOver === idx && "outline-2 outline-dashed outline-blue-400 -outline-offset-2"
               )}
@@ -163,63 +162,77 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
               <img
                 src={img.thumbUrl}
                 alt={img.name}
-                className="h-full w-auto object-cover cursor-pointer"
+                className="h-full w-full object-cover cursor-pointer transition-transform group-hover:scale-[1.02]"
                 onClick={() => setLightboxIdx(idx)}
               />
+              {/* Filename overlay */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pb-1.5 pt-6 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="text-[11px] text-white truncate block">{img.name}</span>
+              </div>
+              {/* Delete button */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(idx);
                 }}
-                className="absolute -right-0.5 -top-0.5 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-[9px] text-white group-hover:flex"
+                className="absolute right-1.5 top-1.5 hidden h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm group-hover:flex hover:bg-destructive"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-20 w-16 shrink-0 rounded-md border border-dashed text-muted-foreground/40 hover:text-muted-foreground"
+
+          {/* Add more button as grid cell */}
+          <button
+            className="flex aspect-[4/3] items-center justify-center rounded-lg border-2 border-dashed text-muted-foreground/30 transition-colors hover:border-muted-foreground/40 hover:text-muted-foreground/50"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
           >
-            <ImagePlus className="h-4 w-4" />
-          </Button>
-          {images.length > 0 && (
-            <span className="shrink-0 text-[10px] text-muted-foreground/50 pl-1">
-              {images.length} mood {images.length === 1 ? "image" : "images"}
-            </span>
-          )}
+            <div className="flex flex-col items-center gap-1">
+              <ImagePlus className="h-6 w-6" />
+              <span className="text-[11px]">{uploading ? "Uploading..." : "Add images"}</span>
+            </div>
+          </button>
         </div>
       )}
 
-      {/* Drop zone when empty or dragging files over */}
-      {(images.length === 0 || dragOver) && (
+      {/* Empty state drop zone */}
+      {images.length === 0 && (
         <div
           className={cn(
-            "flex h-16 items-center justify-center rounded-md border border-dashed text-[11px] text-muted-foreground/40",
+            "flex h-48 flex-col items-center justify-center rounded-lg border-2 border-dashed text-muted-foreground/40 transition-colors",
             dragOver && "border-blue-400 bg-blue-50/50 text-blue-500",
             uploading && "opacity-50"
           )}
         >
           {uploading ? (
-            "Uploading..."
-          ) : images.length === 0 ? (
+            <span className="text-sm">Uploading...</span>
+          ) : (
             <button
-              className="flex items-center gap-1.5 hover:text-muted-foreground"
+              className="flex flex-col items-center gap-2 hover:text-muted-foreground"
               onClick={() => inputRef.current?.click()}
             >
-              <ImagePlus className="h-3.5 w-3.5" />
-              Drop mood images here, paste, or click to add
+              <ImagePlus className="h-8 w-8" />
+              <span className="text-sm">Drop mood images here, paste, or click to add</span>
             </button>
-          ) : (
-            "Drop images here"
           )}
         </div>
       )}
 
-      {error && <p className="mt-1 text-[10px] text-destructive">{error}</p>}
+      {/* Drag-over overlay when images exist */}
+      {images.length > 0 && dragOver && (
+        <div className="mt-3 flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-blue-400 bg-blue-50/50 text-sm text-blue-500">
+          Drop to add images
+        </div>
+      )}
+
+      {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+
+      {images.length > 0 && (
+        <p className="mt-3 text-[11px] text-muted-foreground/50">
+          {images.length} {images.length === 1 ? "image" : "images"} · Click to view full-res · Drag to reorder
+        </p>
+      )}
 
       {/* Hidden file input */}
       <input
@@ -234,7 +247,7 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
         }}
       />
 
-      {/* Lightbox with download */}
+      {/* Lightbox */}
       <Dialog open={lightboxIdx !== null} onOpenChange={() => setLightboxIdx(null)}>
         <DialogContent className="max-w-4xl p-3">
           <DialogTitle className="sr-only">{lightboxImage?.name ?? "Mood image"}</DialogTitle>
@@ -247,7 +260,6 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
               />
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center gap-1">
-                  {/* Previous */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -259,7 +271,6 @@ export function PageMoodStrip({ pageId, images, onUpdate }: PageMoodStripProps) 
                   <span className="text-xs text-muted-foreground">
                     {(lightboxIdx ?? 0) + 1} / {images.length}
                   </span>
-                  {/* Next */}
                   <Button
                     variant="ghost"
                     size="sm"

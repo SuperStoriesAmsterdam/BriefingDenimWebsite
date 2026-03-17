@@ -160,29 +160,18 @@ export function defaults(): Page[] {
 }
 
 export const GHL_PIPES: GhlPipeline[] = [
-  { n: "Tours", t: "GHL Book Appointment", a: "Confirmation, reminder, post-tour nurture, tour→course conversion" },
-  { n: "Courses", t: "GHL Book Appointment", a: "Confirmation, reminder, feedback, upsell (30d), abandoned recovery, certificate" },
-  { n: "Lab/Atelier", t: "Inquiry form (3 tracks)", a: "Inquiry → quote → project tracking. Sub-flows per audience." },
-  { n: "Partnerships", t: "Inquiry form", a: "Inquiry → discovery → proposal. Long B2B nurture." },
-  { n: "Venue", t: "Inquiry form", a: "Inquiry → availability → quote → contract. 48h follow-up." },
-  { n: "Funding", t: "Inquiry form", a: "Inquiry → application → reporting." },
-  { n: "Press", t: "Inquiry form", a: "Inquiry → follow-up." },
-  { n: "Incubator", t: "Application form", a: "Intake → review → trial day → acceptance." },
-  { n: "Repair B2B", t: "Partnership inquiry", a: "Brand inquiry → discovery → onboarding." },
+  { n: "Bookings", t: "Appointment", a: "Confirmation → reminder (24h) → post-visit follow-up" },
+  { n: "Inquiries", t: "Form", a: "New inquiry → auto-reply → 48h follow-up if no response" },
+  { n: "Courses", t: "Appointment", a: "Confirmation → reminder → feedback request → certificate" },
 ];
 
 export const GHL_INT: GhlIntegration[] = [
-  { s: "Lightspeed R", d: "→ GHL (via Make.com)", p: "Store purchases → Make.com middleware → GHL contacts + brand tags + post-purchase nurture. See 'Lightspeed → GHL Integration' page for full strategy." },
-  { s: "Moneybird", d: "↔ GHL (via Make.com)", p: "Booking confirmed in GHL → Make.com → Moneybird invoice. Payment confirmed in Moneybird → Make.com → GHL pipeline update. See 'Moneybird → GHL Integration' page for full strategy." },
-  { s: "Webflow", d: "→ GHL", p: "All forms. Webhooks per form to correct pipeline." },
-  { s: "GHL Calendars + Book Appointment", d: "Native", p: "All bookings handled natively in GHL. No external tool, no sync layer. Booking data lands directly in contacts + pipelines." },
+  { s: "Webflow", d: "→ GHL", p: "All forms webhook to GHL contacts + correct pipeline" },
+  { s: "GHL Calendars", d: "Native", p: "All bookings handled natively — no external tools" },
 ];
 
 export const UNIVERSAL_AUTOMATIONS = [
-  "Booking confirmations + reminders (24h)",
-  "Post-experience feedback",
-  "Abandoned booking recovery (1h, 24h, 72h)",
-  "Cross-sell sequences per service",
-  "Certificate delivery (courses)",
-  "Audience segmentation via pricing tier / form selection (consumer, student, professional, institutional)",
+  "Booking confirmations + reminders (24h before)",
+  "Abandoned booking recovery (24h + 72h)",
+  "Post-experience feedback request",
 ];
