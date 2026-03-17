@@ -37,10 +37,17 @@ export async function registerRoutes(
     }
   });
 
-  // Serve standalone HTML files from workspace root
+  // Serve standalone HTML files
   app.get("/customer-journey.html", (_req, res) => {
-    const filePath = path.resolve(import.meta.dirname, "..", "customer-journey.html");
-    if (fs.existsSync(filePath)) {
+    // In dev (ESM): import.meta.dirname = server/, so .. = workspace root
+    // In production (CJS bundle): __dirname = dist/, file is copied there
+    const dir = typeof __dirname !== "undefined" ? __dirname : import.meta.dirname;
+    const candidates = [
+      path.resolve(dir, "customer-journey.html"),
+      path.resolve(dir, "..", "customer-journey.html"),
+    ];
+    const filePath = candidates.find((p) => fs.existsSync(p));
+    if (filePath) {
       res.type("html").sendFile(filePath);
     } else {
       res.status(404).send("Not found");
