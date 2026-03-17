@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
+import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -42,7 +42,6 @@ interface PrdSidebarProps {
 }
 
 const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
-  { id: "wireframe", label: "Wireframes", icon: FileText },
   { id: "ghl", label: "GHL Overview", icon: LayoutDashboard },
   { id: "sitemap", label: "Sitemap", icon: Map },
 ];
