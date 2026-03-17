@@ -4,7 +4,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { PrdSidebar } from "@/components/prd/prd-sidebar";
 import { PrdToolbar } from "@/components/prd/prd-toolbar";
 import { WireframeView } from "@/components/prd/wireframe-view";
-import { MoodView } from "@/components/prd/mood-view";
 import { GhlOverview } from "@/components/prd/ghl-overview";
 import { SitemapView } from "@/components/prd/sitemap-view";
 
@@ -48,7 +47,6 @@ export default function PrdPage() {
         <SidebarInset className="overflow-y-auto">
           {store.viewMode === "wireframe" && <PrdToolbar store={store} />}
           {store.viewMode === "wireframe" && <WireframeView store={store} />}
-          {store.viewMode === "mood" && <MoodView store={store} />}
           {store.viewMode === "ghl" && <GhlOverview />}
           {store.viewMode === "sitemap" && (
             <SitemapView

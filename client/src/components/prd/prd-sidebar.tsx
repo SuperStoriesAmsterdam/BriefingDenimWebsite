@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { FileText, LayoutDashboard, Map, Image, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
+import { FileText, LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -43,7 +43,6 @@ interface PrdSidebarProps {
 
 const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "wireframe", label: "Wireframes", icon: FileText },
-  { id: "mood", label: "Mood Board", icon: Image },
   { id: "ghl", label: "GHL Overview", icon: LayoutDashboard },
   { id: "sitemap", label: "Sitemap", icon: Map },
 ];
@@ -180,8 +179,8 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                   return (
                     <SidebarMenuItem key={id}>
                       <SidebarMenuButton
-                        isActive={(viewMode === "wireframe" || viewMode === "mood") && activePage === id}
-                        onClick={() => { if (viewMode !== "wireframe" && viewMode !== "mood") setViewMode("wireframe"); setActivePage(id); }}
+                        isActive={viewMode === "wireframe" && activePage === id}
+                        onClick={() => { setViewMode("wireframe"); setActivePage(id); }}
                         className="text-xs font-semibold"
                       >
                         <HelpCircle className="h-4 w-4" />
@@ -201,8 +200,8 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
           </>
         )}
 
-        {/* Page tree (wireframe + mood modes) */}
-        {(viewMode === "wireframe" || viewMode === "mood") && (<>
+        {/* Page tree (wireframe mode only) */}
+        {viewMode === "wireframe" && (<>
           {/* Briefings & Strategies — collapsible, separate from website pages */}
           {topLevelPages.filter((p) => p.id === "briefings").map((p) => {
             const children = childrenOf(p.id);
