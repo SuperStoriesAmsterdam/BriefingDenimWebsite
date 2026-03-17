@@ -1,5 +1,6 @@
 import type { Page, FilterTeam } from "@/types/prd";
 import { BlockCard } from "./block-card";
+import { PageMoodStrip } from "./page-mood-strip";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -15,6 +16,11 @@ export function WireframeView({ store }: WireframeViewProps) {
 
   return (
     <div className="p-5">
+      <PageMoodStrip
+        pageId={currentPage.id}
+        images={currentPage.moodImages ?? []}
+        onUpdate={(images) => store.updateMoodImages(currentPage.id, images)}
+      />
       {currentPage.blocks.map((block, i) => (
         <BlockCard
           key={i}

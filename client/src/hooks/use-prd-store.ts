@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { Page, ViewMode, FilterTeam, Block } from "@/types/prd";
+import type { Page, ViewMode, FilterTeam, Block, MoodImage } from "@/types/prd";
 import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 
@@ -280,6 +280,18 @@ export function usePrdStore() {
     [pages, persist]
   );
 
+  const updateMoodImages = useCallback(
+    (pageId: string, moodImages: MoodImage[]) => {
+      if (!pages) return;
+      persist(
+        pages.map((p) =>
+          p.id === pageId ? { ...p, moodImages } : p
+        )
+      );
+    },
+    [pages, persist]
+  );
+
   const resetToDefaults = useCallback(async () => {
     const d = defaults();
     setPages(d);
@@ -331,6 +343,7 @@ export function usePrdStore() {
     moveBlockDown,
     moveBlockToPage,
     reorderPage,
+    updateMoodImages,
     resetToDefaults,
   };
 }

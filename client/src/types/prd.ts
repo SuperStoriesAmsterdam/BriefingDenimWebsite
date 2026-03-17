@@ -25,6 +25,13 @@ export interface QuestionItem {
   answer: string;
 }
 
+export interface MoodImage {
+  id: string;
+  url: string;
+  thumbUrl: string;
+  name: string;
+}
+
 export interface Block {
   type: BlockType;
   title: string;
@@ -44,6 +51,7 @@ export interface Page {
   nav: boolean;
   parent: string | null;
   blocks: Block[];
+  moodImages?: MoodImage[];
 }
 
 export interface GhlPipeline {
