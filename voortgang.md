@@ -642,3 +642,209 @@ Amsterdamse boutique hotels en short-stay operators zijn permanente aanbevelings
 ---
 
 *Bijgewerkt na strategische sessie met Claude — maart 2026*
+
+---
+
+## GHL + AI Concierge Strategie — Geconsolideerd Overzicht
+
+### Het systeem in drie lagen
+
+1. **Website + AI Concierge** — Webflow site met ingebedde concierge op elke pagina. Concierge beantwoordt vragen 24/7, routeert bezoekers op type, vangt leads op en schrijft ze weg naar GHL met tags, pipeline-toewijzing en gesprekssamenvattingen.
+
+2. **GHL CRM + Automaties** — 9 pipelines die leads automatisch opvolgen per bezoekerstype. Bevestigingen, herinneringen, abandoned booking recovery, post-bezoek reviewverzoeken, cross-sell sequences.
+
+3. **Versterking** — SEO, reviewautomatisering, retargeting (Meta + Google), B2B via LinkedIn, PR, creator-programma, hotel concierge netwerk, fysiek-naar-digitaal via UTM QR-codes.
+
+---
+
+### De 9 GHL Pipelines
+
+| # | Pipeline | Type | Fase | Kern-automatie |
+|---|----------|------|------|----------------|
+| 1 | Tours B2C | Boeking | 1 | Bevestiging → herinnering (24u) → post-bezoek review (SMS T+2u, email T+24u) → cross-sell cursus |
+| 2 | Courses | Inschrijving | 1 | Bevestiging → Moneybird factuur (via Make.com) → herinnering → feedback → certificaat → upsell volgend niveau |
+| 3 | Repairs | Intake | 1 | Formulier met Nudie/KOI-flag → bevestiging → afspraakherinnering → review |
+| 4 | Tours B2B/DMC | Aanvraag | 2 | Groepsaanvraag → professionele nurture sequence → commissiestructuur → testboeking |
+| 5 | Lab & Atelier | Aanvraag | 2 | Projectaanvraag → scoping → offerte |
+| 6 | Partnerships | Aanvraag | 2 | Merkaanvraag → discovery call → onboarding |
+| 7 | Venue Rental | Aanvraag | 2 | Aanvraag → beschikbaarheid → offerte → 48u follow-up |
+| 8 | Funding/Grants | Intern | 3 | Deadline-herinneringen → rapportagetriggers → verlenging |
+| 9 | Repair B2B (Nudie/KOI) | Partner | 3 | Merkreferral → service-onboarding |
+
+---
+
+### De 12 ICPs en hun GHL-routing
+
+| # | ICP | Pipeline | Concierge-routing |
+|---|-----|----------|-------------------|
+| 1 | Internationale toeristen | Tours B2C | Boekingsinfo, groepsgrootte, talen, bereikbaarheid |
+| 2 | DMCs / Reisbureaus | Tours B2B | Commissiestructuur, groepsminima, facturatie |
+| 3 | Corporate teams | Tours B2B | Team-events, venue-upsell, groepswaarde |
+| 4 | Cursuszoekers | Courses | Cursusmatch op niveau en interesse |
+| 5 | Reparatieklanten (betaald) | Repairs | Intake-triage: wat is er mis, hoe urgent, foto |
+| 6 | Reparatieklanten (gratis/partner) | Repair B2B | Nudie/KOI herkenning, gratis flow |
+| 7 | Lab & Atelier-klanten | Lab & Atelier | Projectbeschrijving, capabilities matching |
+| 8 | Technologie- & industriepartners | Partnerships | Lab R&D, samenwerkingsvormen |
+| 9 | Winkelklanten (POS) | Lightspeed → GHL | Opt-in bij kassa → CRM met producttags |
+| 10 | Subsidieverstrekkers | Funding/Grants | Geen concierge-routing (intern) |
+| 11 | Pers / Media | Geen pipeline | Persinformatie, beeldmateriaal, contactpersoon |
+| 12 | Venue-huurders | Venue Rental | Beschikbaarheid, capaciteit, offerte |
+
+---
+
+### AI Concierge — Wat het doet
+
+De concierge is een apart gebouwde tool (Python/Flask + Claude API), geen GHL-feature. Het voedt GHL maar vervangt het niet.
+
+**Kernfuncties:**
+- Beantwoordt vragen die boekingen vertragen (prijzen, geschiktheid, bereikbaarheid, groepsmogelijkheden)
+- Identificeert bezoekerstype binnen 1-2 berichten via LLM structured output
+- Toont per pagina een andere openingszin (Tours: "Planning een bezoek?", Repairs: "Vertel wat er mis is")
+- Reageert automatisch in de taal van de bezoeker (NL, EN, PT, JA, DE)
+- Vangt naam + email op in het gesprek → creëert GHL-contact met juiste tags + pipeline
+- Schrijft gesprekssamenvattingen naar GHL-contactnotities
+- Bij GHL-storing: slaat lead lokaal op, sync bij retry (geen dataverlies)
+
+**Wat het niet doet (v1):**
+- Geen echte kalenderboeking (doorsturen naar boekingslink)
+- Geen spraak
+- Geen admin UI voor kennisbankupdates
+- Geen analytics dashboard
+
+---
+
+### Integraties
+
+| Van | Naar | Via | Wat |
+|-----|------|-----|-----|
+| Webflow formulieren | GHL | Webhooks | Elk formulier → juiste pipeline + tags |
+| GHL Calendars | GHL | Native | Alle boekingen natively in GHL |
+| Lightspeed POS | GHL | Make.com | Opt-in bij kassa → contact + producttags |
+| GHL Courses | Moneybird | Make.com | Tag `course-enrolled` → factuur aanmaken |
+| Concierge | GHL | API | Lead capture → contact + tags + pipeline + gespreksnotities |
+| Meta Pixel | Retargeting | Native | Conversie-events: boeking, aanvraag, aankoop |
+| GA4 | Rapportage | Native | Conversie-events per pipeline |
+| Microsoft Clarity | UX-inzicht | Native | Sessie-opnames, heatmaps, scroll depth |
+
+---
+
+### Universele automaties (over alle pipelines)
+
+- Bevestigingsmail bij elk formulier
+- Interne notificatie aan juist teamlid
+- 48-uur escalatie als geen reactie
+- Abandoned booking recovery (1u, 24u, 72u)
+- GDPR-consentfilter (marketing vs. transactioneel)
+- Post-bezoek reviewautomatisering (SMS T+2u, email T+24u)
+- NPS-routing: 9-10 → reviewverzoek, 7-8 → feedbackformulier, ≤6 → persoonlijke follow-up
+
+---
+
+### Referral mechanic
+
+Naam-gebaseerd, geen externe tools nodig:
+- T+7 (tours) of T+14 (cursussen): persoonlijke uitnodiging "Ken je iemand? Noem mijn naam, jullie krijgen allebei 10% korting"
+- Optioneel veld op boekingsformulier: "Ben je doorverwezen? Zo ja, door wie?"
+- GHL matcht de naam → tagt referrer → stuurt beloningsmail met kortingscode
+- B2B-variant: preferentiële commissie op volgende groepsboeking
+
+---
+
+### Fasering en uren
+
+| Fase | Scope | Uren | Periode |
+|------|-------|------|---------|
+| **1 — Fundament** | Tours B2C + Courses + Repairs pipelines, tag-architectuur, formulieren, bevestigingen, herinneringen, cart abandonment, GDPR filter, Moneybird-integratie | ~50u | Week 1-3 |
+| **2 — B2B + Integraties** | Tours B2B, Lab, Partnerships, Venue pipelines, Lightspeed → GHL, NPS-routing, B2B nurture sequences | ~32u | Week 4-6 |
+| **3 — Geavanceerd** | Referral mechanic, Funding/Grants, Repair B2B, cross-sell optimalisatie | ~18u | Week 7 |
+| **Totaal GHL** | | **~100u** | |
+| **Concierge** | Bouw + training + embed + GHL-integratie | **~40-60u** | Parallel of na Fase 1 |
+
+**Resourcing:** 1 senior builder (automaties, Make.com, custom scripts) + 1 junior operator (formulieren, tags, smartlists, emails)
+
+**Harde afhankelijkheden:**
+- Tag-architectuur MOET getekend zijn vóór enig formulier of automatie gebouwd wordt
+- Moneybird-toegang + factuurtemplate nodig vóór Courses live gaat
+- Make.com account-setup is PM-verantwoordelijkheid
+- Fase 1 MOET in TEST staan en getekend zijn vóór Fase 2 begint
+
+---
+
+### Wat te schrappen als budget krap wordt
+
+In volgorde van minst kritisch:
+1. One-click upsell post-purchase (nice-to-have)
+2. Time-aware Early Bird automatie (nice-to-have)
+3. B2B referral variant (consumentenversie is prioriteit)
+4. Repair B2B pipeline (Fase 3, kan later)
+5. Funding/Grants pipeline (intern, kan handmatig)
+
+---
+
+### Succes meten na 60 dagen
+
+Het ene getal: **inkomende verzoeken per dag.**
+
+Ondersteunende metrics:
+- Leads gevangen per kanaal en per type
+- Conversieratio lead → boeking per pipeline
+- Concierge-gesprekken + conversieratio
+- Reviewvolume groei (Google + TripAdvisor)
+- SEO-ranking beweging (20-30 prioriteitstermen)
+- Abandoned booking recovery rate
+- Omzetattributie (retargeting vs. organisch vs. direct vs. offline UTM)
+
+---
+
+## Voortgang — 17 maart 2026
+
+### Vandaag gedaan
+- Customer journey 404 bug gefixt (production CJS build kon `import.meta.dirname` niet resolven)
+- Server-side image upload infrastructuur gebouwd (sharp resize, `/uploads/` endpoint) — backend staat, UI nog niet opgelost
+- GHL automations vereenvoudigd naar essentie (3 pipelines, 2 integraties, 3 automaties)
+- Wireframes-knop verwijderd (redundant — pagina klikken toont al de content)
+- Mood Board view mode gebouwd en weer verwijderd (slechte UX — designers denken in pagina's, niet in modes)
+- PRDs geschreven voor fork: `WHOLENESS-WORK-BRIEFING-PLATFORM-PRD.md`, `PAGE-MOOD-IMAGES-PRD.md`, `DAM-PRD.md`
+
+### Open issue: GHL scope onderschat 12 ICPs
+
+De GHL overview in de tool toont nu 3 pipelines, 2 integraties, 3 automaties. Dit was bewust versimpeld om scope creep te voorkomen, maar reflecteert niet de werkelijke complexiteit.
+
+**Er zijn 12 ICPs, niet 4.** De huidige GHL overview noemt alleen 4 doelgroeptiers (consumer, student, professional, institutional). De werkelijke 12 ICPs uit de customer journey map:
+
+| # | ICP | Bouwfase | GHL Pipeline |
+|---|-----|---------|--------------|
+| 1 | International Tourists | 1 | Tours — B2C |
+| 2 | DMCs / Travel Agencies | 2 | Tours — B2B / DMC |
+| 3 | Corporate Teams | 2 | Tours — B2B |
+| 4 | Course Seekers | 1 | Courses |
+| 5 | Repair Customers (Paid) | 1 | Repairs |
+| 6 | Repair Customers (Free/Partner) | 3 | Repair B2B (Nudie/KOI) |
+| 7 | Lab & Atelier Clients | 2 | Lab & Atelier |
+| 8 | Technology & Industry Partners | 2 | Partnerships |
+| 9 | In-Store Customers | 2 | Lightspeed POS integratie |
+| 10 | Grant Funders | 3 | Geen GHL pipeline |
+| 11 | Press / Media | 3 | Geen GHL pipeline |
+| 12 | Venue Renters | 2 | Venue Rental |
+
+**Impact op GHL urenschatting:**
+- Fase 1 ICPs (Tourists, Course Seekers, Repair Paid): 3 pipelines met volledige automaties — ~15-20u
+- Fase 2 ICPs (DMCs, Corporate, Lab, Partners, In-Store, Venue): 5-6 pipelines, integraties (Lightspeed, Make.com, Moneybird) — ~25-30u
+- Fase 3 ICPs (Repair Free, Funders, Press): lichter, sommige zonder GHL pipeline — ~5-10u
+- Segmentatie, tagging, UTM routing over 12 ICPs: ~10u
+- **Totaal realistische schatting: 55-70 uur over alle fases**
+
+De vereenvoudigde GHL overview in de tool moet worden bijgewerkt om minimaal de Fase 1 pipelines accuraat te reflecteren.
+
+### Open issue: mood image UX onopgelost
+
+Server-side upload werkt (endpoint, sharp resize, static serving). Maar geen goede UI hiervoor:
+- Inline op wireframe pagina = te druk
+- Apart view mode = slechte UX
+- Inklapbaar panel = afgewezen door gebruiker
+- Mogelijk beter als onderdeel van de standalone DAM dan van deze tool
+
+### Aankomend
+- Fork repo voor Wholeness Work briefing platform (PRD klaar)
+- Standalone DAM app bouwen (PRD klaar: `DAM-PRD.md`)
+- GHL overview bijwerken naar werkelijke 12 ICP pipeline structuur
