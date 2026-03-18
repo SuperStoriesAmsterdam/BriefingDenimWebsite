@@ -847,6 +847,12 @@ Server-side upload werkt (endpoint, sharp resize, static serving). Maar geen goe
 ### TODO: prd-defaults.ts opschonen voor forkbaarheid
 De hele `prd-defaults.ts` bevat hardcoded Denim City content (alle pagina's, blocks, teksten, annotations — honderden regels). Bij een fork voor een nieuw project krijg je al die DC-teksten als startpunt, wat handmatig opruimen vereist. **Oplossing:** defaults vervangen door een kale starterstructuur (Home + lege hero/section). Bestaande DC data blijft veilig in de database — defaults worden alleen geladen als de server database leeg is (= nieuw project).
 
+### Database sync tussen dev en productie
+
+Replit gebruikt aparte PostgreSQL databases voor development en deployment. Bewerkingen in de gepubliceerde versie worden opgeslagen in de productie-database, terwijl de dev-omgeving een eigen database heeft. Dit leidde tot dataverlies-risico bij het werken in de gepubliceerde app.
+
+**Oplossing:** sync-script toegevoegd (`script/sync-from-prod.sh`) dat PRD data ophaalt van de gepubliceerde app en in de dev-database pusht. Draai `npm run sync-prod` (dev server moet draaien) om de dev-database te synchroniseren met productie. Er wordt automatisch een backup bewaard in `production-prd-backup.json`.
+
 ### Aankomend
 - **prd-defaults.ts opschonen** (zie hierboven)
 - Fork repo voor Wholeness Work briefing platform (PRD klaar)
