@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, PageQuestion, ViewMode, FilterTeam, Block, MoodImage, AnnotationReply } from "@/types/prd";
-import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
+import { savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 import { STORE_KEY } from "@/lib/prd-constants";
 
@@ -27,37 +27,24 @@ export function usePrdStore() {
     async function init() {
       const freshDefaults = defaults();
 
-      // Load from both sources
+      // Server is the ONLY source of truth.
+      // localStorage is just a cache for the current browser — never overrides server.
       const server = await loadFromServer();
-      const local = loadPages(freshDefaults);
-
-      // Pick whichever is most recent — server is authoritative,
-      // but localStorage has the latest if a debounced server save hasn't fired yet
       let currentPages: Page[];
-      if (server.data && Array.isArray(server.data) && server.data.length > 0) {
-        // Both exist — use server data, but prefer localStorage if it has user-created
-        // pages that server doesn't (user edited between saves)
-        const serverPages = server.data as Page[];
-        const localHasExtra = local.some((lp) => !serverPages.some((sp) => sp.id === lp.id));
-        currentPages = localHasExtra ? local : serverPages;
-      } else {
-        // No server data — use localStorage/defaults
-        currentPages = local;
-      }
 
-      // Restore any missing default pages
-      const missingDefaults = freshDefaults.filter(
-        (dp) => !currentPages.some((p) => p.id === dp.id)
-      );
-      if (missingDefaults.length > 0) {
-        currentPages = [...currentPages, ...missingDefaults];
+      if (server.data && Array.isArray(server.data) && server.data.length > 0) {
+        // Server has data — use it. Period.
+        currentPages = server.data as Page[];
+      } else {
+        // No server data — first time ever, seed from defaults
+        currentPages = freshDefaults;
+        // Save defaults to server so they become the source of truth
+        await saveToServer(currentPages);
       }
 
       pagesRef.current = currentPages;
       setPages(currentPages);
       try { savePages(currentPages); } catch {}
-      // Always sync to server on init to ensure consistency
-      saveToServer(currentPages);
     }
     init();
   }, []);
