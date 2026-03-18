@@ -1,11 +1,11 @@
 import { useState } from "react";
-import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page, QuestionItem, AnnotationReply } from "@/types/prd";
+import type { Block, FilterTeam, TeamId, BlockType, SchemaType, Page, QuestionItem, AnnotationReply } from "@/types/prd";
 import { BLOCK_TYPES, SCHEMA_TYPES } from "@/lib/prd-constants";
 import { EditableText } from "./editable-text";
 import { BlockContentList } from "./block-content-list";
 import { QAList } from "./qa-list";
 import { AnnotationList } from "./annotation-list";
-import { BlockImageGallery } from "./block-image-gallery";
+
 import { DocLinkBadge } from "./doc-link-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -105,7 +105,7 @@ export function BlockCard({
       onUpdate({ ...block, annotations });
     },
   };
-  const hasDetails = block.llmParagraph || (block.questions && block.questions.length > 0) || (block.images && block.images.length > 0) || block.docUrl || (showAnnotations && block.annotations.length > 0);
+  const hasDetails = block.llmParagraph || (block.questions && block.questions.length > 0) || block.docUrl || (showAnnotations && block.annotations.length > 0);
 
   // Shared content list props
   const contentListProps = {
@@ -373,12 +373,6 @@ export function BlockCard({
                   + Q&A checklist
                 </Button>
               )}
-
-              {/* Image gallery */}
-              <BlockImageGallery
-                images={block.images ?? []}
-                onUpdate={(imgs: BlockImage[]) => onUpdate({ ...block, images: imgs.length > 0 ? imgs : undefined })}
-              />
 
               {/* Doc link */}
               <DocLinkBadge

@@ -46,21 +46,6 @@ export default function PrdPage() {
 
   const teamNames = teamMembers.map((m) => m.name);
 
-  const handleShoppingListReply = (pageId: string, blockIndex: number, annotationIndex: number, reply: AnnotationReply) => {
-    if (!store.pages) return;
-    const page = store.pages.find((p) => p.id === pageId);
-    if (!page) return;
-    const block = page.blocks[blockIndex];
-    if (!block) return;
-    const annotation = block.annotations[annotationIndex];
-    if (!annotation) return;
-    const newAnnotations = [...block.annotations];
-    newAnnotations[annotationIndex] = {
-      ...annotation,
-      replies: [...(annotation.replies || []), reply],
-    };
-    store.updateBlock(pageId, blockIndex, { ...block, annotations: newAnnotations });
-  };
 
   if (!store.pages) {
     return (
@@ -98,7 +83,7 @@ export default function PrdPage() {
               pages={store.pages}
               currentUser={user.name}
               onNavigate={(pageId) => { store.setViewMode("wireframe"); store.setActivePage(pageId); }}
-              onAddReply={handleShoppingListReply}
+              onReplyToPageQuestion={(pageId, qId, reply) => store.replyToPageQuestion(pageId, qId, reply)}
             />
           )}
           {store.viewMode === "team" && (

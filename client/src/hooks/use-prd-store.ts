@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { Page, ViewMode, FilterTeam, Block, MoodImage } from "@/types/prd";
+import type { Page, PageQuestion, ViewMode, FilterTeam, Block, MoodImage, AnnotationReply } from "@/types/prd";
 import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 import { STORE_KEY } from "@/lib/prd-constants";
@@ -373,6 +373,40 @@ export function usePrdStore() {
     [persist]
   );
 
+  const addPageQuestion = useCallback(
+    (pageId: string, question: PageQuestion) => {
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(
+        cur.map((p) =>
+          p.id === pageId
+            ? { ...p, questions: [...(p.questions || []), question] }
+            : p
+        )
+      );
+    },
+    [persist]
+  );
+
+  const replyToPageQuestion = useCallback(
+    (pageId: string, questionId: string, reply: AnnotationReply) => {
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(
+        cur.map((p) => {
+          if (p.id !== pageId) return p;
+          return {
+            ...p,
+            questions: (p.questions || []).map((q) =>
+              q.id === questionId ? { ...q, replies: [...q.replies, reply] } : q
+            ),
+          };
+        })
+      );
+    },
+    [persist]
+  );
+
   const resetToDefaults = useCallback(async () => {
     const d = defaults();
     pagesRef.current = d;
@@ -427,6 +461,8 @@ export function usePrdStore() {
     moveContentBetweenBlocks,
     reorderPage,
     updateMoodImages,
+    addPageQuestion,
+    replyToPageQuestion,
     resetToDefaults,
   };
 }

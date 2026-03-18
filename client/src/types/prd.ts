@@ -55,6 +55,15 @@ export interface Block {
   questions?: QuestionItem[];
 }
 
+export interface PageQuestion {
+  id: string;
+  text: string;
+  author: string;
+  to?: string;
+  timestamp: string;
+  replies: AnnotationReply[];
+}
+
 export interface Page {
   id: string;
   label: string;
@@ -62,6 +71,7 @@ export interface Page {
   parent: string | null;
   blocks: Block[];
   moodImages?: MoodImage[];
+  questions?: PageQuestion[];
 }
 
 export interface GhlPipeline {

@@ -1,4 +1,5 @@
 import { BlockCard } from "./block-card";
+import { PageQuestions } from "./page-questions";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -54,6 +55,15 @@ export function WireframeView({ store, currentUser, allUsers }: WireframeViewPro
         <Plus className="mr-2 h-4 w-4" />
         Add section
       </Button>
+
+      {/* Page-level questions */}
+      <PageQuestions
+        questions={currentPage.questions || []}
+        currentUser={currentUser}
+        allUsers={allUsers}
+        onAdd={(q) => store.addPageQuestion(currentPage.id, q)}
+        onReply={(qId, reply) => store.replyToPageQuestion(currentPage.id, qId, reply)}
+      />
     </div>
   );
 }

@@ -1,5 +1,4 @@
-import type { Page, Annotation, AnnotationReply } from "@/types/prd";
-import { TEAM_COLORS, TEAM_LABELS } from "@/lib/prd-constants";
+import type { Page, PageQuestion, AnnotationReply } from "@/types/prd";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
@@ -10,16 +9,13 @@ interface ShoppingListProps {
   pages: Page[];
   currentUser: string | null;
   onNavigate: (pageId: string) => void;
-  onAddReply: (pageId: string, blockIndex: number, annotationIndex: number, reply: AnnotationReply) => void;
+  onReplyToPageQuestion: (pageId: string, questionId: string, reply: AnnotationReply) => void;
 }
 
-interface AnnotationRef {
-  annotation: Annotation;
+interface QuestionRef {
+  question: PageQuestion;
   pageId: string;
   pageLabel: string;
-  blockIndex: number;
-  blockTitle: string;
-  annotationIndex: number;
 }
 
 function timeAgo(ts?: string) {
@@ -34,81 +30,112 @@ function timeAgo(ts?: string) {
   return `${days}d ago`;
 }
 
-export function ShoppingList({ pages, currentUser, onNavigate, onAddReply }: ShoppingListProps) {
-  const [tab, setTab] = useState<"for-me" | "my-questions">("for-me");
+export function ShoppingList({ pages, currentUser, onNavigate, onReplyToPageQuestion }: ShoppingListProps) {
+  const [tab, setTab] = useState<"all" | "for-me" | "my-questions" | "person">("all");
+  const [filterPerson, setFilterPerson] = useState<string | null>(null);
 
-  if (!currentUser) return null;
+  if (!currentUser) {
+    return (
+      <div className="p-5">
+        <h2 className="text-lg font-bold text-foreground mb-2">My List</h2>
+        <p className="text-sm text-muted-foreground">Select your name in the toolbar first.</p>
+      </div>
+    );
+  }
 
-  // Collect all annotations with their location
-  const allRefs: AnnotationRef[] = [];
+  // Collect all page-level questions
+  const allRefs: QuestionRef[] = [];
   for (const page of pages) {
-    for (let bi = 0; bi < page.blocks.length; bi++) {
-      const block = page.blocks[bi];
-      for (let ai = 0; ai < block.annotations.length; ai++) {
-        allRefs.push({
-          annotation: block.annotations[ai],
-          pageId: page.id,
-          pageLabel: page.label,
-          blockIndex: bi,
-          blockTitle: block.title,
-          annotationIndex: ai,
-        });
-      }
+    for (const q of (page.questions || [])) {
+      allRefs.push({ question: q, pageId: page.id, pageLabel: page.label });
     }
   }
 
-  const forMe = allRefs.filter((r) => r.annotation.to === currentUser);
-  const myQuestions = allRefs.filter((r) => r.annotation.author === currentUser && r.annotation.to);
+  // Collect unique names from questions for the filter
+  const allNames = Array.from(new Set(
+    allRefs.flatMap((r) => [r.question.author, r.question.to].filter(Boolean) as string[])
+  ));
 
-  const items = tab === "for-me" ? forMe : myQuestions;
+  const forMe = allRefs.filter((r) => r.question.to === currentUser);
+  const myQuestions = allRefs.filter((r) => r.question.author === currentUser);
+  const forPerson = filterPerson ? allRefs.filter((r) => r.question.to === filterPerson || r.question.author === filterPerson) : [];
+  const allQuestions = allRefs;
+
+  const items = tab === "for-me" ? forMe
+    : tab === "my-questions" ? myQuestions
+    : tab === "person" ? forPerson
+    : allQuestions;
+
+  const label = tab === "for-me" ? "Questions assigned to you"
+    : tab === "my-questions" ? "Questions you asked"
+    : tab === "person" ? `Questions for/from ${filterPerson}`
+    : "All questions across all pages";
 
   return (
     <div className="p-5">
-      <h2 className="text-lg font-bold text-foreground mb-1">
-        {currentUser}'s List
-      </h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        {tab === "for-me" ? "Questions and notes assigned to you" : "Questions you asked others"}
-      </p>
+      <h2 className="text-lg font-bold text-foreground mb-1">Questions</h2>
+      <p className="text-sm text-muted-foreground mb-4">{label}</p>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4">
+      <div className="flex flex-wrap gap-1 mb-4">
         <button
-          onClick={() => setTab("for-me")}
+          onClick={() => { setTab("all"); setFilterPerson(null); }}
           className={cn(
             "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-            tab === "for-me" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            tab === "all" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
           )}
         >
-          For me ({forMe.length})
+          All ({allQuestions.length})
         </button>
-        <button
-          onClick={() => setTab("my-questions")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-            tab === "my-questions" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
-          )}
-        >
-          My questions ({myQuestions.length})
-        </button>
+        {currentUser && (
+          <>
+            <button
+              onClick={() => { setTab("for-me"); setFilterPerson(null); }}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                tab === "for-me" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              For me ({forMe.length})
+            </button>
+            <button
+              onClick={() => { setTab("my-questions"); setFilterPerson(null); }}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                tab === "my-questions" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              My questions ({myQuestions.length})
+            </button>
+          </>
+        )}
+        {allNames.filter((n) => n !== currentUser).map((name) => (
+          <button
+            key={name}
+            onClick={() => { setTab("person"); setFilterPerson(name); }}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              tab === "person" && filterPerson === name ? "bg-blue-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
       {items.length === 0 && (
         <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 py-12 text-center text-sm text-muted-foreground">
-          {tab === "for-me" ? "Nothing assigned to you yet" : "You haven't asked any questions yet"}
+          No questions yet
         </div>
       )}
 
       <div className="space-y-3">
-        {items.map((ref, i) => (
-          <ShoppingListItem
-            key={`${ref.pageId}-${ref.blockIndex}-${ref.annotationIndex}-${i}`}
+        {items.map((ref) => (
+          <QuestionCard
+            key={ref.question.id}
             ref_={ref}
             currentUser={currentUser}
             onNavigate={onNavigate}
-            onAddReply={(reply) =>
-              onAddReply(ref.pageId, ref.blockIndex, ref.annotationIndex, reply)
-            }
+            onReply={(reply) => onReplyToPageQuestion(ref.pageId, ref.question.id, reply)}
           />
         ))}
       </div>
@@ -116,25 +143,23 @@ export function ShoppingList({ pages, currentUser, onNavigate, onAddReply }: Sho
   );
 }
 
-function ShoppingListItem({
+function QuestionCard({
   ref_,
   currentUser,
   onNavigate,
-  onAddReply,
+  onReply,
 }: {
-  ref_: AnnotationRef;
+  ref_: QuestionRef;
   currentUser: string;
   onNavigate: (pageId: string) => void;
-  onAddReply: (reply: AnnotationReply) => void;
+  onReply: (reply: AnnotationReply) => void;
 }) {
   const [replyText, setReplyText] = useState("");
-  const { annotation } = ref_;
-  const colors = TEAM_COLORS[annotation.team];
-  const hasReplies = annotation.replies && annotation.replies.length > 0;
+  const { question } = ref_;
 
   const submitReply = () => {
     if (!replyText.trim()) return;
-    onAddReply({
+    onReply({
       author: currentUser,
       text: replyText.trim(),
       timestamp: new Date().toISOString(),
@@ -143,42 +168,37 @@ function ShoppingListItem({
   };
 
   return (
-    <div className={cn("rounded-lg border overflow-hidden", colors.bg)}>
-      {/* Location breadcrumb */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/60 border-b">
+    <div className="rounded-lg border overflow-hidden bg-white">
+      {/* Location */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border-b">
         <button
           onClick={() => onNavigate(ref_.pageId)}
           className="text-[11px] font-medium text-blue-600 hover:underline"
         >
           {ref_.pageLabel}
         </button>
-        <span className="text-[11px] text-muted-foreground/40">›</span>
-        <span className="text-[11px] text-muted-foreground">{ref_.blockTitle}</span>
-        <span className={cn("ml-auto rounded px-1.5 py-0.5 text-[9px] font-bold uppercase text-white", colors.badge)}>
-          {TEAM_LABELS[annotation.team]}
-        </span>
       </div>
 
-      {/* Annotation text */}
+      {/* Question */}
       <div className="px-3 py-2">
-        <p className="text-sm leading-relaxed text-foreground">{annotation.text}</p>
+        <p className="text-sm text-foreground">{question.text}</p>
         <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground/60">
-          {annotation.author && <span>{annotation.author}</span>}
-          {annotation.timestamp && <span>{timeAgo(annotation.timestamp)}</span>}
-          {annotation.to && (
+          <span className="font-medium">{question.author}</span>
+          <span>{timeAgo(question.timestamp)}</span>
+          {question.to && (
             <span className="rounded bg-blue-100 px-1 py-0.5 text-[9px] font-medium text-blue-700">
-              → {annotation.to}
+              → {question.to}
             </span>
           )}
         </div>
       </div>
 
       {/* Replies */}
-      {hasReplies && (
+      {question.replies.length > 0 && (
         <div className="border-t">
-          {annotation.replies!.map((r, ri) => (
-            <div key={ri} className="px-3 py-1.5 pl-6 bg-white/50 border-b border-dashed last:border-0">
-              <p className="text-xs leading-relaxed text-foreground">{r.text}</p>
+          {question.replies.map((r, i) => (
+            <div key={i} className="px-3 py-2 pl-6 bg-slate-50/50 border-b last:border-0">
+              <p className="text-xs text-foreground">{r.text}</p>
               <div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground/60">
                 <span className="font-medium">{r.author}</span>
                 <span>{timeAgo(r.timestamp)}</span>
@@ -188,8 +208,8 @@ function ShoppingListItem({
         </div>
       )}
 
-      {/* Reply input */}
-      <div className="flex items-center gap-1.5 border-t px-3 py-1.5 bg-white/30">
+      {/* Reply */}
+      <div className="flex items-center gap-1.5 border-t px-3 py-1.5 bg-slate-50/30">
         <Input
           value={replyText}
           onChange={(e) => setReplyText(e.target.value)}
