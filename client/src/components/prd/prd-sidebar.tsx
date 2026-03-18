@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route, ClipboardList, Users } from "lucide-react";
+import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, Route, ClipboardList, Users } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -45,8 +45,8 @@ interface PrdSidebarProps {
 const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "ghl", label: "GHL Overview", icon: LayoutDashboard },
   { id: "sitemap", label: "Sitemap", icon: Map },
-  { id: "shopping-list", label: "My List", icon: ClipboardList },
   { id: "team", label: "Team Members", icon: Users },
+  { id: "shopping-list", label: "My List", icon: ClipboardList },
 ];
 
 type DropZone = { pageId: string; position: "before" | "after" } | null;
@@ -175,26 +175,6 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-                {(["questions-to-client", "questions-from-client"] as const).map((id) => {
-                  const page = pages?.find((p) => p.id === id);
-                  if (!page) return null;
-                  return (
-                    <SidebarMenuItem key={id}>
-                      <SidebarMenuButton
-                        isActive={viewMode === "wireframe" && activePage === id}
-                        onClick={() => { setViewMode("wireframe"); setActivePage(id); }}
-                        className="text-xs font-semibold"
-                      >
-                        <HelpCircle className="h-4 w-4" />
-                        <EditableText
-                          value={page.label.toLowerCase()}
-                          onChange={(v) => renamePage(id, v)}
-                          className="text-xs font-semibold"
-                        />
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
               </SidebarMenu>
             </SidebarGroup>
 
@@ -262,12 +242,12 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
 
           {/* Website navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel>Nav Items</SidebarGroupLabel>
+            <SidebarGroupLabel>NAV ITEMS</SidebarGroupLabel>
             <SidebarGroupAction title="Add page" onClick={addPage}>
               <Plus className="h-4 w-4" />
             </SidebarGroupAction>
             <SidebarMenu>
-              {topLevelPages.filter((p) => p.id !== "briefings" && p.id !== "questions").map((p) => {
+              {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
                 const children = childrenOf(p.id);
                 const showDropBefore =
                   dropZone?.pageId === p.id && dropZone.position === "before";
