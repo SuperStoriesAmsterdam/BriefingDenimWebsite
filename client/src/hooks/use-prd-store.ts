@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, ViewMode, FilterTeam, Block, MoodImage } from "@/types/prd";
-import { savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
+import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 import { STORE_KEY } from "@/lib/prd-constants";
 
@@ -26,15 +26,23 @@ export function usePrdStore() {
   useEffect(() => {
     async function init() {
       const freshDefaults = defaults();
-      const server = await loadFromServer();
-      let currentPages: Page[];
 
+      // Load from both sources
+      const server = await loadFromServer();
+      const local = loadPages(freshDefaults);
+
+      // Pick whichever is most recent — server is authoritative,
+      // but localStorage has the latest if a debounced server save hasn't fired yet
+      let currentPages: Page[];
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
-        // Server is source of truth — use server data directly
-        currentPages = server.data as Page[];
+        // Both exist — use server data, but prefer localStorage if it has user-created
+        // pages that server doesn't (user edited between saves)
+        const serverPages = server.data as Page[];
+        const localHasExtra = local.some((lp) => !serverPages.some((sp) => sp.id === lp.id));
+        currentPages = localHasExtra ? local : serverPages;
       } else {
-        // No server data — use defaults, then seed the server
-        currentPages = freshDefaults;
+        // No server data — use localStorage/defaults
+        currentPages = local;
       }
 
       // Restore any missing default pages
@@ -45,23 +53,11 @@ export function usePrdStore() {
         currentPages = [...currentPages, ...missingDefaults];
       }
 
-      // Correct parent field for any existing default pages that have drifted
-      let parentFixed = false;
-      currentPages = currentPages.map((p) => {
-        const def = freshDefaults.find((d) => d.id === p.id);
-        if (def && p.parent !== def.parent) {
-          parentFixed = true;
-          return { ...p, parent: def.parent };
-        }
-        return p;
-      });
-
       pagesRef.current = currentPages;
       setPages(currentPages);
       try { savePages(currentPages); } catch {}
-      if (!server.data || missingDefaults.length > 0 || parentFixed) {
-        saveToServer(currentPages);
-      }
+      // Always sync to server on init to ensure consistency
+      saveToServer(currentPages);
     }
     init();
   }, []);
@@ -73,33 +69,42 @@ export function usePrdStore() {
         clearTimeout(timer.current);
         timer.current = null;
         try { savePages(pagesRef.current); } catch {}
-        // Fire-and-forget server save via sendBeacon
-        const body = JSON.stringify({ data: pagesRef.current, version: STORE_KEY });
-        navigator.sendBeacon("/api/prd", new Blob([body], { type: "application/json" }));
+        // Use fetch with keepalive (supports PUT, unlike sendBeacon which is POST-only)
+        fetch("/api/prd", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: pagesRef.current, version: STORE_KEY }),
+          keepalive: true,
+        }).catch(() => {});
       }
     };
     window.addEventListener("beforeunload", flush);
     return () => window.removeEventListener("beforeunload", flush);
   }, []);
 
-  // Persist with debounce — saves to both localStorage and server
+  // Persist — localStorage immediately, server debounced
   const persist = useCallback((p: Page[]) => {
     pagesRef.current = p;
     setPages(p);
+    // Save to localStorage immediately so refreshes never lose data
+    try {
+      savePages(p);
+    } catch (e) {
+      if (e instanceof StorageFullError) {
+        setSaveStatus("Storage full!");
+        return;
+      }
+    }
+    // Debounce server sync
     if (timer.current) clearTimeout(timer.current);
     setSaveStatus("...");
     timer.current = setTimeout(async () => {
       try {
-        savePages(p);
         const serverOk = await saveToServer(p);
         setSaveStatus(serverOk ? "Synced" : "Saved locally");
         setTimeout(() => setSaveStatus(""), 1500);
-      } catch (e) {
-        if (e instanceof StorageFullError) {
-          setSaveStatus("Storage full!");
-        } else {
-          setSaveStatus("Save error");
-        }
+      } catch {
+        setSaveStatus("Save error");
       }
     }, 500);
   }, []);
