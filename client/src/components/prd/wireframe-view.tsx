@@ -29,6 +29,9 @@ export function WireframeView({ store }: WireframeViewProps) {
           onMoveUp={() => store.moveBlockUp(currentPage.id, i)}
           onMoveDown={() => store.moveBlockDown(currentPage.id, i)}
           onMoveToPage={(targetId) => store.moveBlockToPage(currentPage.id, i, targetId)}
+          onReceiveContent={(fromPageId, fromBlockIndex, contentIndex, insertIndex) =>
+            store.moveContentBetweenBlocks(fromPageId, fromBlockIndex, contentIndex, currentPage.id, i, insertIndex)
+          }
           onDragStart={store.setDragBlock}
           onDragOver={store.setOverBlock}
           onDrop={store.dropBlock}

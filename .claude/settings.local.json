@@ -98,7 +98,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(grep:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls -la /home/runner/workspace/*.md)",
+      "Bash(find /home/runner/workspace -maxdepth 2 -type f \\\\\\(-name README* -o -name CLAUDE.md -o -name *.json \\\\\\) ! -path */node_modules/* ! -path */.cache/*)",
+      "Bash(xargs ls:*)",
+      "Bash(ls /home/runner/workspace/tsconfig*.json /home/runner/workspace/client/tsconfig*.json)",
+      "Bash(ls /home/runner/workspace/vite.config.*)",
+      "Bash(npx vite:*)"
     ]
   }
 }

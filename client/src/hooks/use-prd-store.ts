@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, ViewMode, FilterTeam, Block, MoodImage } from "@/types/prd";
-import { loadPages, savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
+import { savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
+import { STORE_KEY } from "@/lib/prd-constants";
 
 export function usePrdStore() {
   const [pages, setPages] = useState<Page[] | null>(null);
@@ -18,47 +19,72 @@ export function usePrdStore() {
   const [overPage, setOverPage] = useState<string | null>(null);
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep a ref to the latest pages so mutations never read stale closures
+  const pagesRef = useRef<Page[] | null>(null);
 
   // Load on mount — try server first, fall back to localStorage, then defaults
   useEffect(() => {
     async function init() {
       const freshDefaults = defaults();
       const server = await loadFromServer();
+      let currentPages: Page[];
+
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
-        // Server has data — use it, then restore any missing default pages
-        // and fix the parent of any default pages that have drifted
-        let currentPages = loadPages(server.data);
-        const missingDefaults = freshDefaults.filter(
-          (dp) => !currentPages.some((p) => p.id === dp.id)
-        );
-        if (missingDefaults.length > 0) {
-          currentPages = [...currentPages, ...missingDefaults];
-        }
-        // Correct parent field for any existing default pages that have drifted
-        let parentFixed = false;
-        currentPages = currentPages.map((p) => {
-          const def = freshDefaults.find((d) => d.id === p.id);
-          if (def && p.parent !== def.parent) {
-            parentFixed = true;
-            return { ...p, parent: def.parent };
-          }
-          return p;
-        });
-        setPages(currentPages);
-        try { savePages(currentPages); } catch {}
-        if (missingDefaults.length > 0 || parentFixed) saveToServer(currentPages);
+        // Server is source of truth — use server data directly
+        currentPages = server.data as Page[];
       } else {
-        // No server data — use localStorage/defaults, then seed the server
-        const local = loadPages(freshDefaults);
-        setPages(local);
-        saveToServer(local);
+        // No server data — use defaults, then seed the server
+        currentPages = freshDefaults;
+      }
+
+      // Restore any missing default pages
+      const missingDefaults = freshDefaults.filter(
+        (dp) => !currentPages.some((p) => p.id === dp.id)
+      );
+      if (missingDefaults.length > 0) {
+        currentPages = [...currentPages, ...missingDefaults];
+      }
+
+      // Correct parent field for any existing default pages that have drifted
+      let parentFixed = false;
+      currentPages = currentPages.map((p) => {
+        const def = freshDefaults.find((d) => d.id === p.id);
+        if (def && p.parent !== def.parent) {
+          parentFixed = true;
+          return { ...p, parent: def.parent };
+        }
+        return p;
+      });
+
+      pagesRef.current = currentPages;
+      setPages(currentPages);
+      try { savePages(currentPages); } catch {}
+      if (!server.data || missingDefaults.length > 0 || parentFixed) {
+        saveToServer(currentPages);
       }
     }
     init();
   }, []);
 
+  // Flush pending saves on beforeunload so edits aren't lost
+  useEffect(() => {
+    const flush = () => {
+      if (timer.current && pagesRef.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+        try { savePages(pagesRef.current); } catch {}
+        // Fire-and-forget server save via sendBeacon
+        const body = JSON.stringify({ data: pagesRef.current, version: STORE_KEY });
+        navigator.sendBeacon("/api/prd", new Blob([body], { type: "application/json" }));
+      }
+    };
+    window.addEventListener("beforeunload", flush);
+    return () => window.removeEventListener("beforeunload", flush);
+  }, []);
+
   // Persist with debounce — saves to both localStorage and server
   const persist = useCallback((p: Page[]) => {
+    pagesRef.current = p;
     setPages(p);
     if (timer.current) clearTimeout(timer.current);
     setSaveStatus("...");
@@ -86,44 +112,49 @@ export function usePrdStore() {
     [pages]
   );
 
-  // Mutations
+  // Mutations — all read from pagesRef to avoid stale-closure bugs
   const renamePage = useCallback(
     (id: string, newLabel: string) => {
-      if (!pages) return;
-      persist(pages.map((p) => (p.id === id ? { ...p, label: newLabel } : p)));
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(cur.map((p) => (p.id === id ? { ...p, label: newLabel } : p)));
     },
-    [pages, persist]
+    [persist]
   );
 
   const unnestPage = useCallback(
     (id: string) => {
-      if (!pages) return;
-      persist(pages.map((p) => (p.id === id ? { ...p, parent: null } : p)));
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(cur.map((p) => (p.id === id ? { ...p, parent: null } : p)));
     },
-    [pages, persist]
+    [persist]
   );
 
   const nestPage = useCallback(
     (sourceId: string, targetId: string) => {
-      if (!pages || sourceId === targetId) return;
-      persist(pages.map((p) => (p.id === sourceId ? { ...p, parent: targetId } : p)));
+      const cur = pagesRef.current;
+      if (!cur || sourceId === targetId) return;
+      persist(cur.map((p) => (p.id === sourceId ? { ...p, parent: targetId } : p)));
     },
-    [pages, persist]
+    [persist]
   );
 
   const toggleNav = useCallback(
     (id: string) => {
-      if (!pages) return;
-      persist(pages.map((p) => (p.id === id ? { ...p, nav: !p.nav } : p)));
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(cur.map((p) => (p.id === id ? { ...p, nav: !p.nav } : p)));
     },
-    [pages, persist]
+    [persist]
   );
 
   const addPage = useCallback(() => {
-    if (!pages) return;
+    const cur = pagesRef.current;
+    if (!cur) return;
     const id = "page-" + Date.now();
     persist([
-      ...pages,
+      ...cur,
       {
         id,
         label: "New Page",
@@ -141,28 +172,27 @@ export function usePrdStore() {
       },
     ]);
     setActivePage(id);
-  }, [pages, persist]);
+  }, [persist]);
 
   const deletePage = useCallback(
     (id: string) => {
-      if (!pages) return;
-      // Also unnest children
-      const updated = pages
+      const cur = pagesRef.current;
+      if (!cur) return;
+      const updated = cur
         .filter((p) => p.id !== id)
         .map((p) => (p.parent === id ? { ...p, parent: null } : p));
       persist(updated);
-      if (activePage === id) {
-        setActivePage(updated[0]?.id ?? "home");
-      }
+      setActivePage((prev) => prev === id ? (updated[0]?.id ?? "home") : prev);
     },
-    [pages, persist, activePage]
+    [persist]
   );
 
   const updateBlock = useCallback(
     (pageId: string, blockIndex: number, newBlock: Block | null) => {
-      if (!pages) return;
+      const cur = pagesRef.current;
+      if (!cur) return;
       persist(
-        pages.map((p) => {
+        cur.map((p) => {
           if (p.id !== pageId) return p;
           if (newBlock === null) {
             return { ...p, blocks: p.blocks.filter((_, j) => j !== blockIndex) };
@@ -171,27 +201,31 @@ export function usePrdStore() {
         })
       );
     },
-    [pages, persist]
+    [persist]
   );
 
   const dropBlock = useCallback(
     (toIndex: number) => {
-      if (dragBlock === null || dragBlock === toIndex || !currentPage || !pages) return;
-      const blocks = [...currentPage.blocks];
+      const cur = pagesRef.current;
+      if (dragBlock === null || dragBlock === toIndex || !cur) return;
+      const page = cur.find((p) => p.id === activePage);
+      if (!page) return;
+      const blocks = [...page.blocks];
       const [moved] = blocks.splice(dragBlock, 1);
       blocks.splice(toIndex, 0, moved);
-      persist(pages.map((p) => (p.id === currentPage.id ? { ...p, blocks } : p)));
+      persist(cur.map((p) => (p.id === page.id ? { ...p, blocks } : p)));
       setDragBlock(null);
       setOverBlock(null);
     },
-    [dragBlock, currentPage, pages, persist]
+    [dragBlock, activePage, persist]
   );
 
   const addBlock = useCallback(
     (pageId: string) => {
-      if (!pages) return;
+      const cur = pagesRef.current;
+      if (!cur) return;
       persist(
-        pages.map((p) =>
+        cur.map((p) =>
           p.id === pageId
             ? {
                 ...p,
@@ -210,14 +244,15 @@ export function usePrdStore() {
         )
       );
     },
-    [pages, persist]
+    [persist]
   );
 
   const moveBlockUp = useCallback(
     (pageId: string, blockIndex: number) => {
-      if (!pages || blockIndex <= 0) return;
+      const cur = pagesRef.current;
+      if (!cur || blockIndex <= 0) return;
       persist(
-        pages.map((p) => {
+        cur.map((p) => {
           if (p.id !== pageId) return p;
           const blocks = [...p.blocks];
           [blocks[blockIndex - 1], blocks[blockIndex]] = [blocks[blockIndex], blocks[blockIndex - 1]];
@@ -225,14 +260,15 @@ export function usePrdStore() {
         })
       );
     },
-    [pages, persist]
+    [persist]
   );
 
   const moveBlockDown = useCallback(
     (pageId: string, blockIndex: number) => {
-      if (!pages) return;
+      const cur = pagesRef.current;
+      if (!cur) return;
       persist(
-        pages.map((p) => {
+        cur.map((p) => {
           if (p.id !== pageId) return p;
           if (blockIndex >= p.blocks.length - 1) return p;
           const blocks = [...p.blocks];
@@ -241,17 +277,18 @@ export function usePrdStore() {
         })
       );
     },
-    [pages, persist]
+    [persist]
   );
 
   const moveBlockToPage = useCallback(
     (fromPageId: string, blockIndex: number, toPageId: string) => {
-      if (!pages || fromPageId === toPageId) return;
-      const sourcePage = pages.find((p) => p.id === fromPageId);
+      const cur = pagesRef.current;
+      if (!cur || fromPageId === toPageId) return;
+      const sourcePage = cur.find((p) => p.id === fromPageId);
       if (!sourcePage || blockIndex < 0 || blockIndex >= sourcePage.blocks.length) return;
       const block = sourcePage.blocks[blockIndex];
       persist(
-        pages.map((p) => {
+        cur.map((p) => {
           if (p.id === fromPageId) {
             return { ...p, blocks: p.blocks.filter((_, j) => j !== blockIndex) };
           }
@@ -262,14 +299,15 @@ export function usePrdStore() {
         })
       );
     },
-    [pages, persist]
+    [persist]
   );
 
   const reorderPage = useCallback(
     (sourceId: string, targetId: string, position: "before" | "after") => {
-      if (!pages || sourceId === targetId) return;
-      const updated = pages.filter((p) => p.id !== sourceId);
-      const sourcePage = pages.find((p) => p.id === sourceId);
+      const cur = pagesRef.current;
+      if (!cur || sourceId === targetId) return;
+      const updated = cur.filter((p) => p.id !== sourceId);
+      const sourcePage = cur.find((p) => p.id === sourceId);
       if (!sourcePage) return;
       const targetIndex = updated.findIndex((p) => p.id === targetId);
       if (targetIndex === -1) return;
@@ -277,23 +315,62 @@ export function usePrdStore() {
       updated.splice(insertAt, 0, sourcePage);
       persist(updated);
     },
-    [pages, persist]
+    [persist]
   );
 
   const updateMoodImages = useCallback(
     (pageId: string, moodImages: MoodImage[]) => {
-      if (!pages) return;
+      const cur = pagesRef.current;
+      if (!cur) return;
       persist(
-        pages.map((p) =>
+        cur.map((p) =>
           p.id === pageId ? { ...p, moodImages } : p
         )
       );
     },
-    [pages, persist]
+    [persist]
+  );
+
+  const moveContentBetweenBlocks = useCallback(
+    (fromPageId: string, fromBlockIndex: number, contentIndex: number,
+     toPageId: string, toBlockIndex: number, insertIndex: number) => {
+      const cur = pagesRef.current;
+      if (!cur) return;
+      // Find the content item text
+      const fromPage = cur.find((p) => p.id === fromPageId);
+      if (!fromPage) return;
+      const fromBlock = fromPage.blocks[fromBlockIndex];
+      if (!fromBlock || contentIndex < 0 || contentIndex >= fromBlock.content.length) return;
+      const item = fromBlock.content[contentIndex];
+      // Remove from source, add to target
+      persist(
+        cur.map((p) => {
+          const newBlocks = p.blocks.map((b, bi) => {
+            // Remove from source block
+            if (p.id === fromPageId && bi === fromBlockIndex) {
+              return { ...b, content: b.content.filter((_, ci) => ci !== contentIndex) };
+            }
+            // Add to target block
+            if (p.id === toPageId && bi === toBlockIndex) {
+              const newContent = [...b.content];
+              newContent.splice(insertIndex, 0, item);
+              return { ...b, content: newContent };
+            }
+            return b;
+          });
+          if (p.id === fromPageId || p.id === toPageId) {
+            return { ...p, blocks: newBlocks };
+          }
+          return p;
+        })
+      );
+    },
+    [persist]
   );
 
   const resetToDefaults = useCallback(async () => {
     const d = defaults();
+    pagesRef.current = d;
     setPages(d);
     savePages(d);
     await saveToServer(d);
@@ -342,6 +419,7 @@ export function usePrdStore() {
     moveBlockUp,
     moveBlockDown,
     moveBlockToPage,
+    moveContentBetweenBlocks,
     reorderPage,
     updateMoodImages,
     resetToDefaults,
