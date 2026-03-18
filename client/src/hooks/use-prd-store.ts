@@ -56,13 +56,14 @@ export function usePrdStore() {
         clearTimeout(timer.current);
         timer.current = null;
         try { savePages(pagesRef.current); } catch {}
-        // Use fetch with keepalive (supports PUT, unlike sendBeacon which is POST-only)
-        fetch("/api/prd", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: pagesRef.current, version: STORE_KEY }),
-          keepalive: true,
-        }).catch(() => {});
+        // Synchronous XHR on beforeunload — blocks the tab close until sent.
+        // fetch+keepalive silently fails when body > 64KB.
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", "/api/prd", false); // false = synchronous
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.send(JSON.stringify({ data: pagesRef.current, version: STORE_KEY }));
+        } catch {};
       }
     };
     window.addEventListener("beforeunload", flush);
@@ -93,7 +94,7 @@ export function usePrdStore() {
       } catch {
         setSaveStatus("Save error");
       }
-    }, 500);
+    }, 150);
   }, []);
 
   // Derived
