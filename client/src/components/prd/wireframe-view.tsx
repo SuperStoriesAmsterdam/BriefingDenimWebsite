@@ -1,4 +1,3 @@
-import type { Page, FilterTeam } from "@/types/prd";
 import { BlockCard } from "./block-card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -6,9 +5,11 @@ import type { PrdStore } from "@/hooks/use-prd-store";
 
 interface WireframeViewProps {
   store: PrdStore;
+  currentUser: string | null;
+  allUsers: string[];
 }
 
-export function WireframeView({ store }: WireframeViewProps) {
+export function WireframeView({ store, currentUser, allUsers }: WireframeViewProps) {
   const { currentPage, pages, filterTeam, showAnnotations } = store;
 
   if (!currentPage || !pages) return null;
@@ -41,6 +42,8 @@ export function WireframeView({ store }: WireframeViewProps) {
           }}
           isDragging={store.dragBlock === i}
           isOver={store.overBlock === i}
+          currentUser={currentUser}
+          allUsers={allUsers}
         />
       ))}
       <Button

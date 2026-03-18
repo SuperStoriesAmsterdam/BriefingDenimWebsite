@@ -2,11 +2,21 @@ import type { FilterTeam } from "@/types/prd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { PrdStore } from "@/hooks/use-prd-store";
+import { User } from "lucide-react";
 
 interface PrdToolbarProps {
   store: PrdStore;
+  currentUser: string | null;
+  allUsers: string[];
+  onSelectUser: (name: string) => void;
 }
 
 const FILTERS: { id: FilterTeam; label: string; activeClass: string }[] = [
@@ -17,7 +27,7 @@ const FILTERS: { id: FilterTeam; label: string; activeClass: string }[] = [
   { id: "copy", label: "Copy", activeClass: "bg-emerald-500 text-white" },
 ];
 
-export function PrdToolbar({ store }: PrdToolbarProps) {
+export function PrdToolbar({ store, currentUser, allUsers, onSelectUser }: PrdToolbarProps) {
   const { currentPage, pages, filterTeam, setFilterTeam, showAnnotations, setShowAnnotations } =
     store;
 
@@ -43,6 +53,29 @@ export function PrdToolbar({ store }: PrdToolbarProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
+        {/* User picker */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted transition-colors">
+              <User className="h-3 w-3" />
+              {currentUser || "I am..."}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {allUsers.map((name) => (
+              <DropdownMenuItem
+                key={name}
+                onClick={() => onSelectUser(name)}
+                className={cn("text-xs", currentUser === name && "font-bold")}
+              >
+                {name}
+                {currentUser === name && " ✓"}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Separator orientation="vertical" className="mx-1 h-5" />
         {FILTERS.map((f) => (
           <Button
             key={f.id}

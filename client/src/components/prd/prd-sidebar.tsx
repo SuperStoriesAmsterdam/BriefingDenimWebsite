@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route } from "lucide-react";
+import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, HelpCircle, Route, ClipboardList, Users } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -39,16 +39,19 @@ import { cn } from "@/lib/utils";
 
 interface PrdSidebarProps {
   store: PrdStore;
+  currentUser: string | null;
 }
 
 const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "ghl", label: "GHL Overview", icon: LayoutDashboard },
   { id: "sitemap", label: "Sitemap", icon: Map },
+  { id: "shopping-list", label: "My List", icon: ClipboardList },
+  { id: "team", label: "Team Members", icon: Users },
 ];
 
 type DropZone = { pageId: string; position: "before" | "after" } | null;
 
-export function PrdSidebar({ store }: PrdSidebarProps) {
+export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
   const {
     viewMode,
     setViewMode,
@@ -199,8 +202,8 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
           </>
         )}
 
-        {/* Page tree (wireframe mode only) */}
-        {viewMode === "wireframe" && (<>
+        {/* Page tree — always visible */}
+        <>
           {/* Briefings & Strategies — collapsible, separate from website pages */}
           {topLevelPages.filter((p) => p.id === "briefings").map((p) => {
             const children = childrenOf(p.id);
@@ -215,7 +218,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                     </CollapsibleTrigger>
                     <SidebarMenuButton
                       isActive={activePage === p.id}
-                      onClick={() => setActivePage(p.id)}
+                      onClick={() => { setViewMode("wireframe"); setActivePage(p.id); }}
                       className="text-[11px] font-semibold uppercase tracking-wider p-0 h-auto"
                     >
                       {p.label}
@@ -227,7 +230,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                         <SidebarMenuItem key={ch.id}>
                           <SidebarMenuButton
                             isActive={activePage === ch.id}
-                            onClick={() => setActivePage(ch.id)}
+                            onClick={() => { setViewMode("wireframe"); setActivePage(ch.id); }}
                             className="text-xs"
                           >
                             <span className="flex-1 truncate">
@@ -259,7 +262,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
 
           {/* Website navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel>Nav Items</SidebarGroupLabel>
             <SidebarGroupAction title="Add page" onClick={addPage}>
               <Plus className="h-4 w-4" />
             </SidebarGroupAction>
@@ -295,7 +298,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                     )}
                     <SidebarMenuButton
                       isActive={activePage === p.id}
-                      onClick={() => setActivePage(p.id)}
+                      onClick={() => { setViewMode("wireframe"); setActivePage(p.id); }}
                       className="text-[13px]"
                     >
                       <span className="flex-1 truncate">
@@ -345,7 +348,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
                           <SidebarMenuSubItem key={ch.id}>
                             <SidebarMenuSubButton
                               isActive={activePage === ch.id}
-                              onClick={() => setActivePage(ch.id)}
+                              onClick={() => { setViewMode("wireframe"); setActivePage(ch.id); }}
                               className="text-xs"
                             >
                               <span className="flex-1 truncate">
@@ -379,7 +382,7 @@ export function PrdSidebar({ store }: PrdSidebarProps) {
             </SidebarMenu>
           </SidebarGroup>
 
-        </>)}
+        </>
       </SidebarContent>
 
       {/* Footer */}

@@ -1,21 +1,29 @@
-import type { Annotation, FilterTeam, TeamId } from "@/types/prd";
+import type { Annotation, AnnotationReply, FilterTeam, TeamId } from "@/types/prd";
 import { AnnotationItem } from "./annotation-item";
 import { Button } from "@/components/ui/button";
 
 interface AnnotationListProps {
   annotations: Annotation[];
   filterTeam: FilterTeam;
+  currentUser: string | null;
+  allUsers: string[];
   onUpdateAnnotation: (realIndex: number, text: string) => void;
   onDeleteAnnotation: (realIndex: number) => void;
   onAddAnnotation: (team: TeamId) => void;
+  onSetTo: (realIndex: number, to: string | undefined) => void;
+  onAddReply: (realIndex: number, reply: AnnotationReply) => void;
 }
 
 export function AnnotationList({
   annotations,
   filterTeam,
+  currentUser,
+  allUsers,
   onUpdateAnnotation,
   onDeleteAnnotation,
   onAddAnnotation,
+  onSetTo,
+  onAddReply,
 }: AnnotationListProps) {
   const filtered =
     filterTeam === "all"
@@ -30,8 +38,12 @@ export function AnnotationList({
           <AnnotationItem
             key={realIndex}
             annotation={a}
+            currentUser={currentUser}
+            allUsers={allUsers}
             onUpdate={(text) => onUpdateAnnotation(realIndex, text)}
             onDelete={() => onDeleteAnnotation(realIndex)}
+            onSetTo={(to) => onSetTo(realIndex, to)}
+            onAddReply={(reply) => onAddReply(realIndex, reply)}
           />
         );
       })}

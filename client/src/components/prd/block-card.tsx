@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page, QuestionItem } from "@/types/prd";
+import type { Block, FilterTeam, TeamId, BlockType, SchemaType, BlockImage, Page, QuestionItem, AnnotationReply } from "@/types/prd";
 import { BLOCK_TYPES, SCHEMA_TYPES } from "@/lib/prd-constants";
 import { EditableText } from "./editable-text";
 import { BlockContentList } from "./block-content-list";
@@ -43,6 +43,8 @@ interface BlockCardProps {
   isDragging: boolean;
   isOver: boolean;
   onReceiveContent?: (fromPageId: string, fromBlockIndex: number, contentIndex: number, insertIndex: number) => void;
+  currentUser: string | null;
+  allUsers: string[];
 }
 
 export function BlockCard({
@@ -64,9 +66,45 @@ export function BlockCard({
   isDragging,
   isOver,
   onReceiveContent,
+  currentUser,
+  allUsers,
 }: BlockCardProps) {
   const otherPages = allPages.filter((p) => p.id !== pageId);
   const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Shared annotation handlers
+  const annotationHandlers = {
+    annotations: block.annotations,
+    filterTeam,
+    currentUser,
+    allUsers,
+    onUpdateAnnotation: (ri: number, text: string) => {
+      const annotations = [...block.annotations];
+      annotations[ri] = { ...annotations[ri], text };
+      onUpdate({ ...block, annotations });
+    },
+    onDeleteAnnotation: (ri: number) =>
+      onUpdate({ ...block, annotations: block.annotations.filter((_: any, j: number) => j !== ri) }),
+    onAddAnnotation: (team: TeamId) =>
+      onUpdate({
+        ...block,
+        annotations: [
+          ...block.annotations,
+          { team, text: "New note...", author: currentUser || undefined, timestamp: new Date().toISOString() },
+        ],
+      }),
+    onSetTo: (ri: number, to: string | undefined) => {
+      const annotations = [...block.annotations];
+      annotations[ri] = { ...annotations[ri], to };
+      onUpdate({ ...block, annotations });
+    },
+    onAddReply: (ri: number, reply: AnnotationReply) => {
+      const annotations = [...block.annotations];
+      const existing = annotations[ri];
+      annotations[ri] = { ...existing, replies: [...(existing.replies || []), reply] };
+      onUpdate({ ...block, annotations });
+    },
+  };
   const hasDetails = block.llmParagraph || (block.questions && block.questions.length > 0) || (block.images && block.images.length > 0) || block.docUrl || (showAnnotations && block.annotations.length > 0);
 
   // Shared content list props
@@ -350,24 +388,7 @@ export function BlockCard({
 
               {/* Annotations */}
               {showAnnotations && (
-                <AnnotationList
-                  annotations={block.annotations}
-                  filterTeam={filterTeam}
-                  onUpdateAnnotation={(ri, text) => {
-                    const annotations = [...block.annotations];
-                    annotations[ri] = { ...annotations[ri], text };
-                    onUpdate({ ...block, annotations });
-                  }}
-                  onDeleteAnnotation={(ri) =>
-                    onUpdate({ ...block, annotations: block.annotations.filter((_, j) => j !== ri) })
-                  }
-                  onAddAnnotation={(team: TeamId) =>
-                    onUpdate({
-                      ...block,
-                      annotations: [...block.annotations, { team, text: "New instruction..." }],
-                    })
-                  }
-                />
+                <AnnotationList {...annotationHandlers} />
               )}
             </div>
           )}
@@ -390,24 +411,7 @@ export function BlockCard({
             onUpdate={(url) => onUpdate({ ...block, docUrl: url })}
           />
           {showAnnotations && (
-            <AnnotationList
-              annotations={block.annotations}
-              filterTeam={filterTeam}
-              onUpdateAnnotation={(ri, text) => {
-                const annotations = [...block.annotations];
-                annotations[ri] = { ...annotations[ri], text };
-                onUpdate({ ...block, annotations });
-              }}
-              onDeleteAnnotation={(ri) =>
-                onUpdate({ ...block, annotations: block.annotations.filter((_, j) => j !== ri) })
-              }
-              onAddAnnotation={(team: TeamId) =>
-                onUpdate({
-                  ...block,
-                  annotations: [...block.annotations, { team, text: "New instruction..." }],
-                })
-              }
-            />
+            <AnnotationList {...annotationHandlers} />
           )}
         </div>
       )}
