@@ -844,7 +844,11 @@ Server-side upload werkt (endpoint, sharp resize, static serving). Maar geen goe
 - Inklapbaar panel = afgewezen door gebruiker
 - Mogelijk beter als onderdeel van de standalone DAM dan van deze tool
 
+### TODO: prd-defaults.ts opschonen voor forkbaarheid
+De hele `prd-defaults.ts` bevat hardcoded Denim City content (alle pagina's, blocks, teksten, annotations — honderden regels). Bij een fork voor een nieuw project krijg je al die DC-teksten als startpunt, wat handmatig opruimen vereist. **Oplossing:** defaults vervangen door een kale starterstructuur (Home + lege hero/section). Bestaande DC data blijft veilig in de database — defaults worden alleen geladen als de server database leeg is (= nieuw project).
+
 ### Aankomend
+- **prd-defaults.ts opschonen** (zie hierboven)
 - Fork repo voor Wholeness Work briefing platform (PRD klaar)
 - Standalone DAM app bouwen (PRD klaar: `DAM-PRD.md`)
 - GHL overview bijwerken naar werkelijke 12 ICP pipeline structuur
