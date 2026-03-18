@@ -108,7 +108,12 @@
       "Bash(ls /home/runner/workspace/vite.config.*)",
       "Bash(npx vite:*)",
       "Bash(fuser -k 5000/tcp)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ls -la dist/public/assets/*.js)",
+      "Bash(node -e \":*)",
+      "Bash(while read:*)",
+      "Bash(do if:*)",
+      "Bash(then echo:*)"
     ]
   }
 }

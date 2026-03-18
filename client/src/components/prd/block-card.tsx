@@ -104,6 +104,12 @@ export function BlockCard({
       annotations[ri] = { ...existing, replies: [...(existing.replies || []), reply] };
       onUpdate({ ...block, annotations });
     },
+    onReorder: (from: number, to: number) => {
+      const annotations = [...block.annotations];
+      const [moved] = annotations.splice(from, 1);
+      annotations.splice(to, 0, moved);
+      onUpdate({ ...block, annotations });
+    },
   };
   const hasDetails = block.llmParagraph || (block.questions && block.questions.length > 0) || block.docUrl || (showAnnotations && block.annotations.length > 0);
 
