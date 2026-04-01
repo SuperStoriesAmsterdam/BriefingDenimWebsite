@@ -7,7 +7,9 @@ export interface TeamMember {
   role: string;
 }
 
-const STORAGE_KEY = "dc-prd-team-members";
+import { PROJECT_ID } from "./project.config";
+
+const STORAGE_KEY = `${PROJECT_ID}-prd-team-members`;
 
 export function getTeamMembers(): TeamMember[] {
   try {

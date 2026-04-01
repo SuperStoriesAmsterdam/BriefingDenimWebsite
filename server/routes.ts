@@ -122,20 +122,5 @@ export async function registerRoutes(
     return res.json({ ok: true });
   });
 
-  // Serve standalone HTML files
-  app.get("/customer-journey.html", (_req, res) => {
-    const dir = typeof __dirname !== "undefined" ? __dirname : import.meta.dirname;
-    const candidates = [
-      path.resolve(dir, "customer-journey.html"),
-      path.resolve(dir, "..", "customer-journey.html"),
-    ];
-    const filePath = candidates.find((p) => fs.existsSync(p));
-    if (filePath) {
-      res.type("html").sendFile(filePath);
-    } else {
-      res.status(404).send("Not found");
-    }
-  });
-
   return httpServer;
 }

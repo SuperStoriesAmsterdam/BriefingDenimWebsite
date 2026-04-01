@@ -1,5 +1,6 @@
 import type { Page, Block } from "@/types/prd";
 import { STORE_KEY } from "./prd-constants";
+import { PROJECT_ID } from "./project.config";
 
 export class StorageFullError extends Error {
   constructor() {
@@ -8,8 +9,8 @@ export class StorageFullError extends Error {
   }
 }
 
-const DATA_KEY = "dc-prd-data";
-const VERSION_KEY = "dc-prd-version";
+const DATA_KEY = `${PROJECT_ID}-prd-data`;
+const VERSION_KEY = `${PROJECT_ID}-prd-version`;
 
 /**
  * Merge user-edited pages with new defaults.
