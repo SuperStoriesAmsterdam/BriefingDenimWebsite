@@ -395,6 +395,31 @@ export function usePrdStore() {
     [persist]
   );
 
+  const toggleAnnotationDone = useCallback(
+    (pageId: string, blockIndex: number, annotationIndex: number) => {
+      const cur = pagesRef.current;
+      if (!cur) return;
+      persist(
+        cur.map((p) => {
+          if (p.id !== pageId) return p;
+          return {
+            ...p,
+            blocks: p.blocks.map((b, bi) => {
+              if (bi !== blockIndex) return b;
+              return {
+                ...b,
+                annotations: b.annotations.map((a, ai) =>
+                  ai === annotationIndex ? { ...a, done: !a.done } : a
+                ),
+              };
+            }),
+          };
+        })
+      );
+    },
+    [persist]
+  );
+
   const resetToDefaults = useCallback(async () => {
     const d = defaults();
     pagesRef.current = d;
@@ -451,6 +476,7 @@ export function usePrdStore() {
     updateMoodImages,
     addPageQuestion,
     replyToPageQuestion,
+    toggleAnnotationDone,
     resetToDefaults,
   };
 }

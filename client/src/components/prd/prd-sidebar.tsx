@@ -31,7 +31,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditableText } from "./editable-text";
 import { StorageIndicator } from "./storage-indicator";
-import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, Route, ClipboardList, Users } from "lucide-react";
+import { LayoutDashboard, Map, Plus, ArrowUp, RotateCcw, ChevronRight, Trash2, Route, ClipboardList, Users, ListChecks } from "lucide-react";
+import { countUnchecked } from "./annotation-tasks";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ViewMode } from "@/types/prd";
 import type { PrdStore } from "@/hooks/use-prd-store";
@@ -47,6 +48,7 @@ const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "sitemap", label: "Sitemap", icon: Map },
   { id: "team", label: "Team Members", icon: Users },
   { id: "shopping-list", label: "My List", icon: ClipboardList },
+  { id: "tasks", label: "Tasks", icon: ListChecks },
 ];
 
 type DropZone = { pageId: string; position: "before" | "after" } | null;
@@ -76,6 +78,8 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
     reorderPage,
     pages,
   } = store;
+
+  const totalUnchecked = pages ? countUnchecked(pages, store.filterTeam) : 0;
 
   const [dropZone, setDropZone] = useState<DropZone>(null);
   const [briefingsOpen, setBriefingsOpen] = useState(true);
@@ -173,6 +177,13 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
                       <v.icon className="h-4 w-4" />
                       <span>{v.label}</span>
                     </SidebarMenuButton>
+                    {v.id === "tasks" && totalUnchecked > 0 && (
+                      <SidebarMenuBadge>
+                        <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                          {totalUnchecked}
+                        </span>
+                      </SidebarMenuBadge>
+                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -289,13 +300,27 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
                         />
                       </span>
                     </SidebarMenuButton>
-                    {!p.nav && (
-                      <SidebarMenuBadge>
-                        <span className="rounded bg-sidebar-foreground/10 px-1 py-0.5 text-[8px] text-sidebar-foreground/40">
-                          footer
-                        </span>
-                      </SidebarMenuBadge>
-                    )}
+                    {(() => {
+                      const pageUnchecked = pages ? countUnchecked(pages, store.filterTeam, p.id) : 0;
+                      return (
+                        <>
+                          {!p.nav && (
+                            <SidebarMenuBadge>
+                              <span className="rounded bg-sidebar-foreground/10 px-1 py-0.5 text-[8px] text-sidebar-foreground/40">
+                                footer
+                              </span>
+                            </SidebarMenuBadge>
+                          )}
+                          {pageUnchecked > 0 && (
+                            <SidebarMenuBadge>
+                              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+                                {pageUnchecked}
+                              </span>
+                            </SidebarMenuBadge>
+                          )}
+                        </>
+                      );
+                    })()}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <SidebarMenuAction

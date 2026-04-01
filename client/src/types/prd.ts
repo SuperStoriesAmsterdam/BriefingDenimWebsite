@@ -2,7 +2,7 @@ export type TeamId = "design" | "dev" | "ghl" | "copy";
 
 export type BlockType = "hero" | "grid" | "section" | "cta";
 
-export type ViewMode = "wireframe" | "ghl" | "sitemap" | "shopping-list" | "team";
+export type ViewMode = "wireframe" | "ghl" | "sitemap" | "shopping-list" | "team" | "tasks";
 
 export type FilterTeam = "all" | TeamId;
 
@@ -27,6 +27,7 @@ export interface Annotation {
   to?: string;
   timestamp?: string;
   replies?: AnnotationReply[];
+  done?: boolean;
 }
 
 export interface QuestionItem {

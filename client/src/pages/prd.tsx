@@ -9,6 +9,7 @@ import { GhlOverview } from "@/components/prd/ghl-overview";
 import { SitemapView } from "@/components/prd/sitemap-view";
 import { ShoppingList } from "@/components/prd/shopping-list";
 import { TeamManager } from "@/components/prd/team-manager";
+import { AnnotationTasks } from "@/components/prd/annotation-tasks";
 import { getTeamMembers, saveTeamMembers, getTeamNames, type TeamMember } from "@/lib/team-members";
 import type { AnnotationReply } from "@/types/prd";
 
@@ -60,7 +61,7 @@ export default function PrdPage() {
       <SidebarProvider>
         <PrdSidebar store={store} currentUser={user.name} />
         <SidebarInset className="overflow-y-auto">
-          {store.viewMode === "wireframe" && (
+          {(store.viewMode === "wireframe" || store.viewMode === "tasks") && (
             <PrdToolbar
               store={store}
               currentUser={user.name}
@@ -84,6 +85,20 @@ export default function PrdPage() {
               currentUser={user.name}
               onNavigate={(pageId) => { store.setViewMode("wireframe"); store.setActivePage(pageId); }}
               onReplyToPageQuestion={(pageId, qId, reply) => store.replyToPageQuestion(pageId, qId, reply)}
+            />
+          )}
+          {store.viewMode === "tasks" && (
+            <AnnotationTasks
+              pages={store.pages}
+              filterTeam={store.filterTeam}
+              onToggleDone={store.toggleAnnotationDone}
+              onNavigate={(pageId, blockIndex) => {
+                store.setViewMode("wireframe");
+                store.setActivePage(pageId);
+                setTimeout(() => {
+                  document.querySelector(`[data-block-index="${blockIndex}"]`)?.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+              }}
             />
           )}
           {store.viewMode === "team" && (

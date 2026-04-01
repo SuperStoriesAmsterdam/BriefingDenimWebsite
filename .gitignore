@@ -5,3 +5,15 @@ server/public
 vite.config.ts.*
 *.tar.gz
 uploads/*.jpg
+
+# Environment
+.env
+
+# Replit
+.cache
+.local
+.replit
+replit.nix
+
+# Docker
+pgdata

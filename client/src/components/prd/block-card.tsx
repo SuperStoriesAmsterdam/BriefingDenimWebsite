@@ -136,6 +136,7 @@ export function BlockCard({
 
   return (
     <div
+      data-block-index={index}
       draggable
       onDragStart={(e) => {
         // Only allow block drag from the toolbar grip, not from content items
