@@ -18,7 +18,7 @@ services:
       POSTGRES_PASSWORD: prd
       POSTGRES_DB: prd
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata2:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -29,4 +29,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  pgdata:
+  pgdata2:
