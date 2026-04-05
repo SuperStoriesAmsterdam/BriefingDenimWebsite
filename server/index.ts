@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,6 +63,22 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Auto-create tables if they don't exist
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      username TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS prd_documents (
+      id VARCHAR(64) PRIMARY KEY DEFAULT 'default',
+      data JSONB NOT NULL,
+      version VARCHAR(32) NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    );
+  `);
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
