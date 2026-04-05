@@ -63,21 +63,29 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Auto-create tables if they don't exist
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS users (
-      id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
-      username TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS prd_documents (
-      id VARCHAR(64) PRIMARY KEY DEFAULT 'default',
-      data JSONB NOT NULL,
-      version VARCHAR(32) NOT NULL,
-      updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW() NOT NULL
-    );
-  `);
+  // Auto-create tables if they don't exist (split — drizzle does not support multi-statement)
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+      )
+    `);
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS prd_documents (
+        id VARCHAR(64) PRIMARY KEY DEFAULT 'default',
+        data JSONB NOT NULL,
+        version VARCHAR(32) NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      )
+    `);
+    log("Database tables ready");
+  } catch (err) {
+    console.error("Failed to create tables:", err);
+    process.exit(1);
+  }
 
   await registerRoutes(httpServer, app);
 
