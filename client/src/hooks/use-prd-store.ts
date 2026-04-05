@@ -429,6 +429,20 @@ export function usePrdStore() {
     setActivePage("home");
   }, []);
 
+  const saveNow = useCallback(async () => {
+    const cur = pagesRef.current;
+    if (!cur) return;
+    setSaveStatus("Saving...");
+    try {
+      savePages(cur);
+      const ok = await saveToServer(cur);
+      setSaveStatus(ok ? "Saved" : "Save failed");
+    } catch {
+      setSaveStatus("Save failed");
+    }
+    setTimeout(() => setSaveStatus(""), 2000);
+  }, []);
+
   return {
     // State
     pages,
@@ -478,6 +492,7 @@ export function usePrdStore() {
     replyToPageQuestion,
     toggleAnnotationDone,
     resetToDefaults,
+    saveNow,
   };
 }
 
