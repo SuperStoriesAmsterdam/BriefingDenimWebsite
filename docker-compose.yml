@@ -13,24 +13,25 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.db
     command: postgres -c hba_file=/etc/postgresql/pg_hba.conf
     environment:
       POSTGRES_USER: prd
       POSTGRES_PASSWORD: prd
       POSTGRES_DB: prd
     volumes:
-      - pgdata4:/var/lib/postgresql/data
-      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - pgdata5:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "psql -U prd -d prd -c 'SELECT 1' -q --no-align -t 2>/dev/null | grep -q 1"]
+      test: ["CMD-SHELL", "pg_isready -U prd -d prd"]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
 
 volumes:
-  pgdata4:
+  pgdata5:
