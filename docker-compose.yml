@@ -14,12 +14,14 @@ services:
 
   db:
     image: postgres:16-alpine
+    command: postgres -c hba_file=/etc/postgresql/pg_hba.conf
     environment:
       POSTGRES_USER: prd
       POSTGRES_PASSWORD: prd
       POSTGRES_DB: prd
     volumes:
-      - pgdata3:/var/lib/postgresql/data
+      - pgdata4:/var/lib/postgresql/data
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -31,4 +33,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  pgdata3:
+  pgdata4:
