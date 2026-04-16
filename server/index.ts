@@ -63,6 +63,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Wait for DB to be ready (up to 30s) before serving any requests
+  for (let i = 0; i < 30; i++) {
+    try {
+      await db.execute(sql`SELECT 1`);
+      log("Database ready");
+      break;
+    } catch {
+      if (i === 29) log("Database not ready after 30s — starting anyway");
+      else await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
   // Auto-create tables if they don't exist
   try {
     await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
