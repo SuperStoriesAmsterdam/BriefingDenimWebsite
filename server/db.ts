@@ -4,8 +4,9 @@ import * as schema from "@shared/schema";
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
+  min: 2,
   max: 5,
-  idleTimeoutMillis: 10000,
+  idleTimeoutMillis: 60000,
   connectionTimeoutMillis: 5000,
 });
 

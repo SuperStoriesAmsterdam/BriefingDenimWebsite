@@ -105,10 +105,10 @@ app.use((req, res, next) => {
     console.error("Failed to create prd_documents table:", err);
   }
 
-  // Warm up the connection pool so the first API requests don't hit cold/broken sockets
-  for (let i = 0; i < 3; i++) {
-    try { await db.execute(sql`SELECT 1`); } catch { /* ignore */ }
-  }
+  // Warm up the connection pool — fill min connections so first requests don't cold-start
+  await Promise.all(
+    Array.from({ length: 5 }, () => db.execute(sql`SELECT 1`).catch(() => {}))
+  );
 
   await registerRoutes(httpServer, app);
 
