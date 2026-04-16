@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Block, FilterTeam, TeamId, BlockType, SchemaType, Page, QuestionItem, AnnotationReply } from "@/types/prd";
+import type { Block, CardItem, FilterTeam, TeamId, BlockType, SchemaType, Page, QuestionItem, AnnotationReply } from "@/types/prd";
 import { BLOCK_TYPES, SCHEMA_TYPES } from "@/lib/prd-constants";
 import { EditableText } from "./editable-text";
 import { BlockContentList } from "./block-content-list";
@@ -228,6 +228,7 @@ export function BlockCard({
                 onChange={(v) => onUpdate({ ...block, desc: v })}
                 className="text-sm leading-relaxed text-slate-300"
                 multi
+                bullets
               />
             </div>
             {block.content.length > 0 && (
@@ -284,6 +285,7 @@ export function BlockCard({
                 onChange={(v) => onUpdate({ ...block, desc: v })}
                 className="text-[13px] leading-relaxed text-muted-foreground"
                 multi
+                bullets
               />
             </div>
           </div>
@@ -308,6 +310,7 @@ export function BlockCard({
                 onChange={(v) => onUpdate({ ...block, desc: v })}
                 className="text-[13px] leading-relaxed text-muted-foreground"
                 multi
+                bullets
               />
             </div>
             <div className="inline-block rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md">
@@ -323,6 +326,93 @@ export function BlockCard({
                 <BlockContentList {...contentListProps} />
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── CARD-LIST ── */}
+      {block.type === "card-list" && (
+        <div className="bg-white px-5 py-5">
+          <div className="border-l-2 border-slate-300 pl-4 mb-4">
+            <EditableText
+              value={block.title}
+              onChange={(v) => onUpdate({ ...block, title: v })}
+              className="text-base font-bold text-foreground"
+            />
+            <div className="mt-1 mb-1">
+              <EditableText
+                value={block.desc}
+                onChange={(v) => onUpdate({ ...block, desc: v })}
+                className="text-[13px] leading-relaxed text-muted-foreground"
+                multi
+              />
+            </div>
+          </div>
+          <div className="space-y-3">
+            {(block.cards ?? []).map((card, ci) => (
+              <div key={ci} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <EditableText
+                    value={card.title}
+                    onChange={(v) => {
+                      const cards = [...(block.cards ?? [])];
+                      cards[ci] = { ...cards[ci], title: v };
+                      onUpdate({ ...block, cards });
+                    }}
+                    className="text-[13px] font-semibold text-foreground flex-1"
+                  />
+                  <button
+                    className="text-[10px] text-muted-foreground/50 hover:text-destructive"
+                    onClick={() => {
+                      const cards = (block.cards ?? []).filter((_, i) => i !== ci);
+                      onUpdate({ ...block, cards });
+                    }}
+                  >✕</button>
+                </div>
+                <div className="space-y-1 ml-1">
+                  {card.items.map((item, ii) => (
+                    <div key={ii} className="flex items-start gap-1.5">
+                      <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />
+                      <EditableText
+                        value={item}
+                        onChange={(v) => {
+                          const cards = [...(block.cards ?? [])];
+                          const items = [...cards[ci].items];
+                          items[ii] = v;
+                          cards[ci] = { ...cards[ci], items };
+                          onUpdate({ ...block, cards });
+                        }}
+                        className="text-[12px] text-muted-foreground flex-1"
+                      />
+                      <button
+                        className="text-[10px] text-muted-foreground/30 hover:text-destructive shrink-0"
+                        onClick={() => {
+                          const cards = [...(block.cards ?? [])];
+                          const items = cards[ci].items.filter((_, i) => i !== ii);
+                          cards[ci] = { ...cards[ci], items };
+                          onUpdate({ ...block, cards });
+                        }}
+                      >✕</button>
+                    </div>
+                  ))}
+                  <button
+                    className="mt-1 text-[11px] text-muted-foreground/50 hover:text-muted-foreground"
+                    onClick={() => {
+                      const cards = [...(block.cards ?? [])];
+                      cards[ci] = { ...cards[ci], items: [...cards[ci].items, "New item..."] };
+                      onUpdate({ ...block, cards });
+                    }}
+                  >+ item</button>
+                </div>
+              </div>
+            ))}
+            <button
+              className="w-full rounded-lg border-2 border-dashed border-slate-200 py-2 text-[12px] text-muted-foreground hover:border-slate-300 hover:text-foreground transition-colors"
+              onClick={() => {
+                const cards = [...(block.cards ?? []), { title: "Brand name", items: ["Detail..."] }];
+                onUpdate({ ...block, cards });
+              }}
+            >+ card</button>
           </div>
         </div>
       )}

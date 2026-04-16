@@ -1,6 +1,11 @@
 export type TeamId = "design" | "dev" | "ghl" | "copy";
 
-export type BlockType = "hero" | "grid" | "section" | "cta";
+export type BlockType = "hero" | "grid" | "section" | "cta" | "card-list";
+
+export interface CardItem {
+  title: string;
+  items: string[];
+}
 
 export type ViewMode = "wireframe" | "ghl" | "sitemap" | "shopping-list" | "team" | "tasks";
 
@@ -48,6 +53,7 @@ export interface Block {
   title: string;
   desc: string;
   content: string[];
+  cards?: CardItem[];
   annotations: Annotation[];
   images?: BlockImage[];
   docUrl?: string;
