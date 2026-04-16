@@ -6,7 +6,25 @@ import { STORE_KEY } from "@/lib/prd-constants";
 
 export function usePrdStore() {
   const [pages, setPages] = useState<Page[] | null>(null);
-  const [activePage, setActivePage] = useState("home");
+  const [activePage, setActivePageState] = useState<string>(() => {
+    const hash = window.location.hash.slice(1);
+    return hash || "home";
+  });
+
+  const setActivePage = useCallback((id: string) => {
+    setActivePageState(id);
+    window.location.hash = id;
+  }, []);
+
+  // Sync activePage when browser back/forward is used
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash) setActivePageState(hash);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
   const [viewMode, setViewMode] = useState<ViewMode>("wireframe");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [filterTeam, setFilterTeam] = useState<FilterTeam>("all");
