@@ -37,6 +37,7 @@ export async function registerRoutes(
 
   // GET /api/prd — load PRD data from database
   app.get("/api/prd", async (_req, res) => {
+    res.set("Cache-Control", "no-store");
     try {
       const doc = await storage.getPrd();
       if (!doc) {

@@ -53,10 +53,14 @@ export function usePrdStore() {
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
         // Server has data — use it. Period.
         currentPages = server.data as Page[];
+      } else if (server.error) {
+        // Server had an error — fall back to localStorage, never seed from defaults
+        // (seeding from defaults would overwrite whatever is in the DB)
+        const raw = localStorage.getItem(`${PROJECT_ID}-prd-data`);
+        try { currentPages = raw ? JSON.parse(raw) as Page[] : freshDefaults; } catch { currentPages = freshDefaults; }
       } else {
-        // No server data — first time ever, seed from defaults
+        // Server responded OK but has no data — truly first run, seed from defaults
         currentPages = freshDefaults;
-        // Save defaults to server so they become the source of truth
         await saveToServer(currentPages);
       }
 

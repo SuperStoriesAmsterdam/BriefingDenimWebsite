@@ -130,15 +130,22 @@ export function savePages(pages: Page[]): void {
 }
 
 /** Load PRD data from the server database */
-export async function loadFromServer(): Promise<{ data: Page[] | null; version: string | null }> {
-  try {
-    const res = await fetch("/api/prd");
-    if (!res.ok) return { data: null, version: null };
-    const json = await res.json();
-    return { data: json.data as Page[] | null, version: json.version };
-  } catch {
-    return { data: null, version: null };
+export async function loadFromServer(): Promise<{ data: Page[] | null; version: string | null; error: boolean }> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch("/api/prd", { cache: "no-store" });
+      if (!res.ok) {
+        if (attempt < 2) { await new Promise((r) => setTimeout(r, 600)); continue; }
+        return { data: null, version: null, error: true };
+      }
+      const json = await res.json();
+      return { data: json.data as Page[] | null, version: json.version, error: false };
+    } catch {
+      if (attempt < 2) { await new Promise((r) => setTimeout(r, 600)); continue; }
+      return { data: null, version: null, error: true };
+    }
   }
+  return { data: null, version: null, error: true };
 }
 
 /** Save PRD data to the server database — auto-retries up to 3x on failure */
