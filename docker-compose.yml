@@ -8,8 +8,7 @@ services:
       - PORT=5000
       - SESSION_SECRET=${SESSION_SECRET:-change-me-in-production}
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     restart: unless-stopped
 
   db:
