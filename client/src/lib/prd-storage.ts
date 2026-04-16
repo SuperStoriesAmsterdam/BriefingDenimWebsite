@@ -141,16 +141,19 @@ export async function loadFromServer(): Promise<{ data: Page[] | null; version: 
   }
 }
 
-/** Save PRD data to the server database */
+/** Save PRD data to the server database — auto-retries up to 3x on failure */
 export async function saveToServer(pages: Page[]): Promise<boolean> {
-  try {
-    const res = await fetch("/api/prd", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: pages, version: STORE_KEY }),
-    });
-    return res.ok;
-  } catch {
-    return false;
+  const body = JSON.stringify({ data: pages, version: STORE_KEY });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch("/api/prd", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (res.ok) return true;
+    } catch { /* network error, retry */ }
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 600));
   }
+  return false;
 }

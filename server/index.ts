@@ -63,7 +63,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Auto-create tables if they don't exist (split — drizzle does not support multi-statement)
+  // Auto-create tables if they don't exist
+  try {
+    await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
+  } catch { /* extension may already exist */ }
   try {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS users (
@@ -72,6 +75,10 @@ app.use((req, res, next) => {
         password TEXT NOT NULL
       )
     `);
+  } catch (err) {
+    console.error("Failed to create users table:", err);
+  }
+  try {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS prd_documents (
         id VARCHAR(64) PRIMARY KEY DEFAULT 'default',
@@ -83,8 +90,12 @@ app.use((req, res, next) => {
     `);
     log("Database tables ready");
   } catch (err) {
-    console.error("Failed to create tables:", err);
-    process.exit(1);
+    console.error("Failed to create prd_documents table:", err);
+  }
+
+  // Warm up the connection pool so the first API requests don't hit cold/broken sockets
+  for (let i = 0; i < 3; i++) {
+    try { await db.execute(sql`SELECT 1`); } catch { /* ignore */ }
   }
 
   await registerRoutes(httpServer, app);
