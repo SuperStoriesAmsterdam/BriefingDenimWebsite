@@ -32,18 +32,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async savePrd(data: unknown, version: string, id: string = "default"): Promise<PrdDocument> {
-    const existing = await this.getPrd(id);
-    if (existing) {
-      const [doc] = await db
-        .update(prdDocuments)
-        .set({ data, version, updatedAt: new Date() })
-        .where(eq(prdDocuments.id, id))
-        .returning();
-      return doc;
-    }
     const [doc] = await db
       .insert(prdDocuments)
       .values({ id, data, version, updatedAt: new Date(), createdAt: new Date() })
+      .onConflictDoUpdate({
+        target: prdDocuments.id,
+        set: { data, version, updatedAt: new Date() },
+      })
       .returning();
     return doc;
   }

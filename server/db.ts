@@ -4,6 +4,14 @@ import * as schema from "@shared/schema";
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
+  max: 5,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
+});
+
+// Remove broken connections from the pool instead of letting them linger
+pool.on("error", (err) => {
+  console.error("Pool connection error (removed from pool):", err.message);
 });
 
 export const db = drizzle(pool, { schema });
