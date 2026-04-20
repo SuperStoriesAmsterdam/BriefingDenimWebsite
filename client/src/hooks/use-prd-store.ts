@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Page, PageQuestion, ViewMode, FilterTeam, Block, MoodImage, AnnotationReply } from "@/types/prd";
-import { savePages, saveToServer, loadFromServer, StorageFullError } from "@/lib/prd-storage";
+import { savePages, saveToServer, loadFromServer, mergePages, StorageFullError } from "@/lib/prd-storage";
 import { defaults } from "@/lib/prd-defaults";
 import { STORE_KEY } from "@/lib/prd-constants";
+import { PROJECT_ID } from "@/lib/project.config";
 
 export function usePrdStore() {
   const [pages, setPages] = useState<Page[] | null>(null);
@@ -51,8 +52,15 @@ export function usePrdStore() {
       let currentPages: Page[];
 
       if (server.data && Array.isArray(server.data) && server.data.length > 0) {
-        // Server has data — use it. Period.
-        currentPages = server.data as Page[];
+        if (server.version && server.version !== STORE_KEY) {
+          // Server has data from an older version — merge with fresh defaults,
+          // then save the merged result back so next load is instant.
+          currentPages = mergePages(server.data as Page[], freshDefaults);
+          await saveToServer(currentPages);
+        } else {
+          // Same version — use server data as-is.
+          currentPages = server.data as Page[];
+        }
       } else if (server.error) {
         // Server had an error — fall back to localStorage, never seed from defaults
         // (seeding from defaults would overwrite whatever is in the DB)

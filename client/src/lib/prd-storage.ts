@@ -20,7 +20,7 @@ const VERSION_KEY = `${PROJECT_ID}-prd-version`;
  * - For matching pages: user's text edits (label, block titles, descriptions,
  *   content, annotations) are preserved. New blocks from defaults are appended.
  */
-function mergePages(stored: Page[], fresh: Page[]): Page[] {
+export function mergePages(stored: Page[], fresh: Page[]): Page[] {
   const storedMap = new Map(stored.map((p) => [p.id, p]));
   const freshMap = new Map(fresh.map((p) => [p.id, p]));
 
