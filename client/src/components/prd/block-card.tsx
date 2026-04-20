@@ -400,7 +400,12 @@ export function BlockCard({
                     </div>
                   ))}
                   <button
-                    className="mt-1 rounded border border-dashed border-slate-200 px-2 py-0.5 text-[11px] text-muted-foreground/50 hover:border-slate-300 hover:text-muted-foreground transition-colors"
+                    className={cn(
+                      "mt-2 w-full rounded border border-dashed px-2 py-1 text-[12px] transition-colors",
+                      card.items.length === 0
+                        ? "border-slate-300 text-muted-foreground hover:border-slate-400 hover:text-foreground"
+                        : "border-slate-200 text-muted-foreground/50 hover:border-slate-300 hover:text-muted-foreground"
+                    )}
                     onClick={() => {
                       const cards = [...(block.cards ?? [])];
                       cards[ci] = { ...cards[ci], items: [...cards[ci].items, "New item..."] };
