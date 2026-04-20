@@ -85,6 +85,10 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
   const [dropZone, setDropZone] = useState<DropZone>(null);
   const [briefingsOpen, setBriefingsOpen] = useState(true);
   const [resourcesOpen, setResourcesOpen] = useState(true);
+  // Track collapsed state per page id — default open (undefined = open)
+  const [pagesOpen, setPagesOpen] = useState<Record<string, boolean>>({});
+  const isOpen = (id: string) => pagesOpen[id] !== false;
+  const toggleOpen = (id: string) => setPagesOpen((prev) => ({ ...prev, [id]: !isOpen(id) }));
 
   const handleDragOver = (e: React.DragEvent, pageId: string) => {
     e.preventDefault();
@@ -252,141 +256,163 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
 
           <SidebarSeparator />
 
-          {/* Website navigation */}
+          {/* Website navigation — main nav pages (nav: true) */}
           <SidebarGroup>
-            <SidebarGroupLabel>NAV ITEMS</SidebarGroupLabel>
+            <SidebarGroupLabel>SITE STRUCTURE</SidebarGroupLabel>
             <SidebarGroupAction title="Add page" onClick={addPage}>
               <Plus className="h-4 w-4" />
             </SidebarGroupAction>
             <SidebarMenu>
-              {topLevelPages.filter((p) => p.id !== "briefings").map((p) => {
+              {topLevelPages.filter((p) => p.id !== "briefings" && p.nav).map((p) => {
                 const children = childrenOf(p.id);
-                const showDropBefore =
-                  dropZone?.pageId === p.id && dropZone.position === "before";
-                const showDropAfter =
-                  dropZone?.pageId === p.id && dropZone.position === "after";
+                const hasChildren = children.length > 0;
+                const showDropBefore = dropZone?.pageId === p.id && dropZone.position === "before";
+                const showDropAfter = dropZone?.pageId === p.id && dropZone.position === "after";
+                const pageUnchecked = pages ? countUnchecked(pages, store.filterTeam, p.id) : 0;
 
                 return (
                   <SidebarMenuItem
                     key={p.id}
                     draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData("page-id", p.id);
-                      e.dataTransfer.effectAllowed = "move";
-                      setDragPage(p.id);
-                    }}
+                    onDragStart={(e) => { e.dataTransfer.setData("page-id", p.id); e.dataTransfer.effectAllowed = "move"; setDragPage(p.id); }}
                     onDragOver={(e) => handleDragOver(e, p.id)}
                     onDrop={(e) => handleDrop(e, p.id)}
                     onDragEnd={handleDragEnd}
-                    className={cn(
-                      "relative",
-                      overPage === p.id &&
-                        "bg-sidebar-primary/15 outline outline-1 outline-sidebar-primary",
-                      dragPage === p.id && "opacity-40"
-                    )}
+                    className={cn("relative", overPage === p.id && "bg-sidebar-primary/15 outline outline-1 outline-sidebar-primary", dragPage === p.id && "opacity-40")}
                   >
-                    {showDropBefore && (
-                      <div className="absolute -top-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />
-                    )}
-                    <SidebarMenuButton
-                      isActive={activePage === p.id}
-                      onClick={() => { setViewMode("wireframe"); setActivePage(p.id); }}
-                      className="text-[13px]"
-                    >
-                      <span className="flex-1 truncate">
-                        <EditableText
-                          value={p.label}
-                          onChange={(v) => renamePage(p.id, v)}
-                          className="text-[13px] font-inherit"
-                        />
-                      </span>
-                    </SidebarMenuButton>
-                    {(() => {
-                      const pageUnchecked = pages ? countUnchecked(pages, store.filterTeam, p.id) : 0;
-                      return (
-                        <>
-                          {!p.nav && (
-                            <SidebarMenuBadge>
-                              <span className="rounded bg-sidebar-foreground/10 px-1 py-0.5 text-[8px] text-sidebar-foreground/40">
-                                footer
-                              </span>
-                            </SidebarMenuBadge>
-                          )}
-                          {pageUnchecked > 0 && (
-                            <SidebarMenuBadge>
-                              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
-                                {pageUnchecked}
-                              </span>
-                            </SidebarMenuBadge>
-                          )}
-                        </>
-                      );
-                    })()}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <SidebarMenuAction
-                          showOnHover
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-sidebar-foreground/25 hover:text-red-400"
-                          title="Delete page"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </SidebarMenuAction>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete "{p.label}"?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete this page and all its content. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deletePage(p.id)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    {showDropBefore && <div className="absolute -top-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />}
 
-                    {/* Nested children */}
-                    {children.length > 0 && (
+                    {/* Row: chevron + label + badges + delete */}
+                    <div className="flex items-center w-full">
+                      <button
+                        onClick={() => hasChildren && toggleOpen(p.id)}
+                        className={cn("shrink-0 p-1 text-sidebar-foreground/30 transition-colors", hasChildren ? "hover:text-sidebar-foreground/70 cursor-pointer" : "cursor-default opacity-0")}
+                        tabIndex={-1}
+                      >
+                        <ChevronRight className={cn("h-3 w-3 transition-transform", hasChildren && isOpen(p.id) && "rotate-90")} />
+                      </button>
+                      <SidebarMenuButton
+                        isActive={activePage === p.id}
+                        onClick={() => { setViewMode("wireframe"); setActivePage(p.id); }}
+                        className="flex-1 min-w-0 text-[13px] pl-0"
+                      >
+                        <EditableText value={p.label} onChange={(v) => renamePage(p.id, v)} className="text-[13px] font-inherit" />
+                      </SidebarMenuButton>
+                      {pageUnchecked > 0 && (
+                        <SidebarMenuBadge>
+                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">{pageUnchecked}</span>
+                        </SidebarMenuBadge>
+                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <SidebarMenuAction showOnHover onClick={(e) => e.stopPropagation()} className="text-sidebar-foreground/25 hover:text-red-400" title="Delete page">
+                            <Trash2 className="h-3 w-3" />
+                          </SidebarMenuAction>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete "{p.label}"?</AlertDialogTitle>
+                            <AlertDialogDescription>This will permanently delete this page and all its content. This action cannot be undone.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deletePage(p.id)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+
+                    {/* Level 2: children */}
+                    {hasChildren && isOpen(p.id) && (
                       <SidebarMenuSub>
-                        {children.map((ch) => (
-                          <SidebarMenuSubItem key={ch.id}>
-                            <SidebarMenuSubButton
-                              isActive={activePage === ch.id}
-                              onClick={() => { setViewMode("wireframe"); setActivePage(ch.id); }}
-                              className="text-xs"
-                            >
-                              <span className="flex-1 truncate">
-                                <EditableText
-                                  value={ch.label}
-                                  onChange={(v) => renamePage(ch.id, v)}
-                                  className="text-xs"
-                                />
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  unnestPage(ch.id);
-                                }}
-                                className="ml-1 shrink-0 text-[10px] text-sidebar-foreground/25 hover:text-sidebar-foreground/60"
-                                title="Move to top level"
-                              >
-                                <ArrowUp className="h-3 w-3" />
-                              </button>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
+                        {children.map((ch) => {
+                          const grandchildren = childrenOf(ch.id);
+                          const hasGrand = grandchildren.length > 0;
+                          return (
+                            <SidebarMenuSubItem key={ch.id}>
+                              <div className="flex items-center w-full group/ch">
+                                <button
+                                  onClick={() => hasGrand && toggleOpen(ch.id)}
+                                  className={cn("shrink-0 p-0.5 text-sidebar-foreground/25 transition-colors", hasGrand ? "hover:text-sidebar-foreground/60 cursor-pointer" : "cursor-default opacity-0")}
+                                  tabIndex={-1}
+                                >
+                                  <ChevronRight className={cn("h-2.5 w-2.5 transition-transform", hasGrand && isOpen(ch.id) && "rotate-90")} />
+                                </button>
+                                <SidebarMenuSubButton
+                                  isActive={activePage === ch.id}
+                                  onClick={() => { setViewMode("wireframe"); setActivePage(ch.id); }}
+                                  className="flex-1 min-w-0 pl-0"
+                                >
+                                  <EditableText value={ch.label} onChange={(v) => renamePage(ch.id, v)} className="text-xs" />
+                                </SidebarMenuSubButton>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); unnestPage(ch.id); }}
+                                  className="shrink-0 p-0.5 text-sidebar-foreground/20 opacity-0 group-hover/ch:opacity-100 hover:text-sidebar-foreground/60 transition-opacity"
+                                  title="Move to top level"
+                                >
+                                  <ArrowUp className="h-3 w-3" />
+                                </button>
+                              </div>
+
+                              {/* Level 3: grandchildren */}
+                              {hasGrand && isOpen(ch.id) && (
+                                <SidebarMenuSub>
+                                  {grandchildren.map((gc) => (
+                                    <SidebarMenuSubItem key={gc.id}>
+                                      <SidebarMenuSubButton
+                                        isActive={activePage === gc.id}
+                                        onClick={() => { setViewMode("wireframe"); setActivePage(gc.id); }}
+                                        className="text-[11px] text-sidebar-foreground/70"
+                                      >
+                                        <EditableText value={gc.label} onChange={(v) => renamePage(gc.id, v)} className="text-[11px]" />
+                                      </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                  ))}
+                                </SidebarMenuSub>
+                              )}
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                       </SidebarMenuSub>
                     )}
-                    {showDropAfter && (
-                      <div className="absolute -bottom-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />
-                    )}
+
+                    {showDropAfter && <div className="absolute -bottom-px left-2 right-2 h-0.5 rounded bg-[hsl(41,47%,56%)]" />}
                   </SidebarMenuItem>
                 );
               })}
             </SidebarMenu>
           </SidebarGroup>
+
+          {/* Footer / hidden pages — nav: false */}
+          {topLevelPages.filter((p) => p.id !== "briefings" && !p.nav).length > 0 && (
+            <>
+              <SidebarSeparator />
+              <SidebarGroup>
+                <SidebarGroupLabel>FOOTER / HIDDEN</SidebarGroupLabel>
+                <SidebarMenu>
+                  {topLevelPages.filter((p) => p.id !== "briefings" && !p.nav).map((p) => {
+                    const pageUnchecked = pages ? countUnchecked(pages, store.filterTeam, p.id) : 0;
+                    return (
+                      <SidebarMenuItem key={p.id}>
+                        <SidebarMenuButton
+                          isActive={activePage === p.id}
+                          onClick={() => { setViewMode("wireframe"); setActivePage(p.id); }}
+                          className="text-[12px] text-sidebar-foreground/50 pl-6"
+                        >
+                          <EditableText value={p.label} onChange={(v) => renamePage(p.id, v)} className="text-[12px]" />
+                        </SidebarMenuButton>
+                        {pageUnchecked > 0 && (
+                          <SidebarMenuBadge>
+                            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">{pageUnchecked}</span>
+                          </SidebarMenuBadge>
+                        )}
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroup>
+            </>
+          )}
 
         </>
       </SidebarContent>
