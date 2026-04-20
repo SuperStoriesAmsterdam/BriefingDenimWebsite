@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PROJECT_NAME } from "@/lib/project.config";
 import {
   Sidebar,
   SidebarContent,
@@ -137,7 +138,7 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
       {/* Header */}
       <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
         <div className="text-[11px] font-bold uppercase tracking-widest text-sidebar-primary">
-          Denim City
+          {PROJECT_NAME}
         </div>
         <button
           className="flex items-center gap-1.5 text-left"
