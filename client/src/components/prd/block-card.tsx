@@ -123,16 +123,34 @@ export function BlockCard({
       content[i] = v;
       onUpdate({ ...block, content });
     },
-    onDelete: (i: number) => onUpdate({ ...block, content: block.content.filter((_: string, j: number) => j !== i) }),
+    onDelete: (i: number) => {
+      const content = block.content.filter((_: string, j: number) => j !== i);
+      const durations = (block.durations ?? []).filter((_: string, j: number) => j !== i);
+      onUpdate({ ...block, content, durations: durations.length ? durations : undefined });
+    },
     onAdd: () => onUpdate({ ...block, content: [...block.content, "New item..."] }),
     onReorder: (from: number, to: number) => {
       const content = [...block.content];
       const [item] = content.splice(from, 1);
       content.splice(to, 0, item);
-      onUpdate({ ...block, content });
+      // Also reorder durations if present
+      const durations = [...(block.durations ?? [])];
+      const [dur] = durations.splice(from, 1);
+      durations.splice(to, 0, dur);
+      onUpdate({ ...block, content, durations: durations.some(Boolean) ? durations : undefined });
     },
     onReceiveContent,
   };
+
+  // Duration handlers for grid blocks
+  const gridDurationProps = block.type === "grid" ? {
+    durations: block.durations,
+    onUpdateDuration: (i: number, v: string) => {
+      const durations = [...(block.durations ?? Array(block.content.length).fill(""))];
+      durations[i] = v;
+      onUpdate({ ...block, durations });
+    },
+  } : {};
 
   return (
     <div
@@ -266,7 +284,7 @@ export function BlockCard({
               multi
             />
           </div>
-          <BlockContentList {...contentListProps} variant="grid" />
+          <BlockContentList {...contentListProps} {...gridDurationProps} variant="grid" />
         </div>
       )}
 

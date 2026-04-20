@@ -53,6 +53,7 @@ export interface Block {
   title: string;
   desc: string;
   content: string[];
+  durations?: string[];
   cards?: CardItem[];
   annotations: Annotation[];
   images?: BlockImage[];

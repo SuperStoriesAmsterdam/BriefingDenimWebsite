@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils";
 
 interface BlockContentListProps {
   items: string[];
+  durations?: string[];
   pageId: string;
   blockIndex: number;
   onUpdate: (index: number, value: string) => void;
+  onUpdateDuration?: (index: number, value: string) => void;
   onDelete: (index: number) => void;
   onAdd: () => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
@@ -18,9 +20,11 @@ interface BlockContentListProps {
 
 export function BlockContentList({
   items,
+  durations,
   pageId,
   blockIndex,
   onUpdate,
+  onUpdateDuration,
   onDelete,
   onAdd,
   onReorder,
@@ -130,6 +134,16 @@ export function BlockContentList({
               className="text-xs leading-relaxed text-foreground"
               multi
             />
+            {onUpdateDuration && (
+              <div className="mt-2 flex justify-center">
+                <EditableText
+                  value={durations?.[i] ?? ""}
+                  onChange={(v) => onUpdateDuration(i, v)}
+                  className="inline-block rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-muted-foreground min-w-[48px] text-center"
+                  placeholder="duration"
+                />
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"
