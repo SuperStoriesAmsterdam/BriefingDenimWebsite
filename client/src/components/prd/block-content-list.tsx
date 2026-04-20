@@ -9,12 +9,14 @@ interface BlockContentListProps {
   durations?: string[];
   descriptions?: string[];
   courseTypes?: string[];
+  courseLevels?: string[];
   pageId: string;
   blockIndex: number;
   onUpdate: (index: number, value: string) => void;
   onUpdateDuration?: (index: number, value: string) => void;
   onUpdateDescription?: (index: number, value: string) => void;
   onUpdateCourseType?: (index: number, value: string) => void;
+  onUpdateCourseLevel?: (index: number, value: string) => void;
   onDelete: (index: number) => void;
   onAdd: () => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
@@ -27,12 +29,14 @@ export function BlockContentList({
   durations,
   descriptions,
   courseTypes,
+  courseLevels,
   pageId,
   blockIndex,
   onUpdate,
   onUpdateDuration,
   onUpdateDescription,
   onUpdateCourseType,
+  onUpdateCourseLevel,
   onDelete,
   onAdd,
   onReorder,
@@ -153,23 +157,45 @@ export function BlockContentList({
                 />
               </div>
             )}
-            {onUpdateCourseType && (
-              <div className="mt-2 flex justify-center">
-                <button
-                  onClick={() => {
-                    const current = courseTypes?.[i] ?? "";
-                    const next = current === "" ? "ongoing" : current === "ongoing" ? "special" : "";
-                    onUpdateCourseType(i, next);
-                  }}
-                  className={cn(
-                    "rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors",
-                    courseTypes?.[i] === "ongoing" && "border-emerald-200 bg-emerald-50 text-emerald-700",
-                    courseTypes?.[i] === "special" && "border-violet-200 bg-violet-50 text-violet-700",
-                    !courseTypes?.[i] && "border-dashed border-slate-200 bg-transparent text-muted-foreground/40 hover:border-slate-300 hover:text-muted-foreground/70",
-                  )}
-                >
-                  {courseTypes?.[i] === "ongoing" ? "● Ongoing" : courseTypes?.[i] === "special" ? "◆ Special" : "· type"}
-                </button>
+            {(onUpdateCourseType || onUpdateCourseLevel) && (
+              <div className="mt-2 flex justify-center gap-1.5">
+                {onUpdateCourseType && (
+                  <button
+                    onClick={() => {
+                      const current = courseTypes?.[i] ?? "";
+                      const next = current === "" ? "ongoing" : current === "ongoing" ? "special" : "";
+                      onUpdateCourseType(i, next);
+                    }}
+                    className={cn(
+                      "rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors",
+                      courseTypes?.[i] === "ongoing" && "border-emerald-200 bg-emerald-50 text-emerald-700",
+                      courseTypes?.[i] === "special" && "border-violet-200 bg-violet-50 text-violet-700",
+                      !courseTypes?.[i] && "border-dashed border-slate-200 bg-transparent text-muted-foreground/40 hover:border-slate-300 hover:text-muted-foreground/70",
+                    )}
+                  >
+                    {courseTypes?.[i] === "ongoing" ? "● Ongoing" : courseTypes?.[i] === "special" ? "◆ Special" : "· type"}
+                  </button>
+                )}
+                {onUpdateCourseLevel && (
+                  <button
+                    onClick={() => {
+                      const levels = ["", "beginner", "experienced", "professional", "all levels"];
+                      const current = courseLevels?.[i] ?? "";
+                      const next = levels[(levels.indexOf(current) + 1) % levels.length];
+                      onUpdateCourseLevel(i, next);
+                    }}
+                    className={cn(
+                      "rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors",
+                      courseLevels?.[i] === "beginner" && "border-sky-200 bg-sky-50 text-sky-700",
+                      courseLevels?.[i] === "experienced" && "border-blue-200 bg-blue-50 text-blue-700",
+                      courseLevels?.[i] === "professional" && "border-orange-200 bg-orange-50 text-orange-700",
+                      courseLevels?.[i] === "all levels" && "border-slate-300 bg-slate-100 text-slate-600",
+                      !courseLevels?.[i] && "border-dashed border-slate-200 bg-transparent text-muted-foreground/40 hover:border-slate-300 hover:text-muted-foreground/70",
+                    )}
+                  >
+                    {courseLevels?.[i] || "· level"}
+                  </button>
+                )}
               </div>
             )}
             {onUpdateDuration && (

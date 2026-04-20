@@ -128,12 +128,14 @@ export function BlockCard({
       const durations = (block.durations ?? []).filter((_: string, j: number) => j !== i);
       const descriptions = (block.descriptions ?? []).filter((_: string, j: number) => j !== i);
       const courseTypes = (block.courseTypes ?? []).filter((_: string, j: number) => j !== i);
+      const courseLevels = (block.courseLevels ?? []).filter((_: string, j: number) => j !== i);
       onUpdate({
         ...block,
         content,
         durations: durations.some(Boolean) ? durations : undefined,
         descriptions: descriptions.some(Boolean) ? descriptions : undefined,
         courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined,
+        courseLevels: courseLevels.some(Boolean) ? courseLevels : undefined,
       });
     },
     onAdd: () => onUpdate({ ...block, content: [...block.content, "New item..."] }),
@@ -150,12 +152,16 @@ export function BlockCard({
       const courseTypes = [...(block.courseTypes ?? [])];
       const [ct] = courseTypes.splice(from, 1);
       courseTypes.splice(to, 0, ct);
+      const courseLevels = [...(block.courseLevels ?? [])];
+      const [cl] = courseLevels.splice(from, 1);
+      courseLevels.splice(to, 0, cl);
       onUpdate({
         ...block,
         content,
         durations: durations.some(Boolean) ? durations : undefined,
         descriptions: descriptions.some(Boolean) ? descriptions : undefined,
         courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined,
+        courseLevels: courseLevels.some(Boolean) ? courseLevels : undefined,
       });
     },
     onReceiveContent,
@@ -180,6 +186,12 @@ export function BlockCard({
       const courseTypes = [...(block.courseTypes ?? Array(block.content.length).fill(""))];
       courseTypes[i] = v;
       onUpdate({ ...block, courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined });
+    },
+    courseLevels: block.courseLevels,
+    onUpdateCourseLevel: (i: number, v: string) => {
+      const courseLevels = [...(block.courseLevels ?? Array(block.content.length).fill(""))];
+      courseLevels[i] = v;
+      onUpdate({ ...block, courseLevels: courseLevels.some(Boolean) ? courseLevels : undefined });
     },
   } : {};
 
