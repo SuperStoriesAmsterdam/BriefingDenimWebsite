@@ -7,10 +7,12 @@ import { cn } from "@/lib/utils";
 interface BlockContentListProps {
   items: string[];
   durations?: string[];
+  descriptions?: string[];
   pageId: string;
   blockIndex: number;
   onUpdate: (index: number, value: string) => void;
   onUpdateDuration?: (index: number, value: string) => void;
+  onUpdateDescription?: (index: number, value: string) => void;
   onDelete: (index: number) => void;
   onAdd: () => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
@@ -21,10 +23,12 @@ interface BlockContentListProps {
 export function BlockContentList({
   items,
   durations,
+  descriptions,
   pageId,
   blockIndex,
   onUpdate,
   onUpdateDuration,
+  onUpdateDescription,
   onDelete,
   onAdd,
   onReorder,
@@ -131,9 +135,20 @@ export function BlockContentList({
             <EditableText
               value={item}
               onChange={(v) => onUpdate(i, v)}
-              className="text-xs leading-relaxed text-foreground"
+              className="text-xs font-medium leading-relaxed text-foreground"
               multi
             />
+            {onUpdateDescription && (
+              <div className="mt-1.5 px-1">
+                <EditableText
+                  value={descriptions?.[i] ?? ""}
+                  onChange={(v) => onUpdateDescription(i, v)}
+                  className="block w-full text-[11px] leading-snug text-muted-foreground text-center"
+                  placeholder="short description..."
+                  multi
+                />
+              </div>
+            )}
             {onUpdateDuration && (
               <div className="mt-2 flex justify-center">
                 <EditableText
