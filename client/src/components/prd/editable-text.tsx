@@ -8,6 +8,7 @@ interface EditableTextProps {
   onChange: (value: string) => void;
   className?: string;
   multi?: boolean;
+  bullets?: boolean;
   placeholder?: string;
 }
 
@@ -16,6 +17,7 @@ export function EditableText({
   onChange,
   className,
   multi = false,
+  bullets = false,
   placeholder = "Click to edit...",
 }: EditableTextProps) {
   const [editing, setEditing] = useState(false);
@@ -93,6 +95,24 @@ export function EditableText({
           className
         )}
       />
+    );
+  }
+
+  if (bullets && multi && value) {
+    const lines = value.split("\n").filter((l) => l.trim());
+    return (
+      <ul
+        onDoubleClick={handleDoubleClick}
+        className={cn("cursor-text min-h-[20px] space-y-0.5", className)}
+        title="Double-click to edit"
+      >
+        {lines.map((line, i) => (
+          <li key={i} className="flex items-start gap-1.5">
+            <span className="mt-[3px] shrink-0 text-muted-foreground/50">•</span>
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
     );
   }
 

@@ -46,8 +46,30 @@ Everything else is platform code — generic, reusable, project-agnostic:
 - [ ] Update `PROJECT_ID` and reset `PROJECT_VERSION` to `"v1"` in `project.config.ts`
 - [ ] Replace `prd-defaults.ts` with new project content
 - [ ] Create new GitHub repo under SuperStoriesAmsterdam
-- [ ] Deploy via Coolify with new subdomain
+- [ ] Deploy via Coolify with new subdomain (Docker Compose, port 5000, branch: main)
+- [ ] Set environment variables in Coolify (see below)
 - [ ] Add Cloudflare CNAME for new subdomain
+
+---
+
+## Coolify Environment Variables
+
+Coolify does not pass env vars from `docker-compose.yml` automatically. Set these manually in the Coolify UI after each new deployment — once, never touch again.
+
+**DB service:**
+```
+POSTGRES_USER=prd
+POSTGRES_PASSWORD=prd
+POSTGRES_DB=prd
+```
+
+**APP service:**
+```
+DATABASE_URL=postgresql://prd:prd@db:5432/prd
+SESSION_SECRET=change-me-to-something-random
+```
+
+> Protocol: internal tools (PRD, briefing tools) → DB in docker-compose stack. Customer-facing production apps → separate Coolify Database resource.
 
 ---
 
