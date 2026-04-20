@@ -8,11 +8,13 @@ interface BlockContentListProps {
   items: string[];
   durations?: string[];
   descriptions?: string[];
+  courseTypes?: string[];
   pageId: string;
   blockIndex: number;
   onUpdate: (index: number, value: string) => void;
   onUpdateDuration?: (index: number, value: string) => void;
   onUpdateDescription?: (index: number, value: string) => void;
+  onUpdateCourseType?: (index: number, value: string) => void;
   onDelete: (index: number) => void;
   onAdd: () => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
@@ -24,11 +26,13 @@ export function BlockContentList({
   items,
   durations,
   descriptions,
+  courseTypes,
   pageId,
   blockIndex,
   onUpdate,
   onUpdateDuration,
   onUpdateDescription,
+  onUpdateCourseType,
   onDelete,
   onAdd,
   onReorder,
@@ -147,6 +151,25 @@ export function BlockContentList({
                   placeholder="short description..."
                   multi
                 />
+              </div>
+            )}
+            {onUpdateCourseType && (
+              <div className="mt-2 flex justify-center">
+                <button
+                  onClick={() => {
+                    const current = courseTypes?.[i] ?? "";
+                    const next = current === "" ? "ongoing" : current === "ongoing" ? "special" : "";
+                    onUpdateCourseType(i, next);
+                  }}
+                  className={cn(
+                    "rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors",
+                    courseTypes?.[i] === "ongoing" && "border-emerald-200 bg-emerald-50 text-emerald-700",
+                    courseTypes?.[i] === "special" && "border-violet-200 bg-violet-50 text-violet-700",
+                    !courseTypes?.[i] && "border-dashed border-slate-200 bg-transparent text-muted-foreground/40 hover:border-slate-300 hover:text-muted-foreground/70",
+                  )}
+                >
+                  {courseTypes?.[i] === "ongoing" ? "● Ongoing" : courseTypes?.[i] === "special" ? "◆ Special" : "· type"}
+                </button>
               </div>
             )}
             {onUpdateDuration && (

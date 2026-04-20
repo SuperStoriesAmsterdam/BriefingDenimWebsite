@@ -55,6 +55,7 @@ export interface Block {
   content: string[];
   durations?: string[];
   descriptions?: string[];
+  courseTypes?: string[];
   cards?: CardItem[];
   annotations: Annotation[];
   images?: BlockImage[];

@@ -127,11 +127,13 @@ export function BlockCard({
       const content = block.content.filter((_: string, j: number) => j !== i);
       const durations = (block.durations ?? []).filter((_: string, j: number) => j !== i);
       const descriptions = (block.descriptions ?? []).filter((_: string, j: number) => j !== i);
+      const courseTypes = (block.courseTypes ?? []).filter((_: string, j: number) => j !== i);
       onUpdate({
         ...block,
         content,
         durations: durations.some(Boolean) ? durations : undefined,
         descriptions: descriptions.some(Boolean) ? descriptions : undefined,
+        courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined,
       });
     },
     onAdd: () => onUpdate({ ...block, content: [...block.content, "New item..."] }),
@@ -145,17 +147,21 @@ export function BlockCard({
       const descriptions = [...(block.descriptions ?? [])];
       const [desc] = descriptions.splice(from, 1);
       descriptions.splice(to, 0, desc);
+      const courseTypes = [...(block.courseTypes ?? [])];
+      const [ct] = courseTypes.splice(from, 1);
+      courseTypes.splice(to, 0, ct);
       onUpdate({
         ...block,
         content,
         durations: durations.some(Boolean) ? durations : undefined,
         descriptions: descriptions.some(Boolean) ? descriptions : undefined,
+        courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined,
       });
     },
     onReceiveContent,
   };
 
-  // Duration + description handlers for grid blocks
+  // Duration + description + course type handlers for grid blocks
   const gridDurationProps = block.type === "grid" ? {
     durations: block.durations,
     onUpdateDuration: (i: number, v: string) => {
@@ -168,6 +174,12 @@ export function BlockCard({
       const descriptions = [...(block.descriptions ?? Array(block.content.length).fill(""))];
       descriptions[i] = v;
       onUpdate({ ...block, descriptions });
+    },
+    courseTypes: block.courseTypes,
+    onUpdateCourseType: (i: number, v: string) => {
+      const courseTypes = [...(block.courseTypes ?? Array(block.content.length).fill(""))];
+      courseTypes[i] = v;
+      onUpdate({ ...block, courseTypes: courseTypes.some(Boolean) ? courseTypes : undefined });
     },
   } : {};
 
