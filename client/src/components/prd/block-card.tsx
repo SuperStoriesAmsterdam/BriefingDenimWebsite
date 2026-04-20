@@ -348,10 +348,11 @@ export function BlockCard({
               />
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {(block.cards ?? []).map((card, ci) => (
-              <div key={ci} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                <div className="flex items-center gap-2 mb-2">
+              <div key={ci} className="group/card rounded-lg border border-slate-200 bg-slate-50">
+                {/* Sub-header row */}
+                <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-2">
                   <EditableText
                     value={card.title}
                     onChange={(v) => {
@@ -359,20 +360,23 @@ export function BlockCard({
                       cards[ci] = { ...cards[ci], title: v };
                       onUpdate({ ...block, cards });
                     }}
-                    className="text-[13px] font-semibold text-foreground flex-1"
+                    className="flex-1 text-[13px] font-bold text-foreground"
                   />
                   <button
-                    className="text-[10px] text-muted-foreground/50 hover:text-destructive"
+                    className="shrink-0 text-[10px] text-muted-foreground/30 opacity-0 group-hover/card:opacity-100 hover:text-destructive transition-opacity"
                     onClick={() => {
                       const cards = (block.cards ?? []).filter((_, i) => i !== ci);
                       onUpdate({ ...block, cards });
                     }}
+                    title="Remove section"
                   >✕</button>
                 </div>
-                <div className="space-y-1 ml-1">
+
+                {/* Item list */}
+                <div className="px-4 py-2 space-y-1">
                   {card.items.map((item, ii) => (
-                    <div key={ii} className="flex items-start gap-1.5">
-                      <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />
+                    <div key={ii} className="flex items-start gap-2">
+                      <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
                       <EditableText
                         value={item}
                         onChange={(v) => {
@@ -382,10 +386,10 @@ export function BlockCard({
                           cards[ci] = { ...cards[ci], items };
                           onUpdate({ ...block, cards });
                         }}
-                        className="text-[12px] text-muted-foreground flex-1"
+                        className="flex-1 text-[13px] leading-snug text-foreground"
                       />
                       <button
-                        className="text-[10px] text-muted-foreground/30 hover:text-destructive shrink-0"
+                        className="mt-0.5 shrink-0 text-[10px] text-muted-foreground/20 opacity-0 group-hover/card:opacity-100 hover:text-destructive transition-opacity"
                         onClick={() => {
                           const cards = [...(block.cards ?? [])];
                           const items = cards[ci].items.filter((_, i) => i !== ii);
@@ -396,7 +400,7 @@ export function BlockCard({
                     </div>
                   ))}
                   <button
-                    className="mt-1 text-[11px] text-muted-foreground/50 hover:text-muted-foreground"
+                    className="mt-1 rounded border border-dashed border-slate-200 px-2 py-0.5 text-[11px] text-muted-foreground/50 hover:border-slate-300 hover:text-muted-foreground transition-colors"
                     onClick={() => {
                       const cards = [...(block.cards ?? [])];
                       cards[ci] = { ...cards[ci], items: [...cards[ci].items, "New item..."] };
@@ -406,13 +410,15 @@ export function BlockCard({
                 </div>
               </div>
             ))}
+
+            {/* Add section */}
             <button
               className="w-full rounded-lg border-2 border-dashed border-slate-200 py-2 text-[12px] text-muted-foreground hover:border-slate-300 hover:text-foreground transition-colors"
               onClick={() => {
-                const cards = [...(block.cards ?? []), { title: "Brand name", items: ["Detail..."] }];
+                const cards = [...(block.cards ?? []), { title: "New section", items: ["Item..."] }];
                 onUpdate({ ...block, cards });
               }}
-            >+ card</button>
+            >+ section</button>
           </div>
         </div>
       )}
