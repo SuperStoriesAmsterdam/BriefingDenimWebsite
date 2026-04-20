@@ -118,7 +118,10 @@ export function BlockContentList({
               overIdx === i && dragIdx !== null && dragIdx !== i && "ring-2 ring-blue-400/50"
             )}
           >
-            <span className="absolute left-1 top-1 cursor-grab text-muted-foreground/20 opacity-0 group-hover:opacity-100">
+            <span className="absolute left-1.5 top-1.5 text-[10px] font-semibold text-muted-foreground/30 select-none group-hover:opacity-0 transition-opacity">
+              {i + 1}
+            </span>
+            <span className="absolute left-1 top-1 cursor-grab text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity">
               <GripVertical className="h-3 w-3" />
             </span>
             <EditableText
