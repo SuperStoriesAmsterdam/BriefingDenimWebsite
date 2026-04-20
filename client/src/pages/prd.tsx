@@ -77,6 +77,10 @@ export default function PrdPage() {
             <SitemapView
               topLevelPages={store.topLevelPages}
               childrenOf={store.childrenOf}
+              onNavigate={(pageId) => {
+                store.setViewMode("wireframe");
+                store.setActivePage(pageId);
+              }}
             />
           )}
           {store.viewMode === "shopping-list" && (

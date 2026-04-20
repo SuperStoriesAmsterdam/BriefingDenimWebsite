@@ -46,7 +46,7 @@ interface PrdSidebarProps {
 
 const VIEW_MODES: { id: ViewMode; label: string; icon: React.ElementType }[] = [
   { id: "ghl", label: "GHL Overview", icon: LayoutDashboard },
-  { id: "sitemap", label: "Sitemap", icon: Map },
+  { id: "sitemap", label: "Nav Overview", icon: Map },
   { id: "team", label: "Team Members", icon: Users },
   { id: "shopping-list", label: "My List", icon: ClipboardList },
   { id: "tasks", label: "Tasks", icon: ListChecks },

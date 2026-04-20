@@ -26,7 +26,10 @@ export function usePrdStore() {
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
-  const [viewMode, setViewMode] = useState<ViewMode>("wireframe");
+  // Default to sitemap overview on fresh open; if there's a URL hash, go straight to that page's brief
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    window.location.hash ? "wireframe" : "sitemap"
+  );
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [filterTeam, setFilterTeam] = useState<FilterTeam>("all");
   const [saveStatus, setSaveStatus] = useState("");
