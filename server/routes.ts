@@ -29,15 +29,14 @@ function generateId(): string {
 }
 
 /**
- * Server-side startup migration: inject navmap block into Education page if missing.
+ * Server-side startup migration: inject navmap blocks into Education and Store pages if missing.
  * Runs once at server start. Directly patches the DB — no client-side JS needed.
  */
-async function migrateEducationNavmap() {
+async function migrateNavmaps() {
   try {
     const doc = await storage.getPrd();
     if (!doc) { console.log("[migration] No PRD doc found — skipping."); return; }
 
-    // doc.data may be a parsed object or a raw JSON string depending on the DB driver
     const raw = doc.data;
     const pages: any[] = Array.isArray(raw)
       ? raw
@@ -47,37 +46,52 @@ async function migrateEducationNavmap() {
 
     if (!pages.length) { console.log("[migration] PRD data is empty — skipping."); return; }
 
-    // Log all page IDs so we can see what's actually in the DB
     console.log("[migration] Page IDs in DB:", pages.map((p: any) => p.id).join(", "));
 
-    // Match by id "education" OR "learn" (old id used in earlier versions)
+    let changed = false;
+
+    // --- Education navmap ---
     const edPage = pages.find((p: any) => p.id === "education" || p.id === "learn");
-    if (!edPage || !Array.isArray(edPage.blocks)) {
-      console.log("[migration] Education/Learn page not found — skipping.");
-      return;
+    if (edPage && Array.isArray(edPage.blocks) && !edPage.blocks.some((b: any) => b.type === "navmap")) {
+      const heroIdx = edPage.blocks.findIndex((b: any) => b.type === "hero");
+      const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
+      edPage.blocks.splice(insertAt, 0, {
+        type: "navmap",
+        title: "Navigation & Tracks",
+        desc: "Live diagram: full site navigation bar (top) + Education's three programme tracks with their sub-pages (below). Rendered automatically from the page structure — no manual editing needed.",
+        content: [],
+        annotations: [],
+      });
+      console.log(`[migration] navmap injected into Education page at position ${insertAt}.`);
+      changed = true;
+    } else {
+      console.log("[migration] Education navmap already present or page not found — skipping.");
     }
 
-    console.log(`[migration] Found page id="${edPage.id}" label="${edPage.label}" with ${edPage.blocks.length} blocks: ${edPage.blocks.map((b: any) => b.type).join(", ")}`);
-
-    if (edPage.blocks.some((b: any) => b.type === "navmap")) {
-      console.log("[migration] navmap already present — skipping.");
-      return;
+    // --- Store navmap ---
+    const storePage = pages.find((p: any) => p.id === "store");
+    if (storePage && Array.isArray(storePage.blocks) && !storePage.blocks.some((b: any) => b.type === "navmap")) {
+      const heroIdx = storePage.blocks.findIndex((b: any) => b.type === "hero");
+      const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
+      storePage.blocks.splice(insertAt, 0, {
+        type: "navmap",
+        title: "Store Tracks",
+        desc: "Live diagram: site nav bar (top) + Store's four service tracks (below). Rendered automatically from page structure.",
+        content: [],
+        annotations: [],
+      });
+      console.log(`[migration] navmap injected into Store page at position ${insertAt}.`);
+      changed = true;
+    } else {
+      console.log("[migration] Store navmap already present or page not found — skipping.");
     }
 
-    const heroIdx = edPage.blocks.findIndex((b: any) => b.type === "hero");
-    const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
-    edPage.blocks.splice(insertAt, 0, {
-      type: "navmap",
-      title: "Navigation & Tracks",
-      desc: "Live diagram: full site navigation bar (top) + Education's three programme tracks with their sub-pages (below). Rendered automatically from the page structure — no manual editing needed.",
-      content: [],
-      annotations: [],
-    });
-
-    await storage.savePrd(pages, "dc-prd-v46");
-    console.log(`[migration] navmap injected into page "${edPage.id}" at position ${insertAt}. Saved.`);
+    if (changed) {
+      await storage.savePrd(pages, "dc-prd-v47");
+      console.log("[migration] Saved with version dc-prd-v47.");
+    }
   } catch (err) {
-    console.error("[migration] Education navmap migration failed:", err);
+    console.error("[migration] Navmap migration failed:", err);
   }
 }
 
@@ -86,7 +100,7 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   // Run DB migrations at startup
-  await migrateEducationNavmap();
+  await migrateNavmaps();
 
   // Serve uploaded mood images as static files
   app.use("/uploads", express.static(UPLOADS_DIR));
