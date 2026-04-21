@@ -74,7 +74,7 @@ async function migrateEducationNavmap() {
       annotations: [],
     });
 
-    await storage.savePrd(pages, "dc-prd-v45");
+    await storage.savePrd(pages, "dc-prd-v46");
     console.log(`[migration] navmap injected into page "${edPage.id}" at position ${insertAt}. Saved.`);
   } catch (err) {
     console.error("[migration] Education navmap migration failed:", err);
