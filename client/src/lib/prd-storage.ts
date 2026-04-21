@@ -59,32 +59,32 @@ export function mergePages(stored: Page[], fresh: Page[]): Page[] {
 
 /**
  * Merge blocks within a page.
- * - Match by index (blocks don't have stable ids)
- * - If user has fewer blocks: append new ones from defaults
- * - If user has more blocks (they added some): keep extras at the end
- * - For matching blocks: keep user's text edits
+ * - If a fresh block type doesn't exist anywhere in stored → insert it (new block added in defaults)
+ * - If a fresh block type exists in stored → use the stored version (preserving user edits)
+ * - Any stored blocks not consumed by the above are appended at the end (user-added blocks kept)
  */
 function mergeBlocks(stored: Block[], fresh: Block[]): Block[] {
+  const storedTypes = new Set(stored.map((b) => b.type));
   const merged: Block[] = [];
-  const maxShared = Math.min(stored.length, fresh.length);
+  let storedIdx = 0;
 
-  for (let i = 0; i < maxShared; i++) {
-    // Keep user's edits for existing blocks
-    merged.push(stored[i]);
-  }
-
-  // If defaults added new blocks beyond what user had, append them
-  if (fresh.length > stored.length) {
-    for (let i = stored.length; i < fresh.length; i++) {
-      merged.push(fresh[i]);
+  for (const freshBlock of fresh) {
+    if (!storedTypes.has(freshBlock.type)) {
+      // Brand-new block type introduced in defaults — insert it
+      merged.push(freshBlock);
+    } else {
+      // Known type — use stored version to preserve user's edits
+      if (storedIdx < stored.length) {
+        merged.push(stored[storedIdx]);
+        storedIdx++;
+      }
     }
   }
 
-  // If user added extra blocks, keep them
-  if (stored.length > fresh.length) {
-    for (let i = fresh.length; i < stored.length; i++) {
-      merged.push(stored[i]);
-    }
+  // Append any remaining stored blocks (user-added extras)
+  while (storedIdx < stored.length) {
+    merged.push(stored[storedIdx]);
+    storedIdx++;
   }
 
   return merged;

@@ -489,6 +489,97 @@ export function BlockCard({
         </div>
       )}
 
+      {/* ── NAVMAP ── */}
+      {block.type === "navmap" && (() => {
+        const PHASE2_NAV_IDS = ["denim-guide"];
+        const topNavPages = allPages.filter((p) => !p.parent && p.nav);
+        const tracks = allPages.filter((p) => p.parent === pageId && p.nav);
+        return (
+          <div className="bg-slate-50 px-5 py-5">
+            {/* Block label */}
+            <div className="border-l-2 border-amber-400 pl-4 mb-5">
+              <EditableText
+                value={block.title}
+                onChange={(v) => onUpdate({ ...block, title: v })}
+                className="text-sm font-bold text-foreground"
+              />
+              <div className="mt-0.5">
+                <EditableText
+                  value={block.desc}
+                  onChange={(v) => onUpdate({ ...block, desc: v })}
+                  className="text-[12px] leading-relaxed text-muted-foreground"
+                  multi
+                />
+              </div>
+            </div>
+
+            {/* SITE NAV BAR */}
+            <div className="mb-6">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Main Navigation</p>
+              <div className="flex items-center gap-0 bg-foreground rounded-lg px-3 h-9 overflow-x-auto">
+                <span className="text-[10px] font-bold tracking-widest text-background/40 mr-3 shrink-0 uppercase">DC</span>
+                {topNavPages.map((p) => {
+                  const isActive = p.id === pageId;
+                  const isPhase2 = PHASE2_NAV_IDS.includes(p.id);
+                  return (
+                    <span
+                      key={p.id}
+                      className={cn(
+                        "px-2.5 h-9 flex items-center text-[11px] font-medium shrink-0",
+                        isActive
+                          ? "text-foreground bg-background rounded"
+                          : isPhase2
+                          ? "text-background/25 italic"
+                          : "text-background/65"
+                      )}
+                    >
+                      {p.label}
+                      {isPhase2 && <span className="ml-1 text-[8px] font-bold uppercase text-background/20">p2</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* TRACKS */}
+            {tracks.length > 0 && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Programme Tracks</p>
+                <div className="flex gap-6 flex-wrap items-start">
+                  {tracks.map((track) => {
+                    const trackChildren = allPages.filter((p) => p.parent === track.id);
+                    return (
+                      <div key={track.id} className="flex flex-col items-center">
+                        {/* Track box */}
+                        <div className="rounded-lg border-2 border-foreground/20 bg-white px-4 py-2 min-w-[110px] text-center shadow-sm">
+                          <span className="text-[12px] font-bold text-foreground">{track.label}</span>
+                        </div>
+                        {/* Children */}
+                        {trackChildren.length > 0 && (
+                          <>
+                            <div className="w-px h-3 bg-border" />
+                            <div className="flex gap-1.5 flex-wrap justify-center">
+                              {trackChildren.map((ch) => (
+                                <div key={ch.id} className="rounded border border-border bg-white px-2.5 py-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                                  {ch.label}
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                        {trackChildren.length === 0 && (
+                          <div className="mt-1.5 text-[9px] text-muted-foreground/40 italic">standalone</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* ── Details section (LLM, Q&A, images, annotations) ── */}
       {hasDetails && (
         <div className="border-t bg-white">

@@ -1,6 +1,6 @@
 export type TeamId = "design" | "dev" | "ghl" | "copy";
 
-export type BlockType = "hero" | "grid" | "section" | "cta" | "card-list";
+export type BlockType = "hero" | "grid" | "section" | "cta" | "card-list" | "navmap";
 
 export interface CardItem {
   title: string;

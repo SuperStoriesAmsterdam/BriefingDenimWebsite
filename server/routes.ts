@@ -28,12 +28,89 @@ function generateId(): string {
   return "mood-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 }
 
+/**
+ * Server-side startup migration: inject navmap block into Education page if missing.
+ * Runs once at server start. Directly patches the DB — no client-side JS needed.
+ */
+async function migrateEducationNavmap() {
+  try {
+    const doc = await storage.getPrd();
+    if (!doc) { console.log("[migration] No PRD doc found — skipping."); return; }
+
+    // doc.data may be a parsed object or a raw JSON string depending on the DB driver
+    const raw = doc.data;
+    const pages: any[] = Array.isArray(raw)
+      ? raw
+      : typeof raw === "string"
+      ? JSON.parse(raw)
+      : [];
+
+    if (!pages.length) { console.log("[migration] PRD data is empty — skipping."); return; }
+
+    // Log all page IDs so we can see what's actually in the DB
+    console.log("[migration] Page IDs in DB:", pages.map((p: any) => p.id).join(", "));
+
+    // Match by id "education" OR "learn" (old id used in earlier versions)
+    const edPage = pages.find((p: any) => p.id === "education" || p.id === "learn");
+    if (!edPage || !Array.isArray(edPage.blocks)) {
+      console.log("[migration] Education/Learn page not found — skipping.");
+      return;
+    }
+
+    console.log(`[migration] Found page id="${edPage.id}" label="${edPage.label}" with ${edPage.blocks.length} blocks: ${edPage.blocks.map((b: any) => b.type).join(", ")}`);
+
+    if (edPage.blocks.some((b: any) => b.type === "navmap")) {
+      console.log("[migration] navmap already present — skipping.");
+      return;
+    }
+
+    const heroIdx = edPage.blocks.findIndex((b: any) => b.type === "hero");
+    const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
+    edPage.blocks.splice(insertAt, 0, {
+      type: "navmap",
+      title: "Navigation & Tracks",
+      desc: "Live diagram: full site navigation bar (top) + Education's three programme tracks with their sub-pages (below). Rendered automatically from the page structure — no manual editing needed.",
+      content: [],
+      annotations: [],
+    });
+
+    await storage.savePrd(pages, "dc-prd-v45");
+    console.log(`[migration] navmap injected into page "${edPage.id}" at position ${insertAt}. Saved.`);
+  } catch (err) {
+    console.error("[migration] Education navmap migration failed:", err);
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Run DB migrations at startup
+  await migrateEducationNavmap();
+
   // Serve uploaded mood images as static files
   app.use("/uploads", express.static(UPLOADS_DIR));
+
+  // GET /api/debug-prd — show page IDs and block types (diagnostic only)
+  app.get("/api/debug-prd", async (_req, res) => {
+    try {
+      const doc = await storage.getPrd();
+      if (!doc) return res.json({ error: "no doc" });
+      const raw = doc.data;
+      const pages: any[] = Array.isArray(raw) ? raw : typeof raw === "string" ? JSON.parse(raw) : [];
+      return res.json({
+        version: doc.version,
+        pageCount: pages.length,
+        pages: pages.map((p: any) => ({
+          id: p.id,
+          label: p.label,
+          blockTypes: (p.blocks || []).map((b: any) => b.type),
+        })),
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
 
   // GET /api/prd — load PRD data from database
   app.get("/api/prd", async (_req, res) => {
@@ -108,6 +185,32 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Upload failed:", err);
       return res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
+  // GET /api/team — load team members from database
+  app.get("/api/team", async (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    try {
+      const doc = await storage.getPrd("team");
+      if (!doc) return res.json({ data: null });
+      return res.json({ data: doc.data });
+    } catch (err) {
+      console.error("Failed to load team:", err);
+      return res.status(500).json({ message: "Failed to load team data" });
+    }
+  });
+
+  // PUT /api/team — save team members to database
+  app.put("/api/team", async (req, res) => {
+    try {
+      const { data } = req.body;
+      if (!data) return res.status(400).json({ message: "Missing data" });
+      await storage.savePrd(data, "team-v1", "team");
+      return res.json({ ok: true });
+    } catch (err) {
+      console.error("Failed to save team:", err);
+      return res.status(500).json({ message: "Failed to save team data" });
     }
   });
 

@@ -37,7 +37,7 @@ export const TEAM_LABELS: Record<TeamId, string> = {
   copy: "COPY",
 };
 
-export const BLOCK_TYPES: BlockType[] = ["hero", "grid", "section", "cta", "card-list"];
+export const BLOCK_TYPES: BlockType[] = ["hero", "grid", "section", "cta", "card-list", "navmap"];
 
 export const SCHEMA_TYPES: SchemaType[] = ["none", "FAQPage", "Course", "LocalBusiness", "Event", "Product", "Article", "Organization", "Service", "Place"];
 
@@ -66,5 +66,10 @@ export const BLOCK_TYPE_STYLES: Record<BlockType, { border: string; bg: string; 
     border: "border-t-[hsl(41,47%,56%)]",
     bg: "bg-[#fdf9f0]",
     label: "cta",
+  },
+  navmap: {
+    border: "border-t-[hsl(210,40%,40%)]",
+    bg: "bg-[#f5f7fa]",
+    label: "navmap",
   },
 };

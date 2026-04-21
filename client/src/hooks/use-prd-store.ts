@@ -27,9 +27,7 @@ export function usePrdStore() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
   // Default to sitemap overview on fresh open; if there's a URL hash, go straight to that page's brief
-  const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    window.location.hash ? "wireframe" : "sitemap"
-  );
+  const [viewMode, setViewMode] = useState<ViewMode>("sitemap");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [filterTeam, setFilterTeam] = useState<FilterTeam>("all");
   const [saveStatus, setSaveStatus] = useState("");
@@ -72,6 +70,30 @@ export function usePrdStore() {
       } else {
         // Server responded OK but has no data — truly first run, seed from defaults
         currentPages = freshDefaults;
+        await saveToServer(currentPages);
+      }
+
+      // ── Post-load patch: ensure navmap block exists on Education page ──
+      // Runs on every load. If the Education page is missing its navmap block,
+      // inject it immediately after the hero block and save back to server.
+      const educationPage = currentPages.find((p) => p.id === "education");
+      if (educationPage && !educationPage.blocks.some((b) => b.type === "navmap")) {
+        const heroIdx = educationPage.blocks.findIndex((b) => b.type === "hero");
+        const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
+        const navmapBlock = {
+          type: "navmap" as const,
+          title: "Navigation & Tracks",
+          desc: "Live diagram: full site navigation bar (top) + Education's three programme tracks with their sub-pages (below). Rendered automatically from the page structure — no manual editing needed.",
+          content: [] as string[],
+          annotations: [] as never[],
+        };
+        const patched = currentPages.map((p) => {
+          if (p.id !== "education") return p;
+          const blocks = [...p.blocks];
+          blocks.splice(insertAt, 0, navmapBlock);
+          return { ...p, blocks };
+        });
+        currentPages = patched;
         await saveToServer(currentPages);
       }
 
