@@ -86,9 +86,43 @@ async function migrateNavmaps() {
       console.log("[migration] Store navmap already present or page not found — skipping.");
     }
 
+    // --- Tours navmap ---
+    const toursPage = pages.find((p: any) => p.id === "tours");
+    if (toursPage && Array.isArray(toursPage.blocks) && !toursPage.blocks.some((b: any) => b.type === "navmap")) {
+      toursPage.blocks.unshift({
+        type: "navmap",
+        title: "Tour Tracks",
+        desc: "Live diagram: site nav bar (top) + Tours' two tracks — Visitor Tours and Travel Trade (below). Rendered automatically from page structure.",
+        content: [],
+        annotations: [],
+      });
+      console.log("[migration] navmap injected into Tours page at position 0.");
+      changed = true;
+    } else {
+      console.log("[migration] Tours navmap already present or page not found — skipping.");
+    }
+
+    // --- Incubator navmap ---
+    const incubatorPage = pages.find((p: any) => p.id === "incubator");
+    if (incubatorPage && Array.isArray(incubatorPage.blocks) && !incubatorPage.blocks.some((b: any) => b.type === "navmap")) {
+      const heroIdx = incubatorPage.blocks.findIndex((b: any) => b.type === "hero");
+      const insertAt = heroIdx >= 0 ? heroIdx + 1 : 0;
+      incubatorPage.blocks.splice(insertAt, 0, {
+        type: "navmap",
+        title: "Incubator Tracks",
+        desc: "Live diagram: site nav bar (top) + Incubator's two tracks — Apply and Support (below). Rendered automatically from page structure.",
+        content: [],
+        annotations: [],
+      });
+      console.log(`[migration] navmap injected into Incubator page at position ${insertAt}.`);
+      changed = true;
+    } else {
+      console.log("[migration] Incubator navmap already present or page not found — skipping.");
+    }
+
     if (changed) {
-      await storage.savePrd(pages, "dc-prd-v47");
-      console.log("[migration] Saved with version dc-prd-v47.");
+      await storage.savePrd(pages, "dc-prd-v48");
+      console.log("[migration] Saved with version dc-prd-v48.");
     }
   } catch (err) {
     console.error("[migration] Navmap migration failed:", err);

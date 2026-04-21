@@ -8,4 +8,4 @@
  */
 export const PROJECT_ID = "dc";
 export const PROJECT_NAME = "Denim City";
-export const PROJECT_VERSION = "v47";
+export const PROJECT_VERSION = "v48";
