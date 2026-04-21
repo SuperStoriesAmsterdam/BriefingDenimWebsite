@@ -300,7 +300,11 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
                       </SidebarMenuButton>
                       {pageUnchecked > 0 && (
                         <SidebarMenuBadge>
-                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">{pageUnchecked}</span>
+                          <button
+                            title="Open annotations"
+                            onClick={(e) => { e.stopPropagation(); setActivePage(p.id); setViewMode("wireframe"); setShowAnnotations(true); }}
+                            className="rounded-full bg-amber-100 hover:bg-amber-200 px-1.5 py-0.5 text-[9px] font-medium text-amber-700 cursor-pointer transition-colors"
+                          >{pageUnchecked}</button>
                         </SidebarMenuBadge>
                       )}
                       <AlertDialog>
@@ -403,7 +407,11 @@ export function PrdSidebar({ store, currentUser }: PrdSidebarProps) {
                         </SidebarMenuButton>
                         {pageUnchecked > 0 && (
                           <SidebarMenuBadge>
-                            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">{pageUnchecked}</span>
+                            <button
+                              title="Open annotations"
+                              onClick={(e) => { e.stopPropagation(); setActivePage(p.id); setViewMode("wireframe"); setShowAnnotations(true); }}
+                              className="rounded-full bg-amber-100 hover:bg-amber-200 px-1.5 py-0.5 text-[9px] font-medium text-amber-700 cursor-pointer transition-colors"
+                            >{pageUnchecked}</button>
                           </SidebarMenuBadge>
                         )}
                       </SidebarMenuItem>
