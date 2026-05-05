@@ -120,9 +120,20 @@ async function migrateNavmaps() {
       console.log("[migration] Incubator navmap already present or page not found — skipping.");
     }
 
+    // --- Force nav:false for briefings and faq ---
+    const NAV_OFF = ["briefings", "faq"];
+    for (const pid of NAV_OFF) {
+      const p = pages.find((pg: any) => pg.id === pid);
+      if (p && p.nav !== false) {
+        p.nav = false;
+        console.log(`[migration] nav forced off for page "${pid}".`);
+        changed = true;
+      }
+    }
+
     if (changed) {
-      await storage.savePrd(pages, "dc-prd-v48");
-      console.log("[migration] Saved with version dc-prd-v48.");
+      await storage.savePrd(pages, "dc-prd-v49");
+      console.log("[migration] Saved with version dc-prd-v49.");
     }
   } catch (err) {
     console.error("[migration] Navmap migration failed:", err);

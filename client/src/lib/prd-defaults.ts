@@ -2,7 +2,7 @@ import type { Page, GhlPipeline, GhlIntegration } from "@/types/prd";
 
 export function defaults(): Page[] {
   return [
-    { id:"briefings", label:"Briefings & Strategies", nav:true, parent:null, blocks:[
+    { id:"briefings", label:"Briefings & Strategies", nav:false, parent:null, blocks:[
       { type:"hero", title:"Briefings & Strategies", desc:"All internal strategy documents, integration specs, and project management in one place. These pages are not visible to website visitors — they're the team's playbook.", content:["Project Brief — what Denim City is, who it's for, and the purpose of this website","Project Management — phases, dependencies, tech stack, roles, mobile UX","Integrations — Lightspeed + Moneybird via Make.com","Conversion & Nurture — growth engine + 25-email nurture plan"], annotations:[] },
     ]},
     { id:"home", label:"Home", nav:true, parent:null, blocks:[
