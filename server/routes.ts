@@ -131,9 +131,21 @@ async function migrateNavmaps() {
       }
     }
 
+    // --- Move archive and library to footer (parent:null, nav:false) ---
+    const FOOTER_PAGES = ["archive", "library"];
+    for (const pid of FOOTER_PAGES) {
+      const p = pages.find((pg: any) => pg.id === pid);
+      if (p && (p.nav !== false || p.parent !== null)) {
+        p.nav = false;
+        p.parent = null;
+        console.log(`[migration] "${pid}" moved to footer (parent:null, nav:false).`);
+        changed = true;
+      }
+    }
+
     if (changed) {
-      await storage.savePrd(pages, "dc-prd-v49");
-      console.log("[migration] Saved with version dc-prd-v49.");
+      await storage.savePrd(pages, "dc-prd-v50");
+      console.log("[migration] Saved with version dc-prd-v50.");
     }
   } catch (err) {
     console.error("[migration] Navmap migration failed:", err);
