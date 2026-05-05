@@ -131,7 +131,7 @@ async function migrateNavmaps() {
       }
     }
 
-    // --- Move archive and library to footer (parent:null, nav:false) ---
+    // --- Move archive and library pages to footer (parent:null, nav:false) ---
     const FOOTER_PAGES = ["archive", "library"];
     for (const pid of FOOTER_PAGES) {
       const p = pages.find((pg: any) => pg.id === pid);
@@ -143,9 +143,24 @@ async function migrateNavmaps() {
       }
     }
 
+    // --- Remove stale Archive/Library blocks from Education page ---
+    const edPageForClean = pages.find((p: any) => p.id === "education" || p.id === "learn");
+    if (edPageForClean && Array.isArray(edPageForClean.blocks)) {
+      const STALE_TITLES = ["Archive", "Library"];
+      const before = edPageForClean.blocks.length;
+      edPageForClean.blocks = edPageForClean.blocks.filter(
+        (b: any) => !STALE_TITLES.includes(b.title)
+      );
+      const after = edPageForClean.blocks.length;
+      if (after < before) {
+        console.log(`[migration] Removed ${before - after} stale block(s) (Archive/Library) from Education page.`);
+        changed = true;
+      }
+    }
+
     if (changed) {
-      await storage.savePrd(pages, "dc-prd-v50");
-      console.log("[migration] Saved with version dc-prd-v50.");
+      await storage.savePrd(pages, "dc-prd-v51");
+      console.log("[migration] Saved with version dc-prd-v51.");
     }
   } catch (err) {
     console.error("[migration] Navmap migration failed:", err);
